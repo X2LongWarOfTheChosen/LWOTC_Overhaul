@@ -1,0 +1,2 @@
+class X2DownloadableContentInfo_LWOTC_Overhaul extends X2DownloadableContentInfo;
+
