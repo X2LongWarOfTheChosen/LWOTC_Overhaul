@@ -4,7 +4,7 @@
 //  PURPOSE: This stores regional Alien AI-related information, such as local ForceLevel, AlertnLevel, and VigilanceLevel
 //			 This is designed as a component to be attached to each world region, and is generally updated via the Activity Manager or individual Activities
 //---------------------------------------------------------------------------------------
-class WorldRegion_XComGameState_AlienStrategyAI extends XComGameState_BaseObject dependson(AlienActivityManager_XComGameState) config(LWOTC_AlienActivities);
+class WorldRegion_XComGameState_AlienStrategyAI extends XComGameState_BaseObject dependson(AlienActivity_XComGameState_Manager) config(LWOTC_AlienActivities);
 
 var config float		LOCAL_VIGILANCE_DECAY_RATE_HOURS;
 var config int			BASELINE_OUTPOST_WORKERS_FOR_STD_VIG_DECAY;

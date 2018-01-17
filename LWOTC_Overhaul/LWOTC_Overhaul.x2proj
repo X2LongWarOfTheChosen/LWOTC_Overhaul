@@ -25,6 +25,24 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIMission_LaunchDelayedMission.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIMission_CustomMission.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIUtilities_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIUtilities_Text_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Utilities_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\WorldRegion_XComGameState_AlienStrategyAI_Con.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\X2DownloadableContentInfo_LWOTC_Overhaul.uc">
       <SubType>Content</SubType>
     </Content>
@@ -37,10 +55,19 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\XComGameState_LWAlienActivity.uc">
+    <Content Include="Src\LWOTC_Overhaul\Classes\AlienActivity_XComGameState.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\XComGameState_LWAlienActivityManager.uc">
+    <Content Include="Src\LWOTC_Overhaul\Classes\AlienActivity_XComGameState_Manager.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\WorldRegion_XComGameState_AlienStrategyAI.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_DefaultAlienActivities.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: This is the singleton, overall alien strategic manager for generating/managing activities
 //---------------------------------------------------------------------------------------
-class AlienActivityManager_XComGameState extends XComGameState_GeoscapeEntity dependson(X2LWAlienActivityTemplate) config(LW_Activities);
+class AlienActivity_XComGameState_Manager extends XComGameState_GeoscapeEntity dependson(X2LWAlienActivityTemplate) config(LW_Activities);
 
 `include(LW_Overhaul\Src\LW_Overhaul.uci)
 

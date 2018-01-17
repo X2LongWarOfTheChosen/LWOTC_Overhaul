@@ -17,7 +17,7 @@ simulated function InitActivityCreation(AlienActivity_X2StrategyElementTemplate 
 {
 	NumActivitiesToCreate = 999;
 	ActivityTemplate = Template;
-	ActivityStates = class'AlienActivityManager_XComGameState'.static.GetAllActivities(NewGameState);
+	ActivityStates = class'AlienActivity_XComGameState_Manager'.static.GetAllActivities(NewGameState);
 }
 
 simulated function int GetNumActivitiesToCreate(XComGameState NewGameState)
