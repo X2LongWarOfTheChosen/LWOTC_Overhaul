@@ -229,10 +229,6 @@ function StrategyCost GetBoostInfiltrationCost()
 	return Cost;
 }
 
-//---------------------------
-// MAIN FUNCTIONALITY -------
-//---------------------------
-
 // UpdateGameBoard()
 function UpdateGameBoard()
 {
