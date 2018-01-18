@@ -1,0 +1,2 @@
+
+`define SQUADMGR class'SquadManager_XComGameState'.static.GetSquadManager()

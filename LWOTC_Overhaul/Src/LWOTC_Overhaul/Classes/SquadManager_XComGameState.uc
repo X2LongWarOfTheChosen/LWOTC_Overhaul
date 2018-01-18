@@ -13,8 +13,8 @@ var config int MAX_FIRST_MISSION_SQUAD_SIZE;
 var config array<name> NonInfiltrationMissions;
 var config MissionIntroDefinition InfiltrationMissionIntroDefinition;
 
+var SquadManager_XComGameState_Squads Squads;
 var transient StateObjectReference LaunchingMissionSquad;
-var array<StateObjectReference> Squads;   //the squads currently defined
 var bool bNeedsAttention;
 
 // The name of the sub-menu for resistance management
@@ -83,7 +83,7 @@ static function CreateFirstMissionSquad(XComGameState StartState)
 	NewSquad = Squad_XComGameState(StartState.CreateStateObject(class'Squad_XComGameState'));
 	StartState.AddStateObject(NewSquad);
 
-	StartSquadMgr.Squads.AddItem(NewSquad.GetReference());
+	StartSquadMgr.Squads.Squads.AddItem(NewSquad.GetReference());
 
 	NewSquad.InitSquad(, false);
 	NewSquad.Soldiers.SquadSoldiersOnMission = StartXComHQ.Squad;
@@ -93,6 +93,68 @@ static function CreateFirstMissionSquad(XComGameState StartState)
 	NewSquad.Infiltration.CurrentInfiltration = 1.0;
 	NewSquad.Infiltration.CurrentEnemyAlertnessModifier = 0;
 }
+
+// IsValidInfiltrationMission(StateObjectReference MissionRef)
+static function bool IsValidInfiltrationMission(StateObjectReference MissionRef)
+{
+	local GeneratedMissionData MissionData;
+
+	MissionData = `XCOMHQ.GetGeneratedMissionData(MissionRef.ObjectID);
+
+	return (default.NonInfiltrationMissions.Find(MissionData.Mission.MissionName) == -1);
+}
+
+// OnCreation( optional X2DataTemplate InitTemplate )
+event OnCreation( optional X2DataTemplate InitTemplate )
+{
+	super.OnCreation(InitTemplate);
+	Squads = new class'SquadManager_XComGameState_Squads';
+}
+
+// UpdateSquadPostMission(optional StateObjectReference MissionRef, optional bool bCompletedMission)
+function UpdateSquadPostMission(optional StateObjectReference MissionRef, optional bool bCompletedMission)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local Squad_XComGameState SquadState, UpdatedSquadState;
+	local XComGameState UpdateState;
+	local SquadManager_XComGameState UpdatedSquadMgr;
+	local StateObjectReference NullRef;
+
+	if (MissionRef.ObjectID == 0)
+	{
+		XComHQ = `XCOMHQ;
+		MissionRef = XComHQ.MissionRef;
+	}
+
+	SquadState = Squads.GetSquadOnMission(MissionRef);
+	if(SquadState == none)
+	{
+		`REDSCREEN("SquadManager : UpdateSquadPostMission called with no squad on mission");
+		return;
+	}
+	UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Post Mission Persistent Squad Cleanup");
+
+	UpdatedSquadMgr = SquadManager_XComGameState(UpdateState.CreateStateObject(Class, ObjectID));
+	UpdateState.AddStateObject(UpdatedSquadMgr);
+
+	UpdatedSquadState = SquadManager_XComGameState(UpdateState.CreateStateObject(SquadState.Class, SquadState.ObjectID));
+	UpdateState.AddStateObject(UpdatedSquadState);
+
+	if (bCompletedMission)
+		UpdatedSquadState.iNumMissions += 1;
+
+	UpdatedSquadMgr.LaunchingMissionSquad = NullRef;
+	UpdatedSquadState.Soldiers.PostMissionRevertSoldierStatus(UpdateState, UpdatedSquadMgr);
+	UpdatedSquadState.ClearMission();
+	`XCOMGAME.GameRuleset.SubmitGameState(UpdateState);
+
+	if(SquadState.bTemporary)
+	{
+		Squads.RemoveSquadByRef(SquadState.GetReference());
+	}
+}
+
+//--------------------- UI --------------------------
 
 // SetupSquadManagerInterface()
 // After beginning a game, set up the squad management interface.
@@ -132,6 +194,7 @@ function EnableSquadManagementMenu(optional bool forceAlert = false)
     }
 }
 
+// GoToSquadManagement(optional StateObjectReference Facility)
 simulated function GoToSquadManagement(optional StateObjectReference Facility)
 {
     local XComHQPresentationLayer HQPres;
@@ -158,22 +221,24 @@ simulated function GoToSquadManagement(optional StateObjectReference Facility)
 	}
 }
 
+// OnPersonnelSelected(StateObjectReference selectedUnitRef)
 simulated function OnPersonnelSelected(StateObjectReference selectedUnitRef)
 {
 	//add any logic here for selecting someone in the squad barracks
 }
 
+// SetSquadMgrNeedsAttention(bool Enable)
 function SetSquadMgrNeedsAttention(bool Enable)
 {
     local XComGameState NewGameState;
     local XComGameState_FacilityXCom BarracksFacility;
-    local XComGameState_LWSquadManager NewManager;
+    local SquadManager_XComGameState NewManager;
     
     if (Enable != NeedsAttention())
     {
         // Set the rebel outpost manager as needing attention (or not)
         NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set squad manager needs attention");
-        NewManager = XComGameState_LWSquadManager(NewGameState.CreateStateObject(class'XComGameState_LWSquadManager', self.ObjectID));
+        NewManager = SquadManager_XComGameState(NewGameState.CreateStateObject(class'SquadManager_XComGameState', self.ObjectID));
         NewGameState.AddStateObject(NewManager);
         if (Enable)
         {
@@ -199,328 +264,47 @@ function SetSquadMgrNeedsAttention(bool Enable)
     }
 }
 
+// NeedsAttention()
 function bool NeedsAttention()
 {
     return bNeedsAttention;
 }
 
+// SetNeedsAttention()
 function SetNeedsAttention()
 {
     bNeedsAttention = true;
 }
 
+// ClearNeedsAttention()
 function ClearNeedsAttention()
 {
     bNeedsAttention = false;
 }
 
-function int NumSquadsOnAnyMission()
+// GetSquadSelect()
+simulated function UISquadSelect GetSquadSelect()
 {
-	local XComGameState_LWPersistentSquad Squad;
-	local int idx;
-	local int NumMissions;
-
-	for (idx = 0; idx < Squads.Length; idx++)
+	local UIScreenStack ScreenStack;
+	local int Index;
+	ScreenStack = `SCREENSTACK;
+	for( Index = 0; Index < ScreenStack.Screens.Length;  ++Index)
 	{
-		Squad = GetSquad(idx);
-		if (Squad.bOnMission && Squad.CurrentMission.ObjectID > 0)
-			NumMissions++;
+		if(UISquadSelect(ScreenStack.Screens[Index]) != none )
+			return UISquadSelect(ScreenStack.Screens[Index]);
 	}
-	return NumMissions;
+	return none; 
 }
-
-//gets the squad assigned to a given mission -- may be none if mission is not being pursued
-function XComGameState_LWPersistentSquad GetSquadOnMission(StateObjectReference MissionRef)
-{
-	local XComGameState_LWPersistentSquad Squad;
-	local int idx;
-	local XComGameStateHistory History;
-
-	if(MissionRef.ObjectID == 0) return none;
-
-	History = `XCOMHISTORY;
-	for(idx = 0; idx < Squads.Length; idx++)
-	{
-		Squad = XComGameState_LWPersistentSquad(History.GetGameStateForObjectID(Squads[idx].ObjectID));
-		if(Squad != none && Squad.CurrentMission.ObjectID == MissionRef.ObjectID)
-			return Squad;
-	}
-	return none;
-}
-
-function StateObjectReference GetBestSquad()
-{
-	local array<XComGameState_LWPersistentSquad> PossibleSquads;
-	local XComGameState_LWPersistentSquad Squad;
-	local int idx;
-	local StateObjectReference NullRef;
-
-	for (idx = 0; idx < Squads.Length; idx++)
-	{
-		Squad = GetSquad(idx);
-		if (!Squad.bOnMission && Squad.CurrentMission.ObjectID == 0)
-		{
-			PossibleSquads.AddItem(Squad);
-		} 
-	}
-
-	if (PossibleSquads.Length > 0)
-		return PossibleSquads[`SYNC_RAND(PossibleSquads.Length)].GetReference();
-	else
-		return NullRef;
-}
-
-function XComGameState_LWPersistentSquad GetSquad(int idx)
-{
-	if(idx >=0 && idx < Squads.Length)
-	{
-		return XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(Squads[idx].ObjectID));
-	}
-	return none;
-} 
-
-function XComGameState_LWPersistentSquad GetSquadByName(string SquadName)
-{
-	local XComGameState_LWPersistentSquad Squad;
-	local int idx;
-	local XComGameStateHistory History;
-
-	History = `XCOMHISTORY;
-	for(idx = 0; idx < Squads.Length; idx++)
-	{
-		Squad = XComGameState_LWPersistentSquad(History.GetGameStateForObjectID(Squads[idx].ObjectID));
-		if(Squad.sSquadName == SquadName)
-			return Squad;
-	}
-	return none;
-}
-
-// Return list of references to all soldiers assigned to any squad
-function array<StateObjectReference> GetAssignedSoldiers()
-{
-	local array<StateObjectReference> UnitRefs;
-	local XComGameState_LWPersistentSquad Squad;
-	local int SquadIdx, UnitIdx;
-
-	for(SquadIdx = 0; SquadIdx < Squads.Length; SquadIdx++)
-	{
-		Squad = GetSquad(SquadIdx);
-		for(UnitIdx = 0; UnitIdx < Squad.SquadSoldiers.Length; UnitIdx++)
-		{
-			UnitRefs.AddItem(Squad.SquadSoldiers[UnitIdx]);
-		}
-		for(UnitIdx = 0; UnitIdx < Squad.SquadSoldiersOnMission.Length; UnitIdx++)
-		{
-			if (UnitRefs.Find('ObjectID', Squad.SquadSoldiersOnMission[UnitIdx].ObjectID) == -1)
-				UnitRefs.AddItem(Squad.SquadSoldiersOnMission[UnitIdx]);
-		}
-	}
-	return UnitRefs;
-}
-
-// Return list of references to all soldier NOT assigned to any squad
-function array<StateObjectReference> GetUnassignedSoldiers()
-{
-	local XComGameState_HeadquartersXCom HQState;
-	local array<StateObjectReference> AssignedRefs, UnassignedRefs;
-	local array<XComGameState_Unit> Soldiers;
-	local XComGameState_Unit Soldier;
-
-	HQState = `XCOMHQ;
-	Soldiers = HQState.GetSoldiers();
-	AssignedRefs = GetAssignedSoldiers();
-	foreach Soldiers(Soldier)
-	{
-		if(AssignedRefs.Find('ObjectID', Soldier.ObjectID) == -1)
-		{
-			UnassignedRefs.AddItem(Soldier.GetReference());
-		}
-	}
-	return UnassignedRefs;
-}
-
-function bool UnitIsInAnySquad(StateObjectReference UnitRef, optional out XComGameState_LWPersistentSquad SquadState)
-{
-	local int idx;
-
-	for(idx = 0; idx < Squads.Length; idx++)
-	{
-		SquadState = GetSquad(idx);
-		if(SquadState.UnitIsInSquad(UnitRef))
-			return true;
-	}
-	SquadState = none;
-	return false;
-}
-
-function bool UnitIsOnMission(StateObjectReference UnitRef)
-{
-	local int idx;
-
-	for(idx = 0; idx < Squads.Length; idx++)
-	{
-		if(GetSquad(idx).UnitIsInSquadOnMission(UnitRef))
-			return true;
-	}
-	return false;
-}
-
-function RemoveSquad_Internal(int idx, XComGameState NewGameState)
-{
-	local XComGameState_LWSquadManager UpdatedSquadMgr;
-	local XComGameState_LWPersistentSquad SquadState;
-	
-	UpdatedSquadMgr = XComGameState_LWSquadManager(NewGameState.CreateStateObject(Class, ObjectID));
-	NewGameState.AddStateObject(UpdatedSquadMgr);
-	if(idx >= 0 && idx < UpdatedSquadMgr.Squads.Length )
-	{
-		UpdatedSquadMgr.Squads.Remove(idx, 1);
-	}
-
-	SquadState = GetSquad(idx);
-	NewGameState.RemoveStateObject(SquadState.ObjectID);
-}
-
-function RemoveSquad(int idx)
-{
-	local XComGameState NewGameState;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Removing Squad");
-	RemoveSquad_Internal(idx, NewGameState);
-	`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-}
-
-function RemoveSquadByRef(StateObjectReference SquadRef)
-{
-	local int idx;
-
-	idx = Squads.Find('ObjectID', SquadRef.ObjectID);
-	if(idx != -1)
-		RemoveSquad(idx);
-}
-
-function XComGameState_LWPersistentSquad AddSquad(optional array<StateObjectReference> Soldiers, optional StateObjectReference MissionRef, optional string SquadName="", optional bool Temp = true, optional float Infiltration=0)
-{
-	local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad NewSquad;
-	local XComGameState_LWSquadManager UpdatedSquadMgr;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding new preformed squad");
-	NewSquad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad'));
-	UpdatedSquadMgr = XComGameState_LWSquadManager(NewGameState.CreateStateObject(Class, ObjectID));
-
-	NewSquad.InitSquad(SquadName, Temp);
-	UpdatedSquadMgr.Squads.AddItem(NewSquad.GetReference());
-
-	if(MissionRef.ObjectID > 0)
-		NewSquad.SquadSoldiersOnMission = Soldiers;
-	else
-		NewSquad.SquadSoldiers = Soldiers;
-
-	NewSquad.InitInfiltration(NewGameState, MissionRef, Infiltration);
-	NewSquad.SetOnMissionSquadSoldierStatus(NewGameState);
-
-	NewGameState.AddStateObject(NewSquad);
-	NewGameState.AddStateObject(UpdatedSquadMgr);
-	`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-
-	return NewSquad;
-}
-
-static function bool IsValidInfiltrationMission(StateObjectReference MissionRef)
-{
-	local GeneratedMissionData MissionData;
-
-	MissionData = `XCOMHQ.GetGeneratedMissionData(MissionRef.ObjectID);
-
-	return (default.NonInfiltrationMissions.Find(MissionData.Mission.MissionName) == -1);
-}
-
-
-//creates an empty squad at the given position with the given name
-function XComGameState_LWPersistentSquad CreateEmptySquad(optional int idx = -1, optional string SquadName = "", optional XComGameState NewGameState, optional bool bTemporary)
-{
-	//local XComGameStateHistory History;
-	//local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad NewSquad;
-	local XComGameState_LWSquadManager UpdatedSquadMgr;
-	local bool bNeedsUpdate;
-
-	//History = `XCOMHISTORY;
-	bNeedsUpdate = NewGameState == none;
-	if (bNeedsUpdate)
-		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding new empty squad");
-
-	NewSquad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad'));
-	UpdatedSquadMgr = XComGameState_LWSquadManager(NewGameState.CreateStateObject(Class, ObjectID));
-
-	NewSquad.InitSquad(SquadName, bTemporary);
-	if(idx <= 0 || idx >= Squads.Length)
-		UpdatedSquadMgr.Squads.AddItem(NewSquad.GetReference());
-	else
-		UpdatedSquadMgr.Squads.InsertItem(idx, NewSquad.GetReference());
-
-	NewGameState.AddStateObject(NewSquad);
-	NewGameState.AddStateObject(UpdatedSquadMgr);
-	if (bNeedsUpdate)
-		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-
-	return NewSquad;
-}
-
-function UpdateSquadPostMission(optional StateObjectReference MissionRef, optional bool bCompletedMission)
-{
-	//local XComGameStateHistory History;
-	local XComGameState_HeadquartersXCom XComHQ;
-	local XComGameState_LWPersistentSquad SquadState, UpdatedSquadState;
-	local XComGameState UpdateState;
-	local XComGameState_LWSquadManager UpdatedSquadMgr;
-	local StateObjectReference NullRef;
-
-	//History = `XCOMHISTORY;
-	if (MissionRef.ObjectID == 0)
-	{
-		XComHQ = `XCOMHQ;
-		MissionRef = XComHQ.MissionRef;
-	}
-
-	SquadState = GetSquadOnMission(MissionRef);
-	if(SquadState == none)
-	{
-		`REDSCREEN("SquadManager : UpdateSquadPostMission called with no squad on mission");
-		return;
-	}
-	UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Post Mission Persistent Squad Cleanup");
-
-	UpdatedSquadMgr = XComGameState_LWSquadManager(UpdateState.CreateStateObject(Class, ObjectID));
-	UpdateState.AddStateObject(UpdatedSquadMgr);
-
-	UpdatedSquadState = XComGameState_LWPersistentSquad(UpdateState.CreateStateObject(SquadState.Class, SquadState.ObjectID));
-	UpdateState.AddStateObject(UpdatedSquadState);
-
-	if (bCompletedMission)
-		UpdatedSquadState.iNumMissions += 1;
-
-	UpdatedSquadMgr.LaunchingMissionSquad = NullRef;
-	UpdatedSquadState.PostMissionRevertSoldierStatus(UpdateState, UpdatedSquadMgr);
-	UpdatedSquadState.ClearMission();
-	`XCOMGAME.GameRuleset.SubmitGameState(UpdateState);
-
-	if(SquadState.bTemporary)
-	{
-		RemoveSquadByRef(SquadState.GetReference());
-	}
-}
-
 
 //--------------- EVENT HANDLING ------------------
 
+// InitSquadManagerListeners()
 function InitSquadManagerListeners()
 {
 	local X2EventManager EventMgr;
 	local Object ThisObj;
 
-	class'XComGameState_LWToolboxPrototype'.static.SetMaxSquadSize(default.MAX_SQUAD_SIZE);
+	//class'XComGameState_LWToolboxPrototype'.static.SetMaxSquadSize(default.MAX_SQUAD_SIZE);
 
 	ThisObj = self;
 	EventMgr = `XEVENTMGR;
@@ -533,15 +317,16 @@ function InitSquadManagerListeners()
 
 }
 
+// ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
 function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
 {
 	local int idx;
-	local LWTuple DeployableSoldiers;
+	local XComLWTuple DeployableSoldiers;
 	local UISquadSelect SquadSelect;
 	local XComGameState_Unit UnitState;
-	local XComGameState_LWPersistentSquad CurrentSquad, TestUnitSquad;
+	local Squad_XComGameState CurrentSquad, TestUnitSquad;
 
-	DeployableSoldiers = LWTuple(EventData);
+	DeployableSoldiers = XComLWTuple(EventData);
 	if(DeployableSoldiers == none)
 	{
 		`REDSCREEN("Validate Deployable Soldiers event triggered with invalid event data.");
@@ -559,7 +344,7 @@ function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventDat
 
 	if(LaunchingMissionSquad.ObjectID > 0)
 	{
-		CurrentSquad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(LaunchingMissionSquad.ObjectID));
+		CurrentSquad = Squad_XComGameState(`XCOMHISTORY.GetGameStateForObjectID(LaunchingMissionSquad.ObjectID));
 	}
 	for(idx = DeployableSoldiers.Data.Length - 1; idx >= 0; idx--)
 	{
@@ -569,12 +354,12 @@ function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventDat
 			if(UnitState != none)
 			{
 				//disallow if actively on a mission
-				if(class'LWDLCHelpers'.static.IsUnitOnMission(UnitState))
+				if(class'Squad_Static_Soldiers_Helper'.static.IsUnitOnMission(UnitState))
 				{
 					DeployableSoldiers.Data.Remove(idx, 1);
 				}
 				//disallow if unit is in a different squad
-				if (UnitIsInAnySquad(UnitState.GetReference(), TestUnitSquad))
+				if (Squads.UnitIsInAnySquad(UnitState.GetReference(), TestUnitSquad))
 				{
 					if (TestUnitSquad != none && TestUnitSquad.ObjectID != CurrentSquad.ObjectID)
 					{
@@ -587,12 +372,13 @@ function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventDat
 	return ELR_NoInterrupt;
 }
 
+// SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
 function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
 {
 	local UIPersonnel_ListItem ListItem;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
     local XComGameState_Unit UnitState;
-	local bool								bInSquadEdit;
+	local bool bInSquadEdit;
 
 	//only do this for squadselect
 	if(GetSquadSelect() == none)
@@ -610,15 +396,15 @@ function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object 
 	if(ListItem.UnitRef.ObjectID > 0)
 	{
 		if (LaunchingMissionSquad.ObjectID > 0)
-			Squad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(LaunchingMissionSquad.ObjectID));
+			Squad = Squad_XComGameState(`XCOMHISTORY.GetGameStateForObjectID(LaunchingMissionSquad.ObjectID));
 
         UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(ListItem.UnitRef.ObjectID));
-		if(bInSquadEdit && UnitIsInAnySquad(ListItem.UnitRef) && (Squad == none || !Squad.UnitIsInSquad(ListItem.UnitRef)))
+		if(bInSquadEdit && Squads.UnitIsInAnySquad(ListItem.UnitRef) && (Squad == none || !Squad.Soldiers.UnitIsInSquad(ListItem.UnitRef)))
 		{
 			ListItem.SetDisabled(true); // can now select soldiers from other squads, but will generate pop-up warning and remove them
 		}
         else 
-		if (class'LWDLCHelpers'.static.IsUnitOnMission(UnitState))
+		if (class'Squad_Static_Soldiers_Helper'.static.IsUnitOnMission(UnitState))
         {
 		    ListItem.SetDisabled(true);
 		}
@@ -698,27 +484,15 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	return ELR_NoInterrupt;
 }
 
-simulated function UISquadSelect GetSquadSelect()
-{
-	local UIScreenStack ScreenStack;
-	local int Index;
-	ScreenStack = `SCREENSTACK;
-	for( Index = 0; Index < ScreenStack.Screens.Length;  ++Index)
-	{
-		if(UISquadSelect(ScreenStack.Screens[Index]) != none )
-			return UISquadSelect(ScreenStack.Screens[Index]);
-	}
-	return none; 
-}
-
+// DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID)
 function EventListenerReturn DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID)
 {
 	local XComGameState_Unit DismissedUnit;
 	local UIArmory_MainMenu MainMenu;
 	local StateObjectReference DismissedUnitRef;
-	local XComGameState_LWPersistentSquad SquadState, UpdatedSquadState;
+	local Squad_XComGameState SquadState, UpdatedSquadState;
 	local XComGameState NewGameState;
-	local int idx;
+	local StateObjectReference SquadRef;
 
 	DismissedUnit = XComGameState_Unit(EventData);
 	if(DismissedUnit == none)
@@ -735,18 +509,17 @@ function EventListenerReturn DismissSoldierFromSquad(Object EventData, Object Ev
 
 	DismissedUnitRef = DismissedUnit.GetReference();
 
-	for(idx = 0; idx < Squads.Length; idx++)
+	foreach Squads.Squads(SquadRef)
 	{
-		SquadState = GetSquad(idx);
-		if(SquadState.UnitIsInSquad(DismissedUnitRef))
+		SquadState = Squads.GetSquad(SquadRef);
+		if(SquadState.Soldiers.UnitIsInSquad(DismissedUnitRef))
 		{
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Removing Dismissed Soldier from Squad");
-			UpdatedSquadState = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', SquadState.ObjectID));
+			UpdatedSquadState = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', SquadState.ObjectID));
 			NewGameState.AddStateObject(UpdatedSquadState);
-			UpdatedSquadState.RemoveSoldier(DismissedUnitRef);
+			UpdatedSquadState.Soldiers.RemoveSoldier(DismissedUnitRef);
 			`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 		}
 	}
-
 	return ELR_NoInterrupt;
 }

@@ -25,6 +25,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState_Squads.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Squad_Static_Infiltration_Helper.uc">
       <SubType>Content</SubType>
     </Content>
@@ -86,6 +89,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Squad_XComGameState.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul.uci">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
