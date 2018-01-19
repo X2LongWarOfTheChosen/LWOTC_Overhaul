@@ -37,8 +37,8 @@ static function InitializeRegionalAIs(optional XComGameState StartState)
 
 	NewRegionalAIs = GenerateRegionalAIsForRegions(RegionStates, RegionStates, bNeedsGameState);
 
-	TotalForceLevelToAdd = default.TOTAL_STARTING_FORCE_LEVEL[`DIFFICULTYSETTING];
-	TotalAlertLevelToAdd = default.TOTAL_STARTING_ALERT_LEVEL[`DIFFICULTYSETTING];
+	TotalForceLevelToAdd = default.TOTAL_STARTING_FORCE_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
+	TotalAlertLevelToAdd = default.TOTAL_STARTING_ALERT_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
 
 	//adjustments in case for some reason only some of the components are initialized
 	if(NewRegionalAIs.Length < RegionStates.Length)
@@ -161,8 +161,8 @@ static function SetRegionValues(array<WorldRegion_XComGameState_AlienStrategyAI>
 	{
 		if(RegionalAIState.OwningObjectId == XComHQ.StartingRegion.ObjectID)
 		{
-			ForceLevelToAdd = default.START_REGION_FORCE_LEVEL[`DIFFICULTYSETTING];
-			AlertLevelToAdd = default.START_REGION_ALERT_LEVEL[`DIFFICULTYSETTING];
+			ForceLevelToAdd = default.START_REGION_FORCE_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
+			AlertLevelToAdd = default.START_REGION_ALERT_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
 			VigilanceLevelToAdd = Clamp (AlertLevelToAdd, 1, default.STARTING_LOCAL_MAX_VIGILANCE_LEVEL);
 		}
 		else

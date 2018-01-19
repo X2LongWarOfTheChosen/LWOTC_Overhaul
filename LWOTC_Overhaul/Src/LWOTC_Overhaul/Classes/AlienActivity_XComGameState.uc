@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------------
 class AlienActivity_XComGameState extends XComGameState_GeoscapeEntity config(LW_Overhaul);
 
-//`include(LW_Overhaul\Src\LW_Overhaul.uci)
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
 var protected name										m_TemplateName;
 var protected AlienActivity_X2StrategyElementTemplate	m_Template;
@@ -66,7 +66,7 @@ simulated function AlienActivity_X2StrategyElementTemplate GetMyTemplate()
 	return m_Template;
 }
 
-function OnCreation(AlienActivity_X2StrategyElementTemplate Template, StateObjectReference PrimaryRegionRef, XComGameState NewGameState)
+function OnInit(AlienActivity_X2StrategyElementTemplate Template, StateObjectReference PrimaryRegionRef, XComGameState NewGameState)
 {
 	m_Template = Template;
 	m_TemplateName = Template.DataName;
@@ -161,7 +161,7 @@ function bool Update(XComGameState NewGameState)
 	if(MissionState != none && class'X2StrategyGameRulesetDataStructures'.static.LessThan(MissionState.ExpirationDateTime, class'XComGameState_GeoscapeEntity'.static.GetCurrentTime()))
 	{
 		bUpdated = true;
-		if(`LWSQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
+		if(`SQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
 		{
 			bNeedsUpdateMissionFailure = true;
 			bFailedFromMissionExpiration = true;
@@ -181,7 +181,7 @@ function bool Update(XComGameState NewGameState)
 		if(ActivityTemplate.CanBeCompletedFn == none || ActivityTemplate.CanBeCompletedFn(self, NewGameState))
 		{
 			bUpdated = true;
-			if(CurrentMissionRef.ObjectID == 0 || `LWSQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
+			if(CurrentMissionRef.ObjectID == 0 || `SQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
 			{
 				if(CurrentMissionRef.ObjectID > 0)  // there is a mission, but no squad attached to it
 				{

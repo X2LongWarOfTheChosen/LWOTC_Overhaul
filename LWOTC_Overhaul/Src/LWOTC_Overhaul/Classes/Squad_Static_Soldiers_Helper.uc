@@ -1,5 +1,7 @@
 class Squad_Static_Soldiers_Helper extends Object;
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 // IsUnitOnMission(XComGameState_Unit UnitState)
 // helper for sparks to resolve if a wounded spark is on a mission, since that status can override the OnMission one
 static function bool IsUnitOnMission(XComGameState_Unit UnitState)
@@ -12,14 +14,14 @@ static function bool IsUnitOnMission(XComGameState_Unit UnitState)
 			{
 				return true;
 			}
-			if (`LWSQUADMGR.UnitIsOnMission(UnitState.GetReference()))
+			if (`SQUADMGR.UnitIsOnMission(UnitState.GetReference()))
 			{
 				return true;
 			}
-			if (`LWOUTPOSTMGR.IsUnitAHavenLiaison(UnitState.GetReference()))
-			{
-				return true;
-			}
+			//if (`LWOUTPOSTMGR.IsUnitAHavenLiaison(UnitState.GetReference()))
+			//{
+			//	return true;
+			//}
 			break;
 		default:
 			return UnitState.GetStatus() == eStatus_OnMission;

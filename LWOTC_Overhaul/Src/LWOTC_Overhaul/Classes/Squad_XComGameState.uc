@@ -213,7 +213,7 @@ function SpendBoostResource(XComGameState NewGameState)
 	XComHQ.PayStrategyCost(NewGameState, BoostCost, CostScalars);
 	
 	//`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
-	//`XCOMHQ.AddResource(NewGameState, 'Intel', -DefaultBoostInfiltrationCost[`DIFFICULTYSETTING]);
+	//`XCOMHQ.AddResource(NewGameState, 'Intel', -DefaultBoostInfiltrationCost[`CAMPAIGNDIFFICULTYSETTING]);
 }
 
 // GetBoostInfiltrationCost()
@@ -223,7 +223,7 @@ function StrategyCost GetBoostInfiltrationCost()
 	local ArtifactCost ResourceCost;
 
 	ResourceCost.ItemTemplateName = 'Intel';
-	ResourceCost.Quantity = DefaultBoostInfiltrationCost[`DIFFICULTYSETTING];
+	ResourceCost.Quantity = DefaultBoostInfiltrationCost[`CAMPAIGNDIFFICULTYSETTING];
 	Cost.ResourceCosts.AddItem(ResourceCost);
 
 	return Cost;

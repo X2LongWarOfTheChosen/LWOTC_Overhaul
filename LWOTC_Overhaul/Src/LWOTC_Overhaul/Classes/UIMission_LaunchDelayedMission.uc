@@ -5,6 +5,8 @@
 //--------------------------------------------------------------------------------------- 
 class UIMission_LaunchDelayedMission extends UIMission config(LWOTC_Infiltration);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 var UITextContainer InfiltrationInfoText;
 var UITextContainer MissionInfoText;
 
@@ -56,7 +58,7 @@ simulated function BuildScreen()
 {
 	// Add Interception warning and Shadow Chamber info 
 	BindLibraryItem();
-	`LWACTIVITYMGR.UpdateMissionData(GetMission());
+	`ACTIVITYMGR.UpdateMissionData(GetMission());
 	BuildMissionPanel();
 	BuildOptionsPanel();
 	class'UIUtilities_LW'.static.BuildMissionInfoPanel(self, MissionRef);
@@ -159,7 +161,7 @@ simulated function BuildMissionPanel()
 
 	MissionInfoText.Show();
 
-	AlienActivity = `LWACTIVITYMGR.FindAlienActivityByMission(Mission);
+	AlienActivity = `ACTIVITYMGR.FindAlienActivityByMission(Mission);
 	if(AlienActivity != none)
 	{
 		MissionInfoText.SetHTMLText(class'UIUtilities_Text'.static.GetColoredText(AlienActivity.GetMissionDescriptionForActivity(), eUIState_Normal));
@@ -433,7 +435,7 @@ simulated function XComGameState_LWPersistentSquad GetInfiltratingSquad()
 {
 	local XComGameState_LWSquadManager SquadMgr;
 	
-	SquadMgr = `LWSQUADMGR;
+	SquadMgr = `SQUADMGR;
 	if(SquadMgr == none)
 	{
 		`REDSCREEN("UIStrategyMapItem_Mission_LW: No SquadManager");
@@ -485,8 +487,8 @@ simulated public function OnBoostInfiltrationClicked(UIButton button)
 
 	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
 	ParamTag.StrValue0 = class'UIUtilities_Strategy'.static.GetStrategyCostString(BoostInfiltrationCost, CostScalars);
-	//ParamTag.IntValue0 = Squad.DefaultBoostInfiltrationCost[`DIFFICULTYSETTING];
-	ParamTag.IntValue1 = Round((Squad.DefaultBoostInfiltrationFactor[`DIFFICULTYSETTING] - 1.0) * 100.0);
+	//ParamTag.IntValue0 = Squad.DefaultBoostInfiltrationCost[`CAMPAIGNDIFFICULTYSETTING];
+	ParamTag.IntValue1 = Round((Squad.DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING] - 1.0) * 100.0);
 
 	PlaySound(SoundCue'SoundUI.HUDOnCue');
 
@@ -528,7 +530,7 @@ simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
         // update "pause" actually resets to 'slow time' and causes a hang.
 		UpdatedSquad.UpdateInfiltrationState(false);
 
-		`LWACTIVITYMGR.UpdateMissionData(GetMission()); // update units on the mission, since AlertLevel likely changed
+		`ACTIVITYMGR.UpdateMissionData(GetMission()); // update units on the mission, since AlertLevel likely changed
 
 		// rebuild the panels to display the updated status
 		BuildMissionPanel();
@@ -606,7 +608,7 @@ simulated public function OnAbortClicked(UIButton button)
 
 		if (bCachedMustLaunch)
 		{
-			Squad = `LWSQUADMGR.GetSquadOnMission(MissionRef);
+			Squad = `SQUADMGR.GetSquadOnMission(MissionRef);
 			if (Squad != none)
 			{
 				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark Squad Abort Status");
@@ -648,7 +650,7 @@ simulated function CloseScreen()
 
 simulated function XComGameState_LWAlienActivity GetActivity()
 {
-	return `LWACTIVITYMGR.FindAlienActivityByMission(GetMission());
+	return `ACTIVITYMGR.FindAlienActivityByMission(GetMission());
 }
 
 defaultproperties

@@ -57,62 +57,60 @@ var int				iPriority;							//lower priority means the activity type is checked 
 
 //REQUIRED
 var Delegate<OnMissionSuccess>		OnMissionSuccessFn;
-delegate							OnMissionSuccess(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
-//REQUIRED
 var Delegate<OnMissionFailure>		OnMissionFailureFn;
-delegate							OnMissionFailure(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
 
 //OPTIONAL: invoked during activity gamestate creation, allows handling of any further gamestate changes that result from activity creation
 var Delegate<OnActivityStarted>		OnActivityStartedFn;
-delegate							OnActivityStarted(XComGameState_LWAlienActivity ActivityState, XComGameState NewGameState);
-
 //OPTIONAL: Used to determine whether a given mission should have any rewards directly attached
 var Delegate<GetMissionRewards>		GetMissionRewardsFn;
-delegate array<name>				GetMissionRewards(XComGameState_LWAlienActivity ActivityState, name MissionFamily, XComGameState NewGameState);
 //OPTIONAL: Used to determine whether a given mission shoud have a DarkEvent directly attached
 var Delegate<GetMissionDarkEvent>	GetMissionDarkEventFn;
-delegate StateObjectReference		GetMissionDarkEvent(XComGameState_LWAlienActivity ActivityState, name MissionFamily, XComGameState NewGameState);
 //OPTIONAL: Used to determine an activity's ForceLevel. If undefined, defaults to the regional ForceLevel.
 var Delegate<GetMissionForceLevel>	GetMissionForceLevelFn;
-delegate int						GetMissionForceLevel(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionSite, XComGameState NewGameState);
 //OPTIONAL: Used to determine an activity's AlertLevel. If undefined, defaults to the regional AlertLevel.
 var Delegate<GetMissionAlertLevel>	GetMissionAlertLevelFn;
-delegate int						GetMissionAlertLevel(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionSite, XComGameState NewGameState);
 //OPTIONAL: Used to set a custom XComGameState_MissionSite subclass for a particular mission
 var Delegate<GetMissionSite>		GetMissionSiteFn;
-delegate XComGameState_MissionSite	GetMissionSite(XComGameState_LWAlienActivity ActivityState, name MissionFamily, XComGameState NewGameState);
-
 //OPTIONAL: Retrieves the next time an intermediate update to the activity should be performed
 var Delegate<GetTimeUpdate>			GetTimeUpdateFn;
-delegate TDateTime					GetTimeUpdate(XComGameState_LWAlienActivity ActivityState, optional XComGameState NewGameState);
 //OPTIIONAL: A modifier on when the activity will next update, computed dynamically
 var Delegate<UpdateModifierHours>	UpdateModifierHoursFn;
-delegate int						UpdateModifierHours(XComGameState_LWAlienActivity ActivityState, optional XComGameState NewGameState);
 //OPTIONAL (linked with GetTimeUpdate) : performs any updates necessary when an intermediate update is triggered
 var Delegate<OnActivityUpdate>		OnActivityUpdateFn;
-delegate							OnActivityUpdate(XComGameState_LWAlienActivity ActivityState, XComGameState NewGameState);
 //OPTIONAL: Checks if a particular mission was successful -- defaults to OneStrategyObjectiveCompleted
 var Delegate<WasMissionSuccessful>	WasMissionSuccessfulFn;
-delegate bool						WasMissionSuccessful(XComGameState_LWAlienActivity AlienActivity, XComGameState_MissionSite MissionState, XComGameState_BattleData BattleDataState);
 //OPTIONAL: Anything special to do when a mission is created
 var Delegate<OnMissionCreated>		OnMissionCreatedFn;
-delegate							OnMissionCreated(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
 //OPTIONAL: Anything special to do when a mission expires
 var Delegate<OnMissionExpire>		OnMissionExpireFn;
-delegate							OnMissionExpire(XComGameState_LWAlienActivity ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
-
 //OPTIONAL: invoked during activity gamestate creation, allows "locking" an activity to prevent completion despite timer elapsing
 var Delegate<CanBeCompleted>		CanBeCompletedFn;
-delegate bool						CanBeCompleted(XComGameState_LWAlienActivity ActivityState, XComGameState NewGameState);
 //OPTIONAL used during update once the activity has completed to apply any results to the gamestate
 var Delegate<OnActivityCompleted>	OnActivityCompletedFn;
-delegate							OnActivityCompleted(bool bAlienSuccess, XComGameState_LWAlienActivity ActivityState, XComGameState NewGameState);
+
+delegate							OnMissionSuccess(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
+delegate							OnMissionFailure(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
+delegate							OnActivityStarted(AlienActivity_XComGameState ActivityState, XComGameState NewGameState);
+delegate array<name>				GetMissionRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState);
+delegate StateObjectReference		GetMissionDarkEvent(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState);
+delegate int						GetMissionForceLevel(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionSite, XComGameState NewGameState);
+delegate int						GetMissionAlertLevel(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionSite, XComGameState NewGameState);
+delegate XComGameState_MissionSite	GetMissionSite(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState);
+delegate TDateTime					GetTimeUpdate(AlienActivity_XComGameState ActivityState, optional XComGameState NewGameState);
+delegate int						UpdateModifierHours(AlienActivity_XComGameState ActivityState, optional XComGameState NewGameState);
+delegate							OnActivityUpdate(AlienActivity_XComGameState ActivityState, XComGameState NewGameState);
+delegate bool						WasMissionSuccessful(AlienActivity_XComGameState AlienActivity, XComGameState_MissionSite MissionState, XComGameState_BattleData BattleDataState);
+delegate							OnMissionCreated(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
+delegate							OnMissionExpire(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState);
+delegate bool						CanBeCompleted(AlienActivity_XComGameState ActivityState, XComGameState NewGameState);
+delegate							OnActivityCompleted(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState);
 
 DefaultProperties
 {
 	iPriority = 50
 }
 
+// CreateInstanceFromTemplate(StateObjectReference PrimaryRegionRef, XComGameState NewGameState, optional MissionDefinition ForceMission)
 function AlienActivity_XComGameState CreateInstanceFromTemplate(StateObjectReference PrimaryRegionRef, XComGameState NewGameState, optional MissionDefinition ForceMission)
 {
 	local AlienActivity_XComGameState ActivityState;
@@ -122,11 +120,12 @@ function AlienActivity_XComGameState CreateInstanceFromTemplate(StateObjectRefer
 	{
 		ActivityState.ForceMission = ForceMission;
 	} 
-	ActivityState.OnCreation(self, PrimaryRegionRef, NewGameState);
+	ActivityState.OnInit(self, PrimaryRegionRef, NewGameState);
 
 	return ActivityState;
 }
 
+// InstantiateActivityTimeline(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 // figures out duration for each mission and activity overall
 function InstantiateActivityTimeline(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
@@ -178,6 +177,7 @@ function InstantiateActivityTimeline(AlienActivity_XComGameState ActivityState, 
 	}
 }
 
+// ValidateTemplate(out string strError)
 function bool ValidateTemplate(out string strError)
 {
 	//local X2MissionTemplateManager MissionTemplateManager;

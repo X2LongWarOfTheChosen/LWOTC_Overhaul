@@ -5,6 +5,8 @@
 //---------------------------------------------------------------------------------------
 class ActivityDetectionCalc_LWOTC extends Object config(LWOTC_AlienActivities);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 var config array <bool>  USE_DETECTION_FORCE_LEVEL_MODIFIERS;
 var config array <float> FORCE_LEVEL_DETECTION_MODIFIER_ROOKIE;
 var config array <float> FORCE_LEVEL_DETECTION_MODIFIER_VETERAN;
@@ -25,6 +27,13 @@ var array<DetectionModifierInfo> DetectionModifiers;       // Can be configured 
 
 var protected name RebelMissionsJob;
 
+defaultProperties
+{
+	bSkipUncontactedRegions = true
+	RebelMissionsJob="Intel"
+}
+
+// AddDetectionModifier(const int ModValue, const string ModReason)
 function AddDetectionModifier(const int ModValue, const string ModReason)
 {
 	local DetectionModifierInfo Mod;
@@ -33,6 +42,7 @@ function AddDetectionModifier(const int ModValue, const string ModReason)
 	DetectionModifiers.AddItem(Mod);
 }
 
+// SetAlwaysDetected(bool Val)
 function SetAlwaysDetected(bool Val)
 {
 	bAlwaysDetected = Val;
@@ -40,6 +50,7 @@ function SetAlwaysDetected(bool Val)
 		bNeverDetected = false;
 }
 
+// SetNeverDetected(bool Val)
 function SetNeverDetected(bool Val)
 {
 	bNeverDetected = Val;
@@ -47,16 +58,17 @@ function SetNeverDetected(bool Val)
 		bAlwaysDetected = false;
 }
 
+// CanBeDetected(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 //activity detection mechanic
 function bool CanBeDetected(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
 	local XComGameState_WorldRegion RegionState;
 	//local XComGameState_LWOutpost OutpostState;
 	//local XComGameState_LWOutpostManager OutpostManager;
-	local X2LWAlienActivityTemplate ActivityTemplate;
+	local AlienActivity_X2StrategyElementTemplate ActivityTemplate;
 	local float DetectionChance, RandValue;
 
-	//`LWTRACE("TypicalActivity Discovery: Starting");
+	`LWTRACE("TypicalActivity Discovery: Starting");
 	if(bAlwaysDetected)
 		return true;
 
@@ -91,12 +103,12 @@ function bool CanBeDetected(AlienActivity_XComGameState ActivityState, XComGameS
 		{
 	
 			DetectionChance = GetDetectionChance(ActivityState, ActivityTemplate);//, OutpostState);
-			//`LWTRACE("DISCOVERY:" @ RegionState.GetMyTemplate().DisplayName @ ": DetectionChance for" @ ActivityTemplate.DataName @ ":" @ string(DetectionChance));
+			`LWTRACE("DISCOVERY:" @ RegionState.GetMyTemplate().DisplayName @ ": DetectionChance for" @ ActivityTemplate.DataName @ ":" @ string(DetectionChance));
 
 			RandValue = `SYNC_FRAND() * 100.0;
 			if(RandValue < DetectionChance)  // pass random roll
 			{
-				//`LWTRACE("SUCCESS: Roll was" @ string(Randvalue));
+				`LWTRACE("SUCCESS: Roll was" @ string(Randvalue));
 				//we found the activity (which will spawn the mission) so spend the income
 				ActivityState.MissionResourcePool = 0;
 				return true;
@@ -107,6 +119,7 @@ function bool CanBeDetected(AlienActivity_XComGameState ActivityState, XComGameS
 	return false;
 }
 
+// GetDetectionChance(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate) //, XComGameState_LWOutpost OutpostState)
 function float GetDetectionChance(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate) //, XComGameState_LWOutpost OutpostState)
 {
 	local float ResourcePool;
@@ -127,8 +140,8 @@ function float GetDetectionChance(AlienActivity_XComGameState ActivityState, Ali
 	}
 
 	// insert something sort of cheaty
-	//`LWTRACE ("Bugcheck:" @ string(`DifficultySetting) @ default.USE_DETECTION_FORCE_LEVEL_MODIFIERS[`DIFFICULTYSETTING]);
-	if (default.USE_DETECTION_FORCE_LEVEL_MODIFIERS[`DIFFICULTYSETTING])
+	`LWTRACE ("Bugcheck:" @ string(`CAMPAIGNDIFFICULTYSETTING) @ default.USE_DETECTION_FORCE_LEVEL_MODIFIERS[`CAMPAIGNDIFFICULTYSETTING]);
+	if (default.USE_DETECTION_FORCE_LEVEL_MODIFIERS[`CAMPAIGNDIFFICULTYSETTING])
 	{
 	    RegionState = GetRegion(ActivityState);
 		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
@@ -136,7 +149,7 @@ function float GetDetectionChance(AlienActivity_XComGameState ActivityState, Ali
 		{
 			`REDSCREEN("Cannot find region for activity " $ ActivityState.GetMyTemplateName());
 		}
-		switch (`DIFFICULTYSETTING)
+		switch (`CAMPAIGNDIFFICULTYSETTING)
 		{
 			case 0: DetectionChance += default.FORCE_LEVEL_DETECTION_MODIFIER_ROOKIE[clamp(RegionalAI.LocalForceLevel, 1, 20)]; break;
 			case 1: DetectionChance += default.FORCE_LEVEL_DETECTION_MODIFIER_VETERAN[clamp(RegionalAI.LocalForceLevel, 1, 20)]; break;
@@ -152,17 +165,20 @@ function float GetDetectionChance(AlienActivity_XComGameState ActivityState, Ali
 	return DetectionChance;
 }
 
+// MeetsOnMissionJobRequirements(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate) //, XComGameState_LWOutpost OutpostState)
 function bool MeetsOnMissionJobRequirements(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate) //, XComGameState_LWOutpost OutpostState)
 {
 	return true;
 	//return OutpostState.GetTrueDailyIncomeForJob(default.RebelMissionsJob) >= ActivityTemplate.MinimumRequiredIntelDailyIncome;
 }
 
+// MeetsRequiredMissionIncome(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate)
 function bool MeetsRequiredMissionIncome(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate)
 {
 	return ActivityState.MissionResourcePool >= ActivityTemplate.RequiredRebelMissionIncome;
 }
 
+// GetMissionIncomeForUpdate()// XComGameState_LWOutpost OutpostState)
 function float GetMissionIncomeForUpdate()// XComGameState_LWOutpost OutpostState)
 {
 	local float NewIncome;
@@ -173,6 +189,7 @@ function float GetMissionIncomeForUpdate()// XComGameState_LWOutpost OutpostStat
 	return NewIncome;
 }
 
+// GetExternalMissionModifiersForUpdate(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 function float GetExternalMissionModifiersForUpdate(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
     local XComLWTuple Tuple;
@@ -194,25 +211,20 @@ function float GetExternalMissionModifiersForUpdate(AlienActivity_XComGameState 
 		return Tuple.Data[0].f;
 }
 
+// GetRegion(AlienActivity_XComGameState ActivityState)
 function XComGameState_WorldRegion GetRegion(AlienActivity_XComGameState ActivityState)
 {
 	return XComGameState_WorldRegion(`XCOMHISTORY.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
 }
 
+// ShouldSkipUncontactedRegion()
 function bool ShouldSkipUncontactedRegion()
 {
 	 return bSkipUncontactedRegions;
 }
 
+// ShouldSkipLiberatedRegion(AlienActivity_X2StrategyElementTemplate ActivityTemplate)
 function bool ShouldSkipLiberatedRegion(AlienActivity_X2StrategyElementTemplate ActivityTemplate)
 {
 	 return !ActivityTemplate.CanOccurInLiberatedRegion;
-}
-
-defaultProperties
-{
-	bSkipUncontactedRegions = true
-
-	RebelMissionsJob="Intel"
-
 }

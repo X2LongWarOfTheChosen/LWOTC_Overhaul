@@ -7,6 +7,8 @@
 
 class UIUtilities_LWOTC extends Object config(LW_Overhaul);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 var config array<name> EvacFlareMissions;
 var config array<name> EvacFlareEscapeMissions;
 var config array<name> FixedExitMissions;
@@ -106,7 +108,7 @@ static function int GetCurrentEvacDelay (XComGameState_LWPersistentSquad Squad, 
 	if (Squad == none)
 		return -1;
 
-	EvacDelay = class'X2Ability_PlaceDelayedEvacZone'.default.DEFAULT_EVAC_PLACEMENT_DELAY[`DIFFICULTYSETTING];
+	EvacDelay = class'X2Ability_PlaceDelayedEvacZone'.default.DEFAULT_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING];
 
 	EvacDelay += Squad.EvacDelayModifier_SquadSize();
 	EvacDelay += Squad.EvacDelayModifier_Infiltration();
@@ -130,7 +132,7 @@ static function int GetCurrentEvacDelay (XComGameState_LWPersistentSquad Squad, 
 		}
 	}
 
-	EvacDelay = Clamp (EvacDelay, class'X2Ability_PlaceDelayedEvacZone'.default.MIN_EVAC_PLACEMENT_DELAY[`DIFFICULTYSETTING], class'X2Ability_PlaceDelayedEvacZone'.default.MAX_EVAC_PLACEMENT_DELAY);
+	EvacDelay = Clamp (EvacDelay, class'X2Ability_PlaceDelayedEvacZone'.default.MIN_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING], class'X2Ability_PlaceDelayedEvacZone'.default.MAX_EVAC_PLACEMENT_DELAY);
 
 	return EvacDelay;
 
@@ -179,7 +181,7 @@ static function string GetMissionTypeString (StateObjectReference MissionRef)
 
 	//MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
 
-	if (`LWSquadMgr.IsValidInfiltrationMission(MissionRef)) // && MissionState.ExpirationDateTime.m_iYear < 2100)
+	if (`SQUADMGR.IsValidInfiltrationMission(MissionRef)) // && MissionState.ExpirationDateTime.m_iYear < 2100)
 	{
 		return default.m_strInfiltrationMission;
 	}
@@ -307,7 +309,7 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 	local string MissionInfoTimer, MissionInfo1, MissionInfo2, HeaderStr;
 	local int EvacFlareTimer;
 
-	SquadMgr = `LWSQUADMGR;
+	SquadMgr = `SQUADMGR;
 	MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
 
 	//if (SquadMgr.IsValidInfiltrationMission(MissionRef) &&

@@ -13,6 +13,7 @@ var int								NumActivitiesToCreate;
 var protectedwrite array<AlienActivity_XComGameState>		ActivityStates;
 var protectedwrite AlienActivity_X2StrategyElementTemplate	ActivityTemplate;
 
+// InitActivityCreation(AlienActivity_X2StrategyElementTemplate Template, XComGameState NewGameState)
 simulated function InitActivityCreation(AlienActivity_X2StrategyElementTemplate Template, XComGameState NewGameState)
 {
 	NumActivitiesToCreate = 999;
@@ -20,6 +21,7 @@ simulated function InitActivityCreation(AlienActivity_X2StrategyElementTemplate 
 	ActivityStates = class'AlienActivity_XComGameState_Manager'.static.GetAllActivities(NewGameState);
 }
 
+// GetNumActivitiesToCreate(XComGameState NewGameState)
 simulated function int GetNumActivitiesToCreate(XComGameState NewGameState)
 {
 	PrimaryRegions = FindValidRegions(NewGameState);
@@ -27,6 +29,7 @@ simulated function int GetNumActivitiesToCreate(XComGameState NewGameState)
 	return NumActivitiesToCreate;
 }
 
+// FindValidRegions(XComGameState NewGameState)
 simulated function array<StateObjectReference> FindValidRegions(XComGameState NewGameState)
 {
 	local ActivityCondition_LWOTC					Condition;
@@ -68,6 +71,7 @@ simulated function array<StateObjectReference> FindValidRegions(XComGameState Ne
 	return ValidActivityRegions;
 }
 
+// GetBestPrimaryRegion(XComGameState NewGameState)
 simulated function StateObjectReference GetBestPrimaryRegion(XComGameState NewGameState)
 {
 	local StateObjectReference SelectedRegion;
@@ -78,6 +82,7 @@ simulated function StateObjectReference GetBestPrimaryRegion(XComGameState NewGa
 	return SelectedRegion;
 }
 
+// FindBestPrimaryRegion(XComGameState NewGameState)
 simulated function StateObjectReference FindBestPrimaryRegion(XComGameState NewGameState)
 {
 	local StateObjectReference NullRef;
@@ -89,8 +94,9 @@ simulated function StateObjectReference FindBestPrimaryRegion(XComGameState NewG
 	return NullRef;
 }
 
-simulated function array<StateObjectReference> GetSecondaryRegions(XComGameState NewGameState, XComGameState_LWAlienActivity ActivityState);
+simulated function array<StateObjectReference> GetSecondaryRegions(XComGameState NewGameState, AlienActivity_XComGameState ActivityState);
 
+// LinkDistanceToClosestContactedRegion(XComGameState_WorldRegion FromRegion)
 function int LinkDistanceToClosestContactedRegion(XComGameState_WorldRegion FromRegion)
 {
 	local array<XComGameState_WorldRegion> arrSearchRegions;

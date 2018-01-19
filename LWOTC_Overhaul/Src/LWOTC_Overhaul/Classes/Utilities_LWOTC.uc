@@ -7,6 +7,8 @@
 
 class Utilities_LWOTC extends Object dependson(X2StrategyElement_DefaultAlienActivities);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 function static XComGameState_Unit CreateProxyUnit(XComGameState_Unit OriginalUnit, Name ProxyTemplateName, bool GiveAbilities, XComGameState NewGameState, optional Name Loadout)
 {
     local XComGameState_Unit ProxyUnit;
@@ -207,7 +209,7 @@ function static bool GetSpawnTileNearTile(out TTile Tile, int FirstRange, int Se
     }
 
     // Still no good!
-    `LWDebug("*** Failed to find a valid position for unit");
+    //`LWDebug("*** Failed to find a valid position for unit");
     return false;
 }
 
@@ -376,7 +378,7 @@ function static XComGameState_Unit CreateRebelSoldier(StateObjectReference Rebel
 				LoadoutStr $= "Shotgun";
 			}
 		}
-		//`LWTRACE ("Rebel Loadout" @ LoadoutStr);
+		`LWTRACE ("Rebel Loadout" @ LoadoutStr);
 		Loadout = name(LoadOutStr);
 	}
 
@@ -410,7 +412,7 @@ function static XComGameState_Unit CreateRebelProxy(StateObjectReference RebelRe
     }
 
     Unit = XComGameState_Unit(History.GetGameStateForObjectID(RebelRef.ObjectID));
-    `LWTrace("Creating proxy for " $ Unit.GetFullName() $ " with template " $ TemplateName);
+    `LWTRACE("Creating proxy for " $ Unit.GetFullName() $ " with template " $ TemplateName);
     Proxy = CreateProxyUnit(Unit, TemplateName, GiveAbilities, NewGameState);
     NewGameState.AddStateObject(Proxy);
     Outpost.SetRebelProxy(Unit.GetReference(), Proxy.GetReference());

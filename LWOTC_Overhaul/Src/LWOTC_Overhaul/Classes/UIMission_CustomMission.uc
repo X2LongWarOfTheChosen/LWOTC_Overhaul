@@ -7,7 +7,7 @@
 //--------------------------------------------------------------------------------------- 
 class UIMission_CustomMission extends UIMission config(LW_Overhaul);
 
-`include(LW_Overhaul\Src\LW_Overhaul.uci)
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
 enum EMissionUIType
 {
@@ -178,7 +178,7 @@ simulated function BuildScreen()
 {
 	// Add Interception warning and Shadow Chamber info 
 	BindLibraryItem();
-	`LWACTIVITYMGR.UpdateMissionData(GetMission());
+	`ACTIVITYMGR.UpdateMissionData(GetMission());
 	BuildMissionPanel();
 	BuildOptionsPanel();
 	class'UIUtilities_LW'.static.BuildMissionInfoPanel(self, MissionRef);
@@ -456,7 +456,7 @@ simulated function BuildGuerrillaOpsMissionPanel()
 
 	MissionInfoText.Show();
 
-	AlienActivity = `LWACTIVITYMGR.FindAlienActivityByMission(MissionState);
+	AlienActivity = `ACTIVITYMGR.FindAlienActivityByMission(MissionState);
 	if(AlienActivity != none)
 		MissionInfoText.SetHTMLText(class'UIUtilities_Text'.static.GetColoredText(AlienActivity.GetMissionDescriptionForActivity(), eUIState_Normal));
 	else

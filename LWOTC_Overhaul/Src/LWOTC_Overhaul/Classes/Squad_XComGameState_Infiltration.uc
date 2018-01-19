@@ -61,7 +61,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 	HoursToFullInfiltration = class'Squad_Static_Infiltration_Helper'.static.GetHoursToFullInfiltration(SquadSoldiersOnMission, CurrentMission);
 
 	if (bHasBoostedInfiltration)
-		HoursToFullInfiltration /= DefaultBoostInfiltrationFactor[`DIFFICULTYSETTING];
+		HoursToFullInfiltration /= DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING];
 	
 	// Add the liberation infiltration bonus to the infiltration time if the region has been liberated.
 	// This handles boosting of missions that are still around after liberating the region where the boost
@@ -73,7 +73,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(RegionalAI.bLiberated)
 		{
-			InfiltrationBonusOnLiberation = class'X2StrategyElement_DefaultAlienActivities'.default.INFILTRATION_BONUS_ON_LIBERATION[`DIFFICULTYSETTING] / 100.0;
+			InfiltrationBonusOnLiberation = class'X2StrategyElement_DefaultAlienActivities'.default.INFILTRATION_BONUS_ON_LIBERATION[`CAMPAIGNDIFFICULTYSETTING] / 100.0;
 			HoursOfInfiltration += class'Squad_Static_Infiltration_Helper'.static.GetHoursToFullInfiltration(SquadSoldiersOnMission, CurrentMission) * InfiltrationBonusOnLiberation;
 		}
 	}
@@ -224,7 +224,7 @@ function float GetSecondsRemainingToFullInfiltration(array<StateObjectReference>
 	HoursToFullInfiltration = GetHoursToFullInfiltration_Static(SquadSoldiersOnMission, CurrentMission);
 
 	if (bHasBoostedInfiltration)
-		HoursToFullInfiltration /= DefaultBoostInfiltrationFactor[`DIFFICULTYSETTING];
+		HoursToFullInfiltration /= DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING];
 
 	TotalSecondsToInfiltrate = 3600.0 * HoursToFullInfiltration;
 	SecondsOfInfiltration = class'X2StrategyGameRulesetDataStructures'.static.DifferenceInSeconds(GetCurrentTime(), StartInfiltrationDateTime);

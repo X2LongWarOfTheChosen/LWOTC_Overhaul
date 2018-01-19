@@ -5,6 +5,8 @@
 //---------------------------------------------------------------------------------------
 class SquadManager_XComGameState extends XComGameState_BaseObject config(LWOTC_Squads);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 var localized string LabelBarracks_SquadManagement;
 var localized string TooltipBarracks_SquadManagement;
 

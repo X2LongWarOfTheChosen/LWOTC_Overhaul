@@ -82,9 +82,6 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_DefaultAlienActivities.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState.uc">
       <SubType>Content</SubType>
     </Content>

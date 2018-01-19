@@ -14,6 +14,7 @@ struct ActivityCooldownTimer
 var float Cooldown_Hours;
 var float RandCooldown_Hours;
 
+// ApplyCooldown(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 simulated function ApplyCooldown(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
 	local XComGameState_WorldRegion RegionState;
@@ -33,6 +34,7 @@ simulated function ApplyCooldown(AlienActivity_XComGameState ActivityState, XCom
 	RegionalAI.RegionalCooldowns.AddItem(Cooldown);
 }
 
+// GetCooldownDateTime()
 function TDateTime GetCooldownDateTime()
 {
 	local TDateTime DateTime;
@@ -42,6 +44,7 @@ function TDateTime GetCooldownDateTime()
 	return DateTime;
 }
 
+// GetCooldownHours()
 function float GetCooldownHours()
 {
 	return Cooldown_Hours + `SYNC_FRAND() * RandCooldown_Hours;

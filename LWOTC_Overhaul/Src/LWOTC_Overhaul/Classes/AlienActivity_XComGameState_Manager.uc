@@ -3,9 +3,9 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: This is the singleton, overall alien strategic manager for generating/managing activities
 //---------------------------------------------------------------------------------------
-class AlienActivity_XComGameState_Manager extends XComGameState_GeoscapeEntity dependson(X2LWAlienActivityTemplate) config(LW_Activities);
+class AlienActivity_XComGameState_Manager extends XComGameState_GeoscapeEntity dependson(AlienActivity_X2StrategyElementTemplate) config(LW_Activities);
 
-`include(LW_Overhaul\Src\LW_Overhaul.uci)
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
 var TDateTime NextUpdateTime;
 
@@ -18,7 +18,7 @@ var config int AVATAR_DELAY_HOURS_PER_NET_GLOBAL_VIG;
 //#############################################################################################
 
 //---------------------------------------------------------------------------------------
-function OnCreation(XComGameState NewGameState)
+function OnInit(XComGameState NewGameState)
 {
 	NextUpdateTime = class'UIUtilities_Strategy'.static.GetGameTime().CurrentTime;
 }
@@ -343,7 +343,7 @@ static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 
 	History = `XCOMHISTORY;
 	AlienHQ = XComGameState_HeadquartersAlien(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
-	SquadMgr = `LWSQUADMGR;
+	SquadMgr = `SQUADMGR;
 	InfiltratingSquad = SquadMgr.GetSquadOnMission(MissionSite.GetReference());
 	ActivityState = FindAlienActivityByMission(MissionSite);
 	RegionState = MissionSite.GetWorldRegion();
@@ -427,7 +427,7 @@ static function int GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 	}
 	else if (MissionSite.GetMissionSource().bGoldenPath)
 	{
-		AlertLevel = `DIFFICULTYSETTING + 1;
+		AlertLevel = `CAMPAIGNDIFFICULTYSETTING + 1;
 	}
 	else if(RegionalAIState != none)
 	{

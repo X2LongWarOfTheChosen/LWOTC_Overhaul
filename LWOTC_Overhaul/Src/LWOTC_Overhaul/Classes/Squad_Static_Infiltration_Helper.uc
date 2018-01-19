@@ -282,6 +282,7 @@ static function UpdateCovertnessForAbilities(XComGameState_Unit UnitState, out f
 }
 
 // UpdateCovertnessForOfficers(array<StateObjectReference> Soldiers, XComGameState_Unit UnitState, out float CumulativeUnitMultiplier)
+/*
 static function UpdateCovertnessForOfficers(array<StateObjectReference> Soldiers, XComGameState_Unit UnitState, out float CumulativeUnitMultiplier)
 {
 	local StateObjectReference SoldierRef;
@@ -320,6 +321,7 @@ static function UpdateCovertnessForOfficers(array<StateObjectReference> Soldiers
 		}
 	}
 }
+*/
 
 // GetBaselineHoursToInfiltration(StateObjectReference MissionRef)
 static function float GetBaselineHoursToInfiltration(StateObjectReference MissionRef)
@@ -330,19 +332,19 @@ static function float GetBaselineHoursToInfiltration(StateObjectReference Missio
 	local float BaseHours;
 	local int MissionIdx;
 
-	BaseHours = default.InfiltrationTime_BaselineHours[`DIFFICULTYSETTING];
+	BaseHours = default.InfiltrationTime_BaselineHours[`CAMPAIGNDIFFICULTYSETTING];
 
 	MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
 	switch (MissionState.Source)
 	{
 		case 'MissionSource_Blacksite': 
-			BaseHours = default.InfiltrationTime_BlackSite[`DIFFICULTYSETTING];
+			BaseHours = default.InfiltrationTime_BlackSite[`CAMPAIGNDIFFICULTYSETTING];
 			break;
 		case 'MissionSource_Forge':
-			BaseHours = default.InfiltrationTime_Forge[`DIFFICULTYSETTING];
+			BaseHours = default.InfiltrationTime_Forge[`CAMPAIGNDIFFICULTYSETTING];
 			break;
 		case 'MissionSource_PsiGate':
-			BaseHours = default.InfiltrationTime_PsiGate[`DIFFICULTYSETTING];
+			BaseHours = default.InfiltrationTime_PsiGate[`CAMPAIGNDIFFICULTYSETTING];
 			break;
 		default:
 			break;

@@ -6,6 +6,8 @@
 //---------------------------------------------------------------------------------------
 class WorldRegion_XComGameState_AlienStrategyAI extends XComGameState_BaseObject dependson(AlienActivity_XComGameState_Manager) config(LWOTC_AlienActivities);
 
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
 var config float		LOCAL_VIGILANCE_DECAY_RATE_HOURS;
 var config int			BASELINE_OUTPOST_WORKERS_FOR_STD_VIG_DECAY;
 var config int			MAX_VIG_DECAY_CHANGE_HOURS;
@@ -110,15 +112,15 @@ function bool UpdateRegionalAI(XComGameState NewGameState)
 		SlotsDelta = 6; // Random number
 
 		HoursMod = (float (SlotsDelta) / float (default.BASELINE_OUTPOST_WORKERS_FOR_STD_VIG_DECAY)) * default.MAX_VIG_DECAY_CHANGE_HOURS;
-		//`LWTRACE("Setting new HoursMod for this region" @ HoursMod @ EmptySlots @ SlotsDelta);
+		`LWTRACE("Setting new HoursMod for this region" @ HoursMod @ EmptySlots @ SlotsDelta);
 		If (!default.BUSY_HAVENS_SLOW_VIGILANCE_DECAY && HoursMod > 0.0)
 		{
 			HoursMod = 0;
 		}
 		class'X2StrategyGameRulesetDataStructures'.static.AddHours(NextVigilanceDecayTime, HoursMod);
 
-		//`LWTRACE("Current Time:" @ class'X2StrategyGameRulesetDataStructures'.static.GetDateString(CurrentTime) @ class'X2StrategyGameRulesetDataStructures'.static.GetTimeString(CurrentTime));
-		//`LWTRACE("Next Vigilance Decay for" @ GetOwningRegion().GetMyTemplateName() @ "scheduled for" @ class'X2StrategyGameRulesetDataStructures'.static.GetDateString(NextVigilanceDecayTime) @ class'X2StrategyGameRulesetDataStructures'.static.GetTimeString(NextVigilanceDecayTime));
+		`LWTRACE("Current Time:" @ class'X2StrategyGameRulesetDataStructures'.static.GetDateString(CurrentTime) @ class'X2StrategyGameRulesetDataStructures'.static.GetTimeString(CurrentTime));
+		`LWTRACE("Next Vigilance Decay for" @ GetOwningRegion().GetMyTemplateName() @ "scheduled for" @ class'X2StrategyGameRulesetDataStructures'.static.GetDateString(NextVigilanceDecayTime) @ class'X2StrategyGameRulesetDataStructures'.static.GetTimeString(NextVigilanceDecayTime));
 		if (class'X2StrategyGameRulesetDataStructures'.static.LessThan(NextVigilanceDecayTime, class'XComGameState_GeoscapeEntity'.static.GetCurrentTime()))
 		{
 			OldLocalVigilanceLevel = LocalVigilanceLevel;
@@ -134,7 +136,7 @@ function bool UpdateRegionalAI(XComGameState NewGameState)
 			}
 			if (LocalVigilanceLevel != OldLocalVigilanceLevel)
 			{
-				//`LWTRACE("PASS: Region " $ GetOwningRegion().GetMyTemplateName() $ " Vigilance Decay by 1.");
+				`LWTRACE("PASS: Region " $ GetOwningRegion().GetMyTemplateName() $ " Vigilance Decay by 1.");
 				LastVigilanceUpdateTime = CurrentTime;
 				bUpdated = true;	
 			}

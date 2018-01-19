@@ -1,2 +1,6 @@
 
 `define SQUADMGR class'SquadManager_XComGameState'.static.GetSquadManager()
+
+`define ACTIVITYMGR class'AlienActivity_XComGameState_Manager'.static.GetAlienActivityManager()
+
+`define LWTrace(msg,cond,tag) `Log(`msg, `cond, 'LWTrace')
