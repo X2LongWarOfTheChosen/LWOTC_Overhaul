@@ -8,6 +8,9 @@
     <AssemblyName>LWOTC_Overhaul</AssemblyName>
     <RootNamespace>LWOTC_Overhaul</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="Config\XComEditor.ini">
       <SubType>Content</SubType>
@@ -25,6 +28,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Infiltration_SeqAct_InitializeMissionTimer.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState_Squads.uc">
       <SubType>Content</SubType>
     </Content>
@@ -37,6 +43,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\Squad_XComGameState_Infiltration.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Squad_XComGameState_Listener.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Squad_XComGameState_Soldiers.uc">
       <SubType>Content</SubType>
     </Content>
@@ -44,6 +53,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIMission_CustomMission.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIPersonnel_SquadBarracks.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIUtilities_LWOTC.uc">
@@ -56,6 +68,12 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\WorldRegion_XComGameState_AlienStrategyAI_Con.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_X2Ability_PlaceDelayed.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_X2Condition_PlaceDelayedPermitted.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\X2DownloadableContentInfo_LWOTC_Overhaul.uc">
@@ -89,6 +107,15 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul.uci">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_X2TargetingMethod.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_XComGameState_EvacSpawner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_DefaultAlienActivities.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

@@ -7,35 +7,37 @@ class AlienActivity_XComGameState_Manager extends XComGameState_GeoscapeEntity d
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
-var TDateTime NextUpdateTime;
-
-var array<ActivityCooldownTimer> GlobalCooldowns;
-
 var config int AVATAR_DELAY_HOURS_PER_NET_GLOBAL_VIG;
+
+var TDateTime NextUpdateTime;
+var array<ActivityCooldownTimer> GlobalCooldowns;
 
 //#############################################################################################
 //----------------   INITIALIZATION   ---------------------------------------------------------
 //#############################################################################################
 
-//---------------------------------------------------------------------------------------
+// OnInit(XComGameState NewGameState)
 function OnInit(XComGameState NewGameState)
 {
 	NextUpdateTime = class'UIUtilities_Strategy'.static.GetGameTime().CurrentTime;
 }
 
+// GetStrategyTemplateManager()
 static function X2StrategyElementTemplateManager GetStrategyTemplateManager()
 {
 	return class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
 }
 
-static function XComGameState_LWAlienActivityManager GetAlienActivityManager(optional bool AllowNULL = false)
+// GetAlienActivityManager(optional bool AllowNULL = false)
+static function AlienActivity_XComGameState_Manager GetAlienActivityManager(optional bool AllowNULL = false)
 {
-    return XComGameState_LWAlienActivityManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWAlienActivityManager', AllowNULL));
+    return AlienActivity_XComGameState_Manager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'AlienActivity_XComGameState_Manager', AllowNULL));
 }
 
+// CreateAlienActivityManager(optional XComGameState StartState)
 static function CreateAlienActivityManager(optional XComGameState StartState)
 {
-	local XComGameState_LWAlienActivityManager ActivityMgr;
+	local AlienActivity_XComGameState_Manager ActivityMgr;
 	local XComGameState NewGameState;
 
 	//first check that there isn't already a singleton instance of the squad manager
@@ -44,13 +46,13 @@ static function CreateAlienActivityManager(optional XComGameState StartState)
 
 	if(StartState != none)
 	{
-		ActivityMgr = XComGameState_LWAlienActivityManager(StartState.CreateStateObject(class'XComGameState_LWAlienActivityManager'));
+		ActivityMgr = AlienActivity_XComGameState_Manager(StartState.CreateStateObject(class'AlienActivity_XComGameState_Manager'));
 		StartState.AddStateObject(ActivityMgr);
 	}
 	else
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Creating LW Alien Activity Manager Quasi-singleton");
-		ActivityMgr = XComGameState_LWAlienActivityManager(NewGameState.CreateStateObject(class'XComGameState_LWAlienActivityManager'));
+		ActivityMgr = AlienActivity_XComGameState_Manager(NewGameState.CreateStateObject(class'AlienActivity_XComGameState_Manager'));
 		ActivityMgr.OnCreation(NewGameState);
 		NewGameState.AddStateObject(ActivityMgr);
 		`XCOMHISTORY.AddGameStateToHistory(NewGameState);
@@ -61,15 +63,15 @@ static function CreateAlienActivityManager(optional XComGameState StartState)
 //----------------   UPDATE   -----------------------------------------------------------------
 //#############################################################################################
 
-//---------------------------------------------------------------------------------------
+// Update(XComGameState NewGameState)
 function bool Update(XComGameState NewGameState)
 {
 	local bool bUpdated;
 	local array<X2StrategyElementTemplate> ActivityTemplates;
-	local X2LWAlienActivityTemplate ActivityTemplate;
+	local AlienActivity_X2StrategyElementTemplate ActivityTemplate;
 	local int idx, NumActivities, ActivityIdx;
-	local XComGameState_LWAlienActivity NewActivityState;
-	local XComGameState_LWAlienActivityManager UpdatedActivityMgr;
+	local AlienActivity_XComGameState NewActivityState;
+	local AlienActivity_XComGameState_Manager UpdatedActivityMgr;
 	local ActivityCooldownTimer Cooldown;
 	local array<ActivityCooldownTimer> CooldownsToRemove;
 	local StateObjectReference PrimaryRegionRef;
@@ -102,12 +104,12 @@ function bool Update(XComGameState NewGameState)
 		}
 
 		//AlienActivity Creation
-		ActivityTemplates = GetStrategyTemplateManager().GetAllTemplatesOfClass(class'X2LWAlienActivityTemplate');
+		ActivityTemplates = GetStrategyTemplateManager().GetAllTemplatesOfClass(class'AlienActivity_X2StrategyElementTemplate');
 		ActivityTemplates = RandomizeOrder(ActivityTemplates);
 		ActivityTemplates.Sort(ActivityPrioritySort);
 		for(idx = 0; idx < ActivityTemplates.Length; idx++)
 		{
-			ActivityTemplate = X2LWAlienActivityTemplate(ActivityTemplates[idx]);
+			ActivityTemplate = AlienActivity_X2StrategyElementTemplate(ActivityTemplates[idx]);
 			if(GlobalCooldowns.Find('ActivityName', ActivityTemplate.DataName) == -1)
 			{
 				if(ActivityTemplate == none)
@@ -130,8 +132,8 @@ function bool Update(XComGameState NewGameState)
 		}
 
 		//update activity creation timer
-		UpdatedActivityMgr = XComGameState_LWAlienActivityManager(NewGameState.CreateStateObject(Class, ObjectID));
-		if(class'X2StrategyGameRulesetDataStructures'.static.DifferenceInHours(class'XComGameState_GeoscapeEntity'.static.GetCurrentTime(), NextUpdateTime) > 20 * class'X2LWAlienActivityTemplate'.default.HOURS_BETWEEN_ALIEN_ACTIVITY_MANAGER_UPDATES)
+		UpdatedActivityMgr = AlienActivity_XComGameState_Manager(NewGameState.CreateStateObject(Class, ObjectID));
+		if(class'X2StrategyGameRulesetDataStructures'.static.DifferenceInHours(class'XComGameState_GeoscapeEntity'.static.GetCurrentTime(), NextUpdateTime) > 20 * class'AlienActivity_X2StrategyElementTemplate'.default.HOURS_BETWEEN_ALIEN_ACTIVITY_MANAGER_UPDATES)
 		{
 			NextUpdateTime = class'XComGameState_GeoscapeEntity'.static.GetCurrentTime();
 
@@ -144,21 +146,21 @@ function bool Update(XComGameState NewGameState)
 	return bUpdated;
 }
 
-//---------------------------------------------------------------------------------------
+// UpdateGameBoard()
 function UpdateGameBoard()
 {
 	local XComGameState NewGameState;
-	local XComGameState_LWAlienActivityManager AAMState;
+	local AlienActivity_XComGameState_Manager AAMState;
 	local XComGameStateHistory History;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAI;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 
 	History = `XCOMHISTORY;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update Regional AIs");
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
 
 		if (!RegionalAI.UpdateRegionalAI(NewGameState))
 			NewGameState.PurgeGameStateForObjectID(RegionalAI.ObjectID);
@@ -170,7 +172,7 @@ function UpdateGameBoard()
 
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update/Create Alien Activities");
-	AAMState = XComGameState_LWAlienActivityManager(NewGameState.CreateStateObject(class'XComGameState_LWAlienActivityManager', ObjectID));
+	AAMState = AlienActivity_XComGameState_Manager(NewGameState.CreateStateObject(class'AlienActivity_XComGameState_Manager', ObjectID));
 	NewGameState.AddStateObject(AAMState);
 
 	if (!AAMState.Update(NewGameState))
@@ -186,12 +188,13 @@ function UpdateGameBoard()
 //----------------   UTILITY   ----------------------------------------------------------------
 //#############################################################################################
 
+// UpdatePreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 // for now, just setting based on liberation status. if finer control is needed, consider adding an activity template delegate
 function UpdatePreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 {
 	local XComGameState_BattleData BattleData;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAIState;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAIState;
 
 	foreach StartGameState.IterateByClassType (class'XComGameState_BattleData', BattleData)
 	{
@@ -204,7 +207,7 @@ function UpdatePreMission(XComGameState StartGameState, XComGameState_MissionSit
 	}
 	RegionState = MissionState.GetWorldRegion();
 	if (RegionState == none) { return; }
-	RegionalAIState = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 	if (RegionalAIState != none && RegionalAIState.bLiberated)
 	{
 		// set the popular support high so that civs won't be hostile
@@ -213,12 +216,13 @@ function UpdatePreMission(XComGameState StartGameState, XComGameState_MissionSit
 	}
 }
 
+// ValidatePendingDarkEvents(optional XComGameState NewGameState)
 function ValidatePendingDarkEvents(optional XComGameState NewGameState)
 {
 	local array<StateObjectReference> InvalidDarkEvents, ValidDarkEvents;
 	local StateObjectReference DarkEventRef;
-	local array<XComGameState_LWAlienActivity> AllActivities;
-	local XComGameState_LWAlienActivity Activity;
+	local array<AlienActivity_XComGameState> AllActivities;
+	local AlienActivity_XComGameState Activity;
 	local XComGameState_HeadquartersAlien UpdateAlienHQ;
 	local bool bNeedsUpdate;
 
@@ -263,23 +267,24 @@ function ValidatePendingDarkEvents(optional XComGameState NewGameState)
 	}
 }
 
-static function array<XComGameState_LWAlienActivity> GetAllActivities(optional XComGameState NewGameState)
+// GetAllActivities(optional XComGameState NewGameState)
+static function array<AlienActivity_XComGameState> GetAllActivities(optional XComGameState NewGameState)
 {
-	local array<XComGameState_LWAlienActivity> arrActivities;
+	local array<AlienActivity_XComGameState> arrActivities;
 	local array<StateObjectReference> arrActivityRefs;
-	local XComGameState_LWAlienActivity ActivityState;
+	local AlienActivity_XComGameState ActivityState;
 	local XComGameStateHistory History;
 	
 	History = `XCOMHISTORY;
 	if(NewGameState != none)
 	{
-		foreach NewGameState.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+		foreach NewGameState.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 		{
 			arrActivities.AddItem(ActivityState);
 			arrActivityRefs.AddItem(ActivityState.GetReference());
 		}
 	}
-	foreach History.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+	foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 	{
 		if(arrActivityRefs.Find('ObjectID', ActivityState.ObjectID) == -1)
 		{
@@ -290,15 +295,17 @@ static function array<XComGameState_LWAlienActivity> GetAllActivities(optional X
 	return arrActivities;
 }
 
-static function XComGameState_LWAlienActivity FindAlienActivityByMission(XComGameState_MissionSite MissionSite)
+// FindAlienActivityByMission(XComGameState_MissionSite MissionSite)
+static function AlienActivity_XComGameState FindAlienActivityByMission(XComGameState_MissionSite MissionSite)
 {
 	return FindAlienActivityByMissionRef(MissionSite.GetReference());
 }
 
-static function XComGameState_LWAlienActivity FindAlienActivityByMissionRef(StateObjectReference MissionRef)
+// FindAlienActivityByMissionRef(StateObjectReference MissionRef)
+static function AlienActivity_XComGameState FindAlienActivityByMissionRef(StateObjectReference MissionRef)
 {
 	local XComGameStateHistory History;
-	local XComGameState_LWAlienActivity ActivityState;
+	local AlienActivity_XComGameState ActivityState;
 	local XComGameState StrategyState;
 	local int LastStrategyStateIndex;
 	
@@ -309,7 +316,7 @@ static function XComGameState_LWAlienActivity FindAlienActivityByMissionRef(Stat
 		// grab the archived strategy state from the history and the headquarters object
 		LastStrategyStateIndex = History.FindStartStateIndex() - 1;
 		StrategyState = History.GetGameStateFromHistory(LastStrategyStateIndex, eReturnType_Copy, false);
-		foreach StrategyState.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+		foreach StrategyState.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 		{
 			if(ActivityState.CurrentMissionRef.ObjectID == MissionRef.ObjectID)
 				return ActivityState;
@@ -317,7 +324,7 @@ static function XComGameState_LWAlienActivity FindAlienActivityByMissionRef(Stat
 	}
 	else
 	{
-		foreach History.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+		foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 		{
 			if(ActivityState.CurrentMissionRef.ObjectID == MissionRef.ObjectID)
 				return ActivityState;
@@ -326,16 +333,17 @@ static function XComGameState_LWAlienActivity FindAlienActivityByMissionRef(Stat
 	return none;
 }
 
+// UpdateMissionData(XComGameState_MissionSite MissionSite)
 static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 {
 	local XComGameStateHistory History;
 	local XComGameState_HeadquartersAlien AlienHQ;
 	local int ForceLevel, AlertLevel, i;
-	local XComGameState_LWPersistentSquad InfiltratingSquad;
-	local XComGameState_LWSquadManager SquadMgr;
-	local XComGameState_LWAlienActivity ActivityState;
+	local Squad_XComGameState InfiltratingSquad;
+	local SquadManager_XComGameState SquadMgr;
+	local AlienActivity_XComGameState ActivityState;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAIState;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAIState;
 	local array<X2DownloadableContentInfo> DLCInfos;
 	local MissionDefinition MissionDef;
 	local name NewMissionFamily;
@@ -344,10 +352,10 @@ static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 	History = `XCOMHISTORY;
 	AlienHQ = XComGameState_HeadquartersAlien(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
 	SquadMgr = `SQUADMGR;
-	InfiltratingSquad = SquadMgr.GetSquadOnMission(MissionSite.GetReference());
+	InfiltratingSquad = SquadMgr.Squads.GetSquadOnMission(MissionSite.GetReference());
 	ActivityState = FindAlienActivityByMission(MissionSite);
 	RegionState = MissionSite.GetWorldRegion();
-	RegionalAIState = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 
 	//ForceLevel : what types of aliens are present
 	if(ActivityState != none && ActivityState.GetMyTemplate().GetMissionForceLevelFn != none)
@@ -368,7 +376,7 @@ static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 
 	//modifiers
 	if (InfiltratingSquad != none && !MissionSite.GetMissionSource().bGoldenPath)
-		AlertLevel += InfiltratingSquad.GetAlertnessModifierForCurrentInfiltration(); // this submits its own gamestate update
+		AlertLevel += InfiltratingSquad.InfiltrationState.GetAlertnessModifierForCurrentInfiltration(); // this submits its own gamestate update
 	AlertLevel = Max(AlertLevel, 1); // clamp to be no less than 1
 
 	`LWTRACE("Updating Mission Difficulty: ForceLevel=" $ ForceLevel $ ", AlertLevel=" $ AlertLevel);
@@ -411,16 +419,17 @@ static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 
 }
 
+// GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 static function int GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 {
-	local XComGameState_LWAlienActivity ActivityState;
+	local AlienActivity_XComGameState ActivityState;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAIState;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAIState;
 	local int AlertLevel;
 	
 	ActivityState = FindAlienActivityByMission(MissionSite);
 	RegionState = MissionSite.GetWorldRegion();
-	RegionalAIState = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 	if(ActivityState != none && ActivityState.GetMyTemplate().GetMissionAlertLevelFn != none)
 	{
 		AlertLevel = ActivityState.GetMyTemplate().GetMissionAlertLevelFn(ActivityState, MissionSite, none);
@@ -444,11 +453,13 @@ static function int GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 	return AlertLevel;
 }
 
-private function int ActivityPrioritySort(X2LWAlienActivityTemplate TemplateA, X2LWAlienActivityTemplate TemplateB)
+// ActivityPrioritySort(AlienActivity_XComGameState TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
+private function int ActivityPrioritySort(AlienActivity_XComGameState TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
 {
 	return (TemplateB.iPriority - TemplateA.iPriority);
 }
 
+// RandomizeOrder(const array<X2StrategyElementTemplate> InputActivityTemplates)
 static function array<X2StrategyElementTemplate> RandomizeOrder(const array<X2StrategyElementTemplate> InputActivityTemplates)
 {
 	local array<X2StrategyElementTemplate> Templates;
@@ -468,6 +479,7 @@ static function array<X2StrategyElementTemplate> RandomizeOrder(const array<X2St
 	return Templates;
 }
 
+// AddDoomToFortress(XComGameState NewGameState, int DoomToAdd, optional string DoomMessage, optional bool bCreatePendingDoom = true)
 static function AddDoomToFortress(XComGameState NewGameState, int DoomToAdd, optional string DoomMessage, optional bool bCreatePendingDoom = true)
 {
 	local XComGameState_HeadquartersAlien AlienHQ;
@@ -518,14 +530,15 @@ static function AddDoomToFortress(XComGameState NewGameState, int DoomToAdd, opt
 	}
 }
 
+// AddDoomToRandomFacility(XComGameState NewGameState, int DoomToAdd, optional string DoomMessage)
 static function AddDoomToRandomFacility(XComGameState NewGameState, int DoomToAdd, optional string DoomMessage)
 {
 	local XComGameStateHistory History;
-	local XComGameState_LWAlienActivity ActivityState;
-	local array<XComGameState_LWAlienActivity> ResearchFacilities;
+	local AlienActivity_XComGameState ActivityState;
+	local array<AlienActivity_XComGameState> ResearchFacilities;
 
 	History = `XCOMHISTORY;
-	foreach History.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+	foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 	{
 		if(ActivityState.GetMyTemplateName() == class'X2StrategyElement_DefaultAlienActivities'.default.RegionalAvatarResearchName)
 		{
@@ -543,7 +556,8 @@ static function AddDoomToRandomFacility(XComGameState NewGameState, int DoomToAd
 	}
 }
 
-static function AddDoomToFacility(XComGameState_LWAlienActivity ActivityState, XComGameState NewGameState, int DoomToAdd, optional string DoomMessage)
+// AddDoomToFacility(AlienActivity_XComGameState ActivityState, XComGameState NewGameState, int DoomToAdd, optional string DoomMessage)
+static function AddDoomToFacility(AlienActivity_XComGameState ActivityState, XComGameState NewGameState, int DoomToAdd, optional string DoomMessage)
 {
 	local XComGameState_MissionSite MissionState;
 	local XComGameState_WorldRegion RegionState;
@@ -603,6 +617,7 @@ static function AddDoomToFacility(XComGameState_LWAlienActivity ActivityState, X
 	class'XComGameState_HeadquartersResistance'.static.RecordResistanceActivity(NewGameState, 'ResAct_AvatarProgress', DoomToAdd);
 }
 
+// GetAlienHQ(XComGameState NewGameState)
 static function XComGameState_HeadquartersAlien GetAlienHQ(XComGameState NewGameState)
 {
 	local XComGameState_HeadquartersAlien AlienHQ, UpdateAlienHQ;
@@ -620,30 +635,33 @@ static function XComGameState_HeadquartersAlien GetAlienHQ(XComGameState NewGame
 	return UpdateAlienHQ;
 }
 
+// GetDoomUpdateModifierHours(optional AlienActivity_XComGameState ActivityState, optional XComGameState NewGameState)
 // compute modifiers to Doom update timers for both facility doom generation and alien hq doom generation
 // facility doom will pass in the optional arguments, while the static-timer based alien hq doom will not
-static function int GetDoomUpdateModifierHours(optional XComGameState_LWAlienActivity ActivityState, optional XComGameState NewGameState)
+static function int GetDoomUpdateModifierHours(optional AlienActivity_XComGameState ActivityState, optional XComGameState NewGameState)
 {
 	return Max (0, GetNetVigilance() * default.AVATAR_DELAY_HOURS_PER_NET_GLOBAL_VIG);
 }
 
+// GetNetVigilance()
 static function int GetNetVigilance()
 {
 	return GetGlobalVigilance() - GetNumAlienRegions() - GetGlobalAlert();
 }
 
+// GetGlobalVigilance()
 static function int GetGlobalVigilance()
 {
 	local XComGameStateHistory History;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAI;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 	local int SumVigilance;
 
 	History = `XCOMHISTORY;
 
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			SumVigilance += RegionalAI.LocalVigilanceLevel;
@@ -652,18 +670,19 @@ static function int GetGlobalVigilance()
 	return SumVigilance;
 }
 
+// GetGlobalAlert()
 static function int GetGlobalAlert()
 {
 	local XComGameStateHistory History;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAI;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 	local int SumAlert;
 
 	History = `XCOMHISTORY;
 
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			SumAlert += RegionalAI.LocalAlertLevel;
@@ -672,15 +691,16 @@ static function int GetGlobalAlert()
 	return SumAlert;
 }
 
+// GetNumAlienRegions()
 static function int GetNumAlienRegions()
 {
 	local int kount;
 	local XComGameState_WorldRegion RegionState;
-	local XComGameState_WorldRegion_LWStrategyAI RegionalAI;
+	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 
 	foreach `XCOMHistory.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'XComGameState_WorldRegion_LWStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			kount += 1;
@@ -689,12 +709,14 @@ static function int GetNumAlienRegions()
 	return kount;
 }
 
+// GetUIClass()
 // We need a UI class for all strategy elements (but they'll never be visible)
 function class<UIStrategyMapItem> GetUIClass()
 {
     return class'UIStrategyMapItem';
 }
 
+// ShouldBeVisible()
 // Never show these on the map.
 function bool ShouldBeVisible()
 {

@@ -5,7 +5,7 @@
 //  PURPOSE: Miscellaneous helper routines.
 //--------------------------------------------------------------------------------------- 
 
-class Utilities_LWOTC extends Object dependson(X2StrategyElement_DefaultAlienActivities);
+class Utilities_LWOTC extends Object; //dependson(X2StrategyElement_DefaultAlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

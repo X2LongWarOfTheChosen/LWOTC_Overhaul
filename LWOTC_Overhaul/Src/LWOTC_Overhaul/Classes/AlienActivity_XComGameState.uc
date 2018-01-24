@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: This models a single persistent alien activity, which can generate mission(s)
 //---------------------------------------------------------------------------------------
-class AlienActivity_XComGameState extends XComGameState_GeoscapeEntity config(LW_Overhaul);
+class AlienActivity_XComGameState extends XComGameState_GeoscapeEntity config(LW_Overhaul) dependson(UIMission_CustomMission, X2StrategyElement_DefaultAlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
@@ -47,16 +47,19 @@ var MissionDefinition ForceMission;                         // A mission type to
 //----------------   REQUIRED FROM BASEOBJECT   -----------------------------------------------
 //#############################################################################################
 
+// GetMyTemplateManager()
 static function X2StrategyElementTemplateManager GetMyTemplateManager()
 {
 	return class'X2StrategyElementTemplateManager'.static.GetStrategyElementTemplateManager();
 }
 
+// GetMyTemplateName()
 simulated function name GetMyTemplateName()
 {
 	return m_TemplateName;
 }
 
+// GetMyTemplate()
 simulated function AlienActivity_X2StrategyElementTemplate GetMyTemplate()
 {
 	if (m_Template == none)
@@ -66,6 +69,7 @@ simulated function AlienActivity_X2StrategyElementTemplate GetMyTemplate()
 	return m_Template;
 }
 
+// OnInit(AlienActivity_X2StrategyElementTemplate Template, StateObjectReference PrimaryRegionRef, XComGameState NewGameState)
 function OnInit(AlienActivity_X2StrategyElementTemplate Template, StateObjectReference PrimaryRegionRef, XComGameState NewGameState)
 {
 	m_Template = Template;
@@ -104,7 +108,7 @@ function OnInit(AlienActivity_X2StrategyElementTemplate Template, StateObjectRef
 //----------------   UPDATE   -----------------------------------------------------------------
 //#############################################################################################
 
-//---------------------------------------------------------------------------------------
+// Update(XComGameState NewGameState) TODO
 function bool Update(XComGameState NewGameState)
 {
 	local XComGameStateHistory History;
@@ -260,7 +264,7 @@ function bool Update(XComGameState NewGameState)
 	return bUpdated;
 }
 
-//---------------------------------------------------------------------------------------
+// UpdateGameBoard()
 function UpdateGameBoard()
 {
 	local XComGameState NewGameState;
@@ -326,9 +330,10 @@ function UpdateGameBoard()
 	}
 }
 
+// SpawnInfiltrationUI()
 function SpawnInfiltrationUI()
 {
-	local UIMission_LWLaunchDelayedMission MissionScreen;
+	local UIMission_LaunchDelayedMission MissionScreen;
 	local XComHQPresentationLayer HQPres;
 
 	HQPres = `HQPRES;
@@ -338,6 +343,7 @@ function SpawnInfiltrationUI()
 	MissionScreen = UIMission_LaunchDelayedMission(HQPres.ScreenStack.Push(MissionScreen));
 }
 
+// SpawnMissionPopup()
 function SpawnMissionPopup()
 {
 	local UIAlert Alert;
@@ -362,6 +368,7 @@ function SpawnMissionPopup()
 	HQPres.ScreenStack.Push(Alert);
 }
 
+// MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional bool bInstant = false)
 simulated function MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional bool bInstant = false)
 {
 	if (eAction == eUIAction_Accept)
@@ -376,6 +383,7 @@ simulated function MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional
 	}
 }
 
+// SecondsRemainingCurrentMission()
 function float SecondsRemainingCurrentMission()
 {
 	local XComGameState_MissionSite MissionState;
@@ -406,6 +414,7 @@ function float SecondsRemainingCurrentMission()
 	return TotalSeconds;
 }
 
+// PercentCurrentMissionComplete()
 function int PercentCurrentMissionComplete()
 {
 	local XComGameState_MissionSite MissionState;
@@ -424,6 +433,7 @@ function int PercentCurrentMissionComplete()
 	return PctRemaining;
 }
 
+// SpawnMission(XComGameState NewGameState)
 function bool SpawnMission(XComGameState NewGameState)
 {
 	local name RewardName;
@@ -555,6 +565,7 @@ function bool SpawnMission(XComGameState NewGameState)
 	return true;
 } 
 
+// GetNextMissionFamily(XComGameState NewGameState)
 function name GetNextMissionFamily(XComGameState NewGameState)
 {
 	local AlienActivity_X2StrategyElementTemplate ActivityTemplate;
@@ -612,6 +623,7 @@ function name GetNextMissionFamily(XComGameState NewGameState)
 	return '';
 }
 
+// SetMissionData(name MissionFamily, XComGameState_MissionSite MissionState, X2RewardTemplate MissionReward, XComGameState NewGameState, bool bUseSpecifiedLevelSeed, int LevelSeedOverride)
 function SetMissionData(name MissionFamily, XComGameState_MissionSite MissionState, X2RewardTemplate MissionReward, XComGameState NewGameState, bool bUseSpecifiedLevelSeed, int LevelSeedOverride)
 {
 	local GeneratedMissionData EmptyData;
@@ -670,6 +682,7 @@ function SetMissionData(name MissionFamily, XComGameState_MissionSite MissionSta
 	MissionState.GenerateMissionFlavorText();
 }
 
+// GetMissionDefinitionForFamily(name MissionFamily)
 function MissionDefinition GetMissionDefinitionForFamily(name MissionFamily)
 {
 	local X2CardManager CardManager;
@@ -701,6 +714,7 @@ function MissionDefinition GetMissionDefinitionForFamily(name MissionFamily)
 	return MissionMgr.arrMissions[0];
 }
 
+// SelectPlotDefinition(MissionDefinition MissionDef, string Biome)
 function PlotDefinition SelectPlotDefinition(MissionDefinition MissionDef, string Biome)
 {
 	local XComParcelManager ParcelMgr;
@@ -720,6 +734,7 @@ function PlotDefinition SelectPlotDefinition(MissionDefinition MissionDef, strin
 	return ParcelMgr.arrPlots[0];
 }
 
+// GetMissionDescriptionForActivity()
 function string GetMissionDescriptionForActivity()
 {
 	local AlienActivity_X2StrategyElementTemplate Template;
@@ -756,6 +771,7 @@ function string GetMissionDescriptionForActivity()
 /////////////////////////////////////////////////////
 ///// UI Handlers
 
+// TriggerMissionUI(XComGameState_MissionSite MissionSite)
 //function used to trigger a mission UI, using activity and mission info
 function TriggerMissionUI(XComGameState_MissionSite MissionSite)
 {
@@ -770,6 +786,7 @@ function TriggerMissionUI(XComGameState_MissionSite MissionSite)
 	MissionScreen = UIMission_LWCustomMission(HQPres.ScreenStack.Push(MissionScreen));
 }
 
+// GetMissionUIType(XComGameState_MissionSite MissionSite)
 simulated function EMissionUIType GetMissionUIType(XComGameState_MissionSite MissionSite)
 {
 	local MissionSettings_LW MissionSettings;
@@ -781,6 +798,7 @@ simulated function EMissionUIType GetMissionUIType(XComGameState_MissionSite Mis
 	return eMissionUI_GuerillaOps;
 }
 
+// UpdateMissionIcon(UIStrategyMap_MissionIcon MissionIcon, XComGameState_MissionSite MissionSite)
 //function used to determine what mission icon to display on Geoscape
 simulated function string UpdateMissionIcon(UIStrategyMap_MissionIcon MissionIcon, XComGameState_MissionSite MissionSite)
 {
@@ -792,6 +810,7 @@ simulated function string UpdateMissionIcon(UIStrategyMap_MissionIcon MissionIco
 	return "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_GoldenPath";
 }
 
+// GetOverworldMeshPath(XComGameState_MissionSite MissionSite)
 //function for retrieving the 3D geoscape mesh used to represent a mission
 simulated function string GetOverworldMeshPath(XComGameState_MissionSite MissionSite)
 {
@@ -804,7 +823,7 @@ simulated function string GetOverworldMeshPath(XComGameState_MissionSite Mission
 	return "UI_3D.Overworld.Hexagon";
 }
 
-
+// GetEventToTrigger(XComGameState_MissionSite MissionSite)
 simulated function name GetEventToTrigger(XComGameState_MissionSite MissionSite)
 {
 	local MissionSettings_LW MissionSettings;
@@ -816,6 +835,8 @@ simulated function name GetEventToTrigger(XComGameState_MissionSite MissionSite)
 	return '';
 
 }
+
+// GetSoundToPlay(XComGameState_MissionSite MissionSite)
 simulated function string GetSoundToPlay(XComGameState_MissionSite MissionSite)
 {
 	local MissionSettings_LW MissionSettings;
@@ -826,7 +847,8 @@ simulated function string GetSoundToPlay(XComGameState_MissionSite MissionSite)
 	return "Geoscape_NewResistOpsMissions";
 }
 
-simulated function EAlertType GetAlertType(XComGameState_MissionSite MissionSite)
+// GetAlertType(XComGameState_MissionSite MissionSite)
+simulated function name GetAlertType(XComGameState_MissionSite MissionSite)
 {
 	local MissionSettings_LW MissionSettings;
 
@@ -837,6 +859,7 @@ simulated function EAlertType GetAlertType(XComGameState_MissionSite MissionSite
 	return eAlert_GOps;
 }
 
+// GetMissionImage(XComGameState_MissionSite MissionSite)
 simulated function String GetMissionImage(XComGameState_MissionSite MissionSite)
 {
 	local MissionSettings_LW MissionSettings;
@@ -848,12 +871,14 @@ simulated function String GetMissionImage(XComGameState_MissionSite MissionSite)
 	return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
 }
 
+// GetUIClass()
 // We need a UI class for all strategy elements (but they'll never be visible)
 function class<UIStrategyMapItem> GetUIClass()
 {
     return class'UIStrategyMapItem';
 }
 
+// ShouldBeVisible()
 // Never show these on the map.
 function bool ShouldBeVisible()
 {

@@ -37,6 +37,13 @@ var UIButton IgnoreButton;
 var bool bCachedMustLaunch;
 var bool bAborted;
 
+defaultproperties
+{
+	Package = "/ package/gfxAlerts/Alerts";
+	InputState = eInputState_Consume;
+}
+
+// InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 {
 	local AlienActivity_XComGameState AlienActivity;
@@ -49,11 +56,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	BuildScreen();
 }
 
-simulated function Name GetLibraryID()
-{
-	return 'Alert_GuerrillaOpsBlades';
-}
-
+// BuildScreen()
 simulated function BuildScreen()
 {
 	// Add Interception warning and Shadow Chamber info 
@@ -61,7 +64,7 @@ simulated function BuildScreen()
 	`ACTIVITYMGR.UpdateMissionData(GetMission());
 	BuildMissionPanel();
 	BuildOptionsPanel();
-	class'UIUtilities_LW'.static.BuildMissionInfoPanel(self, MissionRef);
+	class'UIUtilities_LWOTC'.static.BuildMissionInfoPanel(self, MissionRef);
 
 	// Set  up the navigation *after* the alert is built, so that the button visibility can be used. 
 	RefreshNavigation();
@@ -76,26 +79,22 @@ simulated function BuildScreen()
 
 }
 
-// Called when screen is removed from Stack
-simulated function OnRemoved()
+// AddIgnoreButton()
+simulated function AddIgnoreButton()
 {
-	super.OnRemoved();
+	//Button is controlled by flash and shows by default. Hide if need to. 
+	//local UIButton IgnoreButton; 
 
-	//Restore the saved camera location
-	if(GetMission().GetMissionSource().DataName != 'MissionSource_Final' || class'XComGameState_HeadquartersXCom'.static.GetObjectiveStatus('T5_M3_CompleteFinalMission') != eObjectiveState_InProgress)
-	{
-		HQPRES().CAMRestoreSavedLocation();
-	}
-
-	`HQPRES.m_kAvengerHUD.NavHelp.ClearButtonHelp();
-
-	class'UIUtilities_Sound'.static.PlayCloseSound();
+	IgnoreButton = Spawn(class'UIButton', LibraryPanel);
+	IgnoreButton.SetResizeToText( false );
+	IgnoreButton.InitButton('IgnoreButton', "", OnCancelClicked);
 }
 
+// BuildMissionPanel()
 simulated function BuildMissionPanel()
 {
 	local string strDarkEventLabel, strDarkEventValue, strDarkEventTime;
-	local XComGameState_LWAlienActivity AlienActivity;
+	local AlienActivity_XComGameState AlienActivity;
 	local bool bHasDarkEvent;
 	local X2RewardTemplate UnknownTemplate;
 	local X2StrategyElementTemplateManager StratMgr;
@@ -129,7 +128,7 @@ simulated function BuildMissionPanel()
 	LibraryPanel.MC.QueueString(m_strMissionObjective);
 	LibraryPanel.MC.QueueString(GetObjectiveString());
 	LibraryPanel.MC.QueueString(m_strMissionDifficulty);
-	LibraryPanel.MC.QueueString(class'UIUtilities_Text_LW'.static.GetDifficultyString(Mission));
+	LibraryPanel.MC.QueueString(class'UIUtilities_Text_LWOTC'.static.GetDifficultyString(Mission));
 	LibraryPanel.MC.QueueString(m_strReward);
 
 	if(GetRewardString() != "")
@@ -200,6 +199,47 @@ simulated function BuildMissionPanel()
 	}
 }
 
+// GetObjectiveString()
+simulated function String GetObjectiveString()
+{
+	local string ObjectiveString;
+	local AlienActivity_XComGameState AlienActivity;
+	local AlienActivity_X2StrategyElementTemplate ActivityTemplate;
+	local string ActivityObjective;
+
+	ObjectiveString = super.GetObjectiveString();
+	ObjectiveString $= "\n";
+
+	AlienActivity = GetActivity();
+
+	if (AlienActivity != none)
+	{
+		ActivityTemplate = AlienActivity.GetMyTemplate();
+		if (ActivityTemplate != none)
+		{
+			ActivityObjective = ActivityTemplate.ActivityObjectives[AlienActivity.CurrentMissionLevel];
+		}
+		//if(ActivityObjective == "")
+			//ActivityObjective = "Missing ActivityObjectives[" $ AlienActivity.CurrentMissionLevel $ "] for AlienActivity " $ ActivityTemplate.DataName;
+	}
+	ObjectiveString $= ActivityObjective;
+
+	return ObjectiveString;
+}
+
+// GetMissionImage()
+simulated function string GetMissionImage()
+{
+	local AlienActivity_XComGameState AlienActivity;
+
+	AlienActivity = GetActivity();
+	if(AlienActivity != none)
+		return AlienActivity.GetMissionImage(GetMission());
+
+	return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
+}
+
+// BuildOptionsPanel()
 simulated function BuildOptionsPanel()
 {
 	local string Reason;
@@ -244,41 +284,10 @@ simulated function BuildOptionsPanel()
 		
 }
 
-simulated function String GetObjectiveString()
-{
-	local string ObjectiveString;
-	local XComGameState_LWAlienActivity AlienActivity;
-	local X2LWAlienActivityTemplate ActivityTemplate;
-	local string ActivityObjective;
-
-	ObjectiveString = super.GetObjectiveString();
-	ObjectiveString $= "\n";
-
-	AlienActivity = GetAlienActivity();
-
-	if (AlienActivity != none)
-	{
-		ActivityTemplate = AlienActivity.GetMyTemplate();
-		if (ActivityTemplate != none)
-		{
-			ActivityObjective = ActivityTemplate.ActivityObjectives[AlienActivity.CurrentMissionLevel];
-		}
-		//if(ActivityObjective == "")
-			//ActivityObjective = "Missing ActivityObjectives[" $ AlienActivity.CurrentMissionLevel $ "] for AlienActivity " $ ActivityTemplate.DataName;
-	}
-	ObjectiveString $= ActivityObjective;
-
-	return ObjectiveString;
-}
-
-simulated function XComGameState_LWAlienActivity GetAlienActivity()
-{
-	return class'XComGameState_LWAlienActivityManager'.static.FindAlienActivityByMission(GetMission());
-}
-
+// CanBoostInfiltration(out string Reason)
 simulated function bool CanBoostInfiltration(out string Reason)
 {
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 	local XGParamTag ParamTag;
 	local bool bCanBoost, bCanAfford;
 	local StrategyCost BoostInfiltrationCost;
@@ -307,9 +316,10 @@ simulated function bool CanBoostInfiltration(out string Reason)
 	return bCanBoost;
 }
 
+// CanLaunchInfiltration(out string Reason)
 simulated function bool CanLaunchInfiltration(out string Reason)
 {
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 	local XComGameState_MissionSite MissionState;
 	local XGParamTag ParamTag;
 
@@ -317,29 +327,18 @@ simulated function bool CanLaunchInfiltration(out string Reason)
 	MissionState = GetMission();
 
 	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
-	ParamTag.IntValue0 = Round(Squad.GetRequiredPctInfiltrationToLaunch(MissionState));
+	ParamTag.IntValue0 = Round(Squad.InfiltrationState.GetRequiredPctInfiltrationToLaunch(MissionState));
 	Reason = `XEXPAND.ExpandString(m_strInsuffientInfiltrationToLaunch);
 
-	return Squad.HasSufficientInfiltrationToStartMission(MissionState);
+	return Squad.InfiltrationState.HasSufficientInfiltrationToStartMission(MissionState);
 }
 
-
-simulated function string GetMissionImage()
-{
-	local XComGameState_LWAlienActivity AlienActivity;
-
-	AlienActivity = GetActivity();
-	if(AlienActivity != none)
-		return AlienActivity.GetMissionImage(GetMission());
-
-	return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
-}
-
+// GetInfiltrationString()
 simulated function string GetInfiltrationString()
 {
 	local string InfiltrationString;
-	local XComGameState_LWPersistentSquad InfiltratingSquad;
-	local XComGameState_LWAlienActivity AlienActivity;
+	local Squad_XComGameState InfiltratingSquad;
+	local AlienActivity_XComGameState AlienActivity;
 	local XComGameState_MissionSite MissionState;
 	local XGParamTag ParamTag;
 	local float TotalSeconds_Mission, TotalSeconds_Infiltration;
@@ -352,7 +351,7 @@ simulated function string GetInfiltrationString()
 	AlienActivity = GetActivity();
 
 	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
-	ParamTag.IntValue0 = int(InfiltratingSquad.CurrentInfiltration * 100.0);
+	ParamTag.IntValue0 = int(InfiltratingSquad.InfiltrationState.CurrentInfiltration * 100.0);
 	
 	bExpiringMission = MissionState.ExpirationDateTime.m_iYear < 2050;
 	if(bCachedMustLaunch)
@@ -363,9 +362,9 @@ simulated function string GetInfiltrationString()
 	{
 		//determine if can fully infiltrate before mission expires
 		TotalSeconds_Mission = AlienActivity.SecondsRemainingCurrentMission();
-		TotalSeconds_Infiltration = InfiltratingSquad.GetSecondsRemainingToFullInfiltration();
+		TotalSeconds_Infiltration = InfiltratingSquad.InfiltrationState.GetSecondsRemainingToFullInfiltration();
 
-		bCanFullyInfiltrate = (TotalSeconds_Infiltration < TotalSeconds_Mission) && (InfiltratingSquad.CurrentInfiltration < 1.0);
+		bCanFullyInfiltrate = (TotalSeconds_Infiltration < TotalSeconds_Mission) && (InfiltratingSquad.InfiltrationState.CurrentInfiltration < 1.0);
 		if(bCanFullyInfiltrate)
 		{
 			TotalSeconds = TotalSeconds_Infiltration;
@@ -379,7 +378,7 @@ simulated function string GetInfiltrationString()
 		ParamTag.IntValue1 = int(TotalDays);
 		ParamTag.IntValue2 = int(TotalHours);
 
-		if(bCanFullyInfiltrate && InfiltratingSquad.CurrentInfiltration < 1.0)
+		if(bCanFullyInfiltrate && InfiltratingSquad.InfiltrationState.CurrentInfiltration < 1.0)
 			InfiltrationString = `XEXPAND.ExpandString(m_strInfiltrationStatusExpiring);
 		else
 			InfiltrationString = `XEXPAND.ExpandString(m_strInfiltrationStatusMissionEnding);
@@ -387,9 +386,9 @@ simulated function string GetInfiltrationString()
 	else // mission does not expire
 	{
 		//ID 619 - allow non-expiring missions to show remaining time until 100% infiltration will be reached
-		if (InfiltratingSquad.CurrentInfiltration < 1.0)
+		if (InfiltratingSquad.InfiltrationState.CurrentInfiltration < 1.0)
 		{
-			TotalSeconds = InfiltratingSquad.GetSecondsRemainingToFullInfiltration();
+			TotalSeconds = InfiltratingSquad.InfiltrationState.GetSecondsRemainingToFullInfiltration();
 			TotalHours = int(TotalSeconds / 3600.0) % 24;
 			TotalDays = TotalSeconds / 86400.0;
 			ParamTag.IntValue1 = int(TotalDays);
@@ -405,7 +404,7 @@ simulated function string GetInfiltrationString()
 	InfiltrationString $= "\n";
 
 	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
-	AlertModifier = InfiltratingSquad.GetAlertnessModifierForCurrentInfiltration(,, AlertnessIndex);
+	AlertModifier = InfiltratingSquad.InfiltrationState.GetAlertnessModifierForCurrentInfiltration(,, AlertnessIndex);
 	ParamTag.StrValue0 = default.m_strAlertnessModifierDescriptions[AlertnessIndex];  
 	if (false) // for debugging only !
 		ParamTag.StrValue0 $= " (" $ AlertModifier $ ")";
@@ -421,32 +420,10 @@ simulated function string GetInfiltrationString()
 	return InfiltrationString;
 }
 
-simulated function AddIgnoreButton()
-{
-	//Button is controlled by flash and shows by default. Hide if need to. 
-	//local UIButton IgnoreButton; 
-
-	IgnoreButton = Spawn(class'UIButton', LibraryPanel);
-	IgnoreButton.SetResizeToText( false );
-	IgnoreButton.InitButton('IgnoreButton', "", OnCancelClicked);
-}
-
-simulated function XComGameState_LWPersistentSquad GetInfiltratingSquad()
-{
-	local XComGameState_LWSquadManager SquadMgr;
-	
-	SquadMgr = `SQUADMGR;
-	if(SquadMgr == none)
-	{
-		`REDSCREEN("UIStrategyMapItem_Mission_LW: No SquadManager");
-		return none;
-	}
-	return SquadMgr.GetSquadOnMission(MissionRef);
-}
-
+// OnLaunchClicked(UIButton button)
 simulated public function OnLaunchClicked(UIButton button)
 {
-	local XComGameState_LWPersistentSquad InfiltratingSquad;
+	local Squad_XComGameState InfiltratingSquad;
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameState UpdateState;
 	
@@ -460,7 +437,7 @@ simulated public function OnLaunchClicked(UIButton button)
 	XComHQ = `XCOMHQ;
 	UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update XComHQ for current mission being started");
 	XComHQ = XComGameState_HeadquartersXCom(UpdateState.CreateStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
-	XComHQ.MissionRef = InfiltratingSquad.CurrentMission;
+	XComHQ.MissionRef = InfiltratingSquad.InfiltrationState.CurrentMission;
 	UpdateState.AddStateObject(XComHQ);
 	`GAMERULES.SubmitGameState(UpdateState);
 
@@ -473,11 +450,12 @@ simulated public function OnLaunchClicked(UIButton button)
 	GetMission().ConfirmMission();
 }
 
+// OnBoostInfiltrationClicked(UIButton button)
 simulated public function OnBoostInfiltrationClicked(UIButton button)
 {
 	local TDialogueBoxData kDialogData;
 	local XGParamTag ParamTag;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 	local StrategyCost BoostInfiltrationCost;
 	local array<StrategyCostScalar> CostScalars;
 
@@ -505,18 +483,19 @@ simulated public function OnBoostInfiltrationClicked(UIButton button)
 
 }
 
+// ConfirmBoostInfiltrationCallback(EUIAction Action)
 simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
 {
 	local XComGameStateHistory History;
 	local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad Squad, UpdatedSquad;
+	local Squad_XComGameState Squad, UpdatedSquad;
 
 	if(Action == eUIAction_Accept)
 	{
 		History = `XCOMHISTORY;
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding Boost Infiltration");
 		Squad = GetInfiltratingSquad();
-		UpdatedSquad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', Squad.ObjectID));
+		UpdatedSquad = Squad_XComGameState(NewGameState.ModifyStateObject(class'Squad_XComGameState', Squad.ObjectID));
 		NewGameState.AddStateObject(UpdatedSquad);
 		UpdatedSquad.bHasBoostedInfiltration = true;
 		UpdatedSquad.SpendBoostResource(NewGameState);
@@ -528,14 +507,14 @@ simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
 
         // update the infiltration status, but don't pause the game. We're already in a popup and actually paused completely, and this
         // update "pause" actually resets to 'slow time' and causes a hang.
-		UpdatedSquad.UpdateInfiltrationState(false);
+		UpdatedSquad.InfiltrationState.UpdateInfiltrationState(false);
 
 		`ACTIVITYMGR.UpdateMissionData(GetMission()); // update units on the mission, since AlertLevel likely changed
 
 		// rebuild the panels to display the updated status
 		BuildMissionPanel();
 		BuildOptionsPanel(); 
-		class'UIUtilities_LW'.static.BuildMissionInfoPanel(self, MissionRef);
+		class'UIUtilities_LWOTC'.static.BuildMissionInfoPanel(self, MissionRef);
 
 		Movie.Pres.PlayUISound(eSUISound_SoldierPromotion);
 	}
@@ -543,6 +522,21 @@ simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
 		Movie.Pres.PlayUISound(eSUISound_MenuClickNegative);
 }
 
+// GetInfiltratingSquad()
+simulated function Squad_XComGameState GetInfiltratingSquad()
+{
+	local SquadManager_XComGameState SquadMgr;
+	
+	SquadMgr = `SQUADMGR;
+	if(SquadMgr == none)
+	{
+		`REDSCREEN("UIStrategyMapItem_Mission_LW: No SquadManager");
+		return none;
+	}
+	return SquadMgr.Squads.GetSquadOnMission(MissionRef);
+}
+
+// OnViewSquadClicked(UIButton button)
 simulated public function OnViewSquadClicked(UIButton button)
 {
 	local UIPersonnel_SquadBarracks kPersonnelList;
@@ -559,6 +553,7 @@ simulated public function OnViewSquadClicked(UIButton button)
 	}
 }
 
+// OnAbortClicked(UIButton button)
 simulated public function OnAbortClicked(UIButton button)
 {
 	local XComGameStateHistory History;
@@ -567,7 +562,7 @@ simulated public function OnAbortClicked(UIButton button)
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameState_GeoscapeEntity ThisEntity;
 	local XComGameState_MissionSite Mission;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 
 	if(CanBackOut())
 	{
@@ -582,7 +577,7 @@ simulated public function OnAbortClicked(UIButton button)
 		XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
 
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set Squad As On Board");
-		SkyrangerState = XComGameState_Skyranger(NewGameState.CreateStateObject(class'XComGameState_Skyranger', XComHQ.SkyrangerRef.ObjectID));
+		SkyrangerState = XComGameState_Skyranger(NewGameState.ModifyStateObject(class'XComGameState_Skyranger', XComHQ.SkyrangerRef.ObjectID));
 		SkyrangerState.SquadOnBoard = true;
 		NewGameState.AddStateObject(SkyrangerState);
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -596,7 +591,7 @@ simulated public function OnAbortClicked(UIButton button)
 		else
 		{
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Store cross continent mission reference");
-			XComHQ = XComGameState_HeadquartersXCom(NewGameState.CreateStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+			XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
 			NewGameState.AddStateObject(XComHQ);
 			XComHQ.CrossContinentMission = MissionRef;
 			`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -612,7 +607,7 @@ simulated public function OnAbortClicked(UIButton button)
 			if (Squad != none)
 			{
 				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark Squad Abort Status");
-				Squad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', Squad.ObjectID));
+				Squad = Squad_XComGameState(NewGameState.ModifyStateObject(class'Squad_XComGameState', Squad.ObjectID));
 				NewGameState.AddStateObject(Squad);
 				Squad.bCannotCancelAbort = true;
 				`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -624,6 +619,7 @@ simulated public function OnAbortClicked(UIButton button)
 	}
 }
 
+// CloseScreen()
 simulated function CloseScreen()
 {
 	local UIScreenStack ScreenStack;
@@ -648,13 +644,33 @@ simulated function CloseScreen()
 	}
 }
 
-simulated function XComGameState_LWAlienActivity GetActivity()
+// OnRemoved()
+// Called when screen is removed from Stack
+simulated function OnRemoved()
+{
+	super.OnRemoved();
+
+	//Restore the saved camera location
+	if(GetMission().GetMissionSource().DataName != 'MissionSource_Final' || class'XComGameState_HeadquartersXCom'.static.GetObjectiveStatus('T5_M3_CompleteFinalMission') != eObjectiveState_InProgress)
+	{
+		HQPRES().CAMRestoreSavedLocation();
+	}
+
+	`HQPRES.m_kAvengerHUD.NavHelp.ClearButtonHelp();
+
+	class'UIUtilities_Sound'.static.PlayCloseSound();
+}
+
+// GetActivity()
+simulated function AlienActivity_XComGameState GetActivity()
 {
 	return `ACTIVITYMGR.FindAlienActivityByMission(GetMission());
 }
 
-defaultproperties
+// GetLibraryID()
+simulated function Name GetLibraryID()
 {
-	Package = "/ package/gfxAlerts/Alerts";
-	InputState = eInputState_Consume;
+	return 'Alert_GuerrillaOpsBlades';
 }
+
+

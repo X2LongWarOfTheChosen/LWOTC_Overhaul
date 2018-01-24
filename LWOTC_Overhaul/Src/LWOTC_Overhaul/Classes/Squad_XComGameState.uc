@@ -35,7 +35,7 @@ event OnCreation( optional X2DataTemplate InitTemplate )
 }
 
 // InitSquad(optional string sName = "", optional bool Temp = false)
-function Squad_XComGameState_Persistent InitSquad(optional string sName = "", optional bool Temp = false)
+function Squad_XComGameState InitSquad(optional string sName = "", optional bool Temp = false)
 {
 	local TDateTime StartDate;
 	local string DateString;
@@ -255,8 +255,8 @@ function bool IsDeployedOnMission()
 	return (bOnMission && InfiltrationState.CurrentMission.ObjectID != 0);
 }
 
-// EvacDelayModifier_Missions()
-function int EvacDelayModifier_Missions()
+// EvacDelayModifier()
+function int EvacDelayModifier()
 {
 	local int NumMissions;
 	local SquadManager_XComGameState SquadMgr;

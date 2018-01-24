@@ -4,10 +4,11 @@
 //  PURPOSE: Utilities & generic localized text for UI
 //--------------------------------------------------------------------------------------- 
 
-class UIUtilities_Text_LWOTC extends object;
+class UIUtilities_Text_LWOTC extends Object;
 
 var localized string m_strHelp;
 
+// GetDifficultyString(XComGameState_MissionSite MissionState)
 static function String GetDifficultyString(XComGameState_MissionSite MissionState)
 {
 	local string Text;
@@ -28,6 +29,7 @@ static function String GetDifficultyString(XComGameState_MissionSite MissionStat
 	return Caps(Text);
 }
 
+// StripHTML (String InputString)
 // Strips up to 50 html tags and what's between them from a string
 // This doesn't actually work yet (discovered the bug it was trying to fix was caused by a mod), but leaving it here in case we need to come back and fix it later
 static function string StripHTML (String InputString)

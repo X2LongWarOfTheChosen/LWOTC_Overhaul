@@ -141,7 +141,7 @@ static function SetRegionValues(array<WorldRegion_XComGameState_AlienStrategyAI>
 	local int RegionCount, RemainingRegions;
 	local int NumVigilanceToDeviate;
 	local int ForceLevelToAdd, AlertLevelToAdd, VigilanceLevelToAdd;
-	local ing NumVigilanceUp, NumVigilanceDown;
+	local int NumVigilanceUp, NumVigilanceDown;
 
 	if(NewGameState != none)
 	{

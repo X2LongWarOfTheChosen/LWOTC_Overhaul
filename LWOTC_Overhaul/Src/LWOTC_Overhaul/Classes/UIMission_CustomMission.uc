@@ -5,9 +5,17 @@
 //			 This is used for initiating infiltration/investigation of a mission site 
 //			 Launching a mission after investigation has begun is handled in UIMission_LWLaunchDelayedMission
 //--------------------------------------------------------------------------------------- 
-class UIMission_CustomMission extends UIMission config(LW_Overhaul);
+class UIMission_CustomMission extends UIMission config(LWOTC_Infiltration);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
+var localized string m_strUrgent;
+var localized string m_strRendezvousMission;
+var localized string m_strRendezvousDesc;
+var localized string m_strMissionDifficulty_start;
+var localized string m_strInvasionMission;
+var localized string m_strInvasionWarning;
+var localized string m_strInvasionDesc;
 
 enum EMissionUIType
 {
@@ -32,17 +40,16 @@ var EMissionUIType MissionUIType;
 var name LibraryID;
 var string GeoscapeSFX;
 
-var localized string m_strUrgent;
-var localized string m_strRendezvousMission;
-var localized string m_strRendezvousDesc;
-var localized string m_strMissionDifficulty_start;
-var localized string m_strInvasionMission;
-var localized string m_strInvasionWarning;
-var localized string m_strInvasionDesc;
+defaultproperties
+{
+	Package = "/ package/gfxAlerts/Alerts";
+	InputState = eInputState_Consume;
+}
 
+// InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 {
-	local XComGameState_LWAlienActivity AlienActivity;
+	local AlienActivity_XComGameState AlienActivity;
 
 	super.InitScreen(InitController, InitMovie, InitName);
 
@@ -57,34 +64,27 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	BuildScreen();
 }
 
-simulated function Name GetLibraryID()
+// BuildScreen()
+simulated function BuildScreen()
 {
-	//allow manual overrides
-	if(LibraryID != '')
-		return LibraryID;
+	// Add Interception warning and Shadow Chamber info 
+	BindLibraryItem();
+	`ACTIVITYMGR.UpdateMissionData(GetMission());
+	BuildMissionPanel();
+	BuildOptionsPanel();
+	class'UIUtilities_LWOTC'.static.BuildMissionInfoPanel(self, MissionRef);
 
-	switch(MissionUIType)
-	{
-		case eMissionUI_GuerillaOps:
-			return 'Alert_GuerrillaOpsBlades';
-		case eMissionUI_SupplyRaid:
-		case eMissionUI_LandedUFO:
-			return 'Alert_SupplyRaidBlades';  // used for Supply Raid, Landed UFO
-		case eMissionUI_GoldenPath:
-		case eMissionUI_AlienFacility:
-		case eMissionUI_GPIntel:
-			return 'Alert_GoldenPath';  // used for AlienFacility, GoldenPath, GPIntel
-		case eMissionUI_Council:
-			return 'Alert_CouncilMissionBlades';
-		case eMissionUI_Retaliation:
-        case eMissionUI_Rendezvous:
-		case eMissionUI_Invasion:
-			return 'Alert_RetaliationBlades';
-		default:
-			return 'Alert_GuerrillaOpsBlades';
-	}
+	PlaySFX(GetSFX());
+
+	XComHQPresentationLayer(Movie.Pres).CAMSaveCurrentLocation();
+
+	if(bInstantInterp)
+		XComHQPresentationLayer(Movie.Pres).CAMLookAtEarth(GetMission().Get2DLocation(), CAMERA_ZOOM, 0);
+	else
+		XComHQPresentationLayer(Movie.Pres).CAMLookAtEarth(GetMission().Get2DLocation(), CAMERA_ZOOM);
 }
 
+// BindLibraryItem()
 // Override, because we use a DefaultPanel in the AlienFacility
 simulated function BindLibraryItem()
 {
@@ -138,6 +138,7 @@ simulated function BindLibraryItem()
 	}
 }
 
+// GetSFX()
 simulated function string GetSFX()
 {
 	//allow manual overrides
@@ -168,31 +169,42 @@ simulated function string GetSFX()
 	}
 }
 
+// GetLibraryID()
+simulated function Name GetLibraryID()
+{
+	//allow manual overrides
+	if(LibraryID != '')
+		return LibraryID;
+
+	switch(MissionUIType)
+	{
+		case eMissionUI_GuerillaOps:
+			return 'Alert_GuerrillaOpsBlades';
+		case eMissionUI_SupplyRaid:
+		case eMissionUI_LandedUFO:
+			return 'Alert_SupplyRaidBlades';  // used for Supply Raid, Landed UFO
+		case eMissionUI_GoldenPath:
+		case eMissionUI_AlienFacility:
+		case eMissionUI_GPIntel:
+			return 'Alert_GoldenPath';  // used for AlienFacility, GoldenPath, GPIntel
+		case eMissionUI_Council:
+			return 'Alert_CouncilMissionBlades';
+		case eMissionUI_Retaliation:
+        case eMissionUI_Rendezvous:
+		case eMissionUI_Invasion:
+			return 'Alert_RetaliationBlades';
+		default:
+			return 'Alert_GuerrillaOpsBlades';
+	}
+}
+
+// GetMissionTitle()
 simulated function String GetMissionTitle()
 {
 	return GetMission().GetMissionDescription();
 }
 
-
-simulated function BuildScreen()
-{
-	// Add Interception warning and Shadow Chamber info 
-	BindLibraryItem();
-	`ACTIVITYMGR.UpdateMissionData(GetMission());
-	BuildMissionPanel();
-	BuildOptionsPanel();
-	class'UIUtilities_LW'.static.BuildMissionInfoPanel(self, MissionRef);
-
-	PlaySFX(GetSFX());
-
-	XComHQPresentationLayer(Movie.Pres).CAMSaveCurrentLocation();
-
-	if(bInstantInterp)
-		XComHQPresentationLayer(Movie.Pres).CAMLookAtEarth(GetMission().Get2DLocation(), CAMERA_ZOOM, 0);
-	else
-		XComHQPresentationLayer(Movie.Pres).CAMLookAtEarth(GetMission().Get2DLocation(), CAMERA_ZOOM);
-}
-
+// OnRemoved()
 // Called when screen is removed from Stack
 simulated function OnRemoved()
 {
@@ -209,6 +221,124 @@ simulated function OnRemoved()
 	class'UIUtilities_Sound'.static.PlayCloseSound();
 }
 
+// AddIgnoreButton()
+simulated function AddIgnoreButton()
+{
+	//Button is controlled by flash and shows by default. Hide if need to. 
+	//local UIButton IgnoreButton; 
+
+	IgnoreButton = Spawn(class'UIButton', LibraryPanel);
+	if(CanBackOut())
+	{
+		IgnoreButton.SetResizeToText( false );
+		IgnoreButton.InitButton('IgnoreButton', "", OnCancelClicked);
+	}
+	else
+	{
+		IgnoreButton.InitButton('IgnoreButton').Hide();
+	}
+}
+
+// ----------------------------------------------------------------------
+// -------- UTILITY CLASSSES FOR VARIOUS MISSION TYPES ------------------
+// ----------------------------------------------------------------------
+
+//--=- GAME DATA HOOKUP ----
+
+// GetRegionLocalizedDesc(string strDesc)
+simulated function String GetRegionLocalizedDesc(string strDesc)
+{
+	local XGParamTag ParamTag;
+
+	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
+	ParamTag.StrValue0 = GetRegionName();
+
+	return `XEXPAND.ExpandString(strDesc);
+}
+
+// CanTakeMission()
+simulated function bool CanTakeMission()
+{
+	return GetRegion().HaveMadeContact() || !GetMission().bNotAtThreshold;
+}
+
+// GetMissionImage()
+simulated function String GetMissionImage()
+{
+	local AlienActivity_XComGameState AlienActivity;
+	local XComGameState_MissionSite MissionSite;
+
+	MissionSite = GetMission();
+
+	AlienActivity = GetAlienActivity();
+	if(AlienActivity != none)
+		return AlienActivity.GetMissionImage(MissionSite);
+
+	return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
+}
+
+// GetObjectiveString()
+simulated function String GetObjectiveString()
+{
+	local string ObjectiveString;
+	local AlienActivity_XComGameState AlienActivity;
+	local AlienActivity_X2StrategyElementTemplate ActivityTemplate;
+	local string ActivityObjective;
+
+	ObjectiveString = super.GetObjectiveString();
+	ObjectiveString $= "\n";
+
+	AlienActivity = GetAlienActivity();
+	
+	if (AlienActivity != none)
+	{
+		ActivityTemplate = AlienActivity.GetMyTemplate();
+		ActivityObjective = ActivityTemplate.ActivityObjectives[AlienActivity.CurrentMissionLevel];
+	}
+	else
+	{
+		ActivityObjective = "";
+	}
+	//if(ActivityObjective == "")
+		//ActivityObjective = "Missing ActivityObjectives[" $ AlienActivity.CurrentMissionLevel $ "] for AlienActivity " $ ActivityTemplate.DataName;
+
+	ObjectiveString $= ActivityObjective;
+
+	return ObjectiveString;
+}
+
+// GetAlienActivity()
+simulated function AlienActivity_XComGameState GetAlienActivity()
+{
+	return class'AlienActivity_XComGameState_Manager'.static.FindAlienActivityByMission(GetMission());
+}
+
+// GetModifiedRewardString()
+simulated function string GetModifiedRewardString()
+{
+	local XComGameState_MissionSite MissionState;
+	local string RewardString, OldCaptureRewardString, NewCaptureRewardString;
+
+	MissionState = GetMission();
+	RewardString = GetRewardString();
+	if (MissionState.GeneratedMission.Mission.MissionFamily == "Neutralize_LW")
+	{
+		RewardString = "$$$" $ RewardString;	// Intended to handle any repeats
+		OldCaptureRewardString = Mid(RewardString, 0, Instr(RewardString, ","));
+		//`log ("MODIFYING REWARD STRING" @ OldCaptureRewardString);
+		NewCaptureRewardString = OldCaptureRewardString @ class'UIUtilities_LWOTC'.default.m_strVIPCaptureReward;
+		RewardString = Repl (RewardString, OldCaptureRewardString, NewCaptureRewardString);
+		RewardString -= "$$$";
+	}
+	return RewardString;
+}
+
+
+// ----------------------------------------------------------------------
+// ----------------- START FLASH INTERFACES -----------------------------
+// ----------------------------------------------------------------------
+
+// BuildMissionPanel()
 simulated function BuildMissionPanel()
 {
 	switch(MissionUIType)
@@ -249,6 +379,7 @@ simulated function BuildMissionPanel()
 	}
 }
 
+// BuildOptionsPanel()
 simulated function BuildOptionsPanel()
 {
 	switch(MissionUIType)
@@ -289,121 +420,13 @@ simulated function BuildOptionsPanel()
 	}
 }
 
-simulated function AddIgnoreButton()
-{
-	//Button is controlled by flash and shows by default. Hide if need to. 
-	//local UIButton IgnoreButton; 
-
-	IgnoreButton = Spawn(class'UIButton', LibraryPanel);
-	if(CanBackOut())
-	{
-		IgnoreButton.SetResizeToText( false );
-		IgnoreButton.InitButton('IgnoreButton', "", OnCancelClicked);
-	}
-	else
-	{
-		IgnoreButton.InitButton('IgnoreButton').Hide();
-	}
-}
-
-// ----------------------------------------------------------------------
-// -------- UTILITY CLASSSES FOR VARIOUS MISSION TYPES ------------------
-// ----------------------------------------------------------------------
-
-//--=- GAME DATA HOOKUP ----
-simulated function String GetRegionLocalizedDesc(string strDesc)
-{
-	local XGParamTag ParamTag;
-
-	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
-	ParamTag.StrValue0 = GetRegionName();
-
-	return `XEXPAND.ExpandString(strDesc);
-}
-
-simulated function bool CanTakeMission()
-{
-	return GetRegion().HaveMadeContact() || !GetMission().bNotAtThreshold;
-}
-
-simulated function String GetMissionImage()
-{
-	local XComGameState_LWAlienActivity AlienActivity;
-	local XComGameState_MissionSite MissionSite;
-
-	MissionSite = GetMission();
-
-	AlienActivity = GetAlienActivity();
-	if(AlienActivity != none)
-		return AlienActivity.GetMissionImage(MissionSite);
-
-	return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
-}
-
-simulated function String GetObjectiveString()
-{
-	local string ObjectiveString;
-	local XComGameState_LWAlienActivity AlienActivity;
-	local X2LWAlienActivityTemplate ActivityTemplate;
-	local string ActivityObjective;
-
-	ObjectiveString = super.GetObjectiveString();
-	ObjectiveString $= "\n";
-
-	AlienActivity = GetAlienActivity();
-	
-	if (AlienActivity != none)
-	{
-		ActivityTemplate = AlienActivity.GetMyTemplate();
-		ActivityObjective = ActivityTemplate.ActivityObjectives[AlienActivity.CurrentMissionLevel];
-	}
-	else
-	{
-		ActivityObjective = "";
-	}
-	//if(ActivityObjective == "")
-		//ActivityObjective = "Missing ActivityObjectives[" $ AlienActivity.CurrentMissionLevel $ "] for AlienActivity " $ ActivityTemplate.DataName;
-
-	ObjectiveString $= ActivityObjective;
-
-	return ObjectiveString;
-}
-
-simulated function XComGameState_LWAlienActivity GetAlienActivity()
-{
-	return class'XComGameState_LWAlienActivityManager'.static.FindAlienActivityByMission(GetMission());
-}
-
-simulated function string GetModifiedRewardString()
-{
-	local XComGameState_MissionSite MissionState;
-	local string RewardString, OldCaptureRewardString, NewCaptureRewardString;
-
-	MissionState = GetMission();
-	RewardString = GetRewardString();
-	if (MissionState.GeneratedMission.Mission.MissionFamily == "Neutralize_LW")
-	{
-		RewardString = "$$$" $ RewardString;	// Intended to handle any repeats
-		OldCaptureRewardString = Mid(RewardString, 0, Instr(RewardString, ","));
-		//`log ("MODIFYING REWARD STRING" @ OldCaptureRewardString);
-		NewCaptureRewardString = OldCaptureRewardString @ class'UIUtilities_LW'.default.m_strVIPCaptureReward;
-		RewardString = Repl (RewardString, OldCaptureRewardString, NewCaptureRewardString);
-		RewardString -= "$$$";
-	}
-	return RewardString;
-}
-
-
-// ----------------------------------------------------------------------
-// ----------------- START FLASH INTERFACES -----------------------------
-// ----------------------------------------------------------------------
-
 // ---- GUERRILLA OPS ----
 
+// BuildGuerrillaOpsMissionPanel()
 simulated function BuildGuerrillaOpsMissionPanel()
 {
 	local string strDarkEventLabel, strDarkEventValue, strDarkEventTime;
-	local XComGameState_LWAlienActivity AlienActivity;
+	local AlienActivity_XComGameState AlienActivity;
 	local bool bHasDarkEvent;
 	local XComGameState_MissionSite MissionState;
 
@@ -463,6 +486,7 @@ simulated function BuildGuerrillaOpsMissionPanel()
 		MissionInfoText.Hide();		
 }
 
+// BuildGuerrillaOpsOptionsPanel()
 simulated function BuildGuerrillaOpsOptionsPanel()
 {
 	local bool bCanBackOut;
@@ -497,9 +521,9 @@ simulated function BuildGuerrillaOpsOptionsPanel()
 	BuildConfirmPanel();
 }
 
-
 // ---- COUNCIL ----
 
+// BuildCouncilMissionPanel()
 simulated function BuildCouncilMissionPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateCouncilInfoBlade");
@@ -524,6 +548,7 @@ simulated function BuildCouncilMissionPanel()
 	ConfirmButton.Hide();
 }
 
+// BuildCouncilOptionsPanel()
 simulated function BuildCouncilOptionsPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateCouncilButtonBlade");
@@ -535,6 +560,7 @@ simulated function BuildCouncilOptionsPanel()
 
 // ---- SUPPLY RAID ----
 
+// BuildSupplyRaidMissionPanel()
 simulated function BuildSupplyRaidMissionPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateSupplyRaidButtonBlade");
@@ -551,6 +577,7 @@ simulated function BuildSupplyRaidMissionPanel()
 	ConfirmButton.Hide();
 }
 
+// BuildSupplyRaidOptionsPanel()
 simulated function BuildSupplyRaidOptionsPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateSupplyRaidInfoBlade");
@@ -573,6 +600,7 @@ simulated function BuildSupplyRaidOptionsPanel()
 
 // ---- LANDED UFO ----
 
+// BuildLandedUFOMissionPanel()
 simulated function BuildLandedUFOMissionPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateSupplyRaidButtonBlade");
@@ -589,6 +617,7 @@ simulated function BuildLandedUFOMissionPanel()
 	ConfirmButton.Hide();
 }
 
+// BuildLandedUFOOptionsPanel()
 simulated function BuildLandedUFOOptionsPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateSupplyRaidInfoBlade");
@@ -611,6 +640,7 @@ simulated function BuildLandedUFOOptionsPanel()
 
 // ---- RETALIATION ----
 
+// BuildRetaliationMissionPanel()
 simulated function BuildRetaliationMissionPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -626,6 +656,7 @@ simulated function BuildRetaliationMissionPanel()
 	LibraryPanel.MC.EndOp();
 }
 
+// BuildRetaliationOptionsPanel()
 simulated function BuildRetaliationOptionsPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -654,6 +685,7 @@ simulated function BuildRetaliationOptionsPanel()
 
 // ---- RENDEZVOUS ----
 
+// BuildRendezvousMissionPanel()
 simulated function BuildRendezvousMissionPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -669,6 +701,7 @@ simulated function BuildRendezvousMissionPanel()
 	LibraryPanel.MC.EndOp();
 }
 
+// BuildRendezvousOptionsPanel()
 simulated function BuildRendezvousOptionsPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -695,9 +728,9 @@ simulated function BuildRendezvousOptionsPanel()
 	ConfirmButton.Hide();
 }
 
-
 // ---- INVASION ----
 
+// BuildInvasionMissionPanel()
 simulated function BuildInvasionMissionPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -713,6 +746,7 @@ simulated function BuildInvasionMissionPanel()
 	LibraryPanel.MC.EndOp();
 }
 
+// BuildInvasionOptionsPanel()
 simulated function BuildInvasionOptionsPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -739,13 +773,12 @@ simulated function BuildInvasionOptionsPanel()
 	ConfirmButton.Hide();
 }
 
-
-
 // ---- ALIEN FACILITY ----
 
+// BuildAlienFacilityMissionPanel()
 simulated function BuildAlienFacilityMissionPanel()
 {
-	local XComGameState_LWAlienActivity Activity;
+	local AlienActivity_XComGameState Activity;
 
 	Activity = GetAlienActivity();
 
@@ -770,12 +803,7 @@ simulated function BuildAlienFacilityMissionPanel()
 	LibraryPanel.MC.EndOp();
 }
 
-simulated function bool CanTakeAlienFacilityMission()
-{	
-	return GetRegion().HaveMadeContact();
-}
-
-
+// BuildAlienFacilityOptionsPanel()
 simulated function BuildAlienFacilityOptionsPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateGoldenPathIntel");
@@ -829,8 +857,15 @@ simulated function BuildAlienFacilityOptionsPanel()
 	ConfirmButton.Hide();
 }
 
+// CanTakeAlienFacilityMission()
+simulated function bool CanTakeAlienFacilityMission()
+{	
+	return GetRegion().HaveMadeContact();
+}
+
 // ---- GOLDEN PATH ----
 
+// BuildGoldenPathMissionPanel()
 simulated function BuildGoldenPathMissionPanel()
 {
 	// Send over to flash ---------------------------------------------------
@@ -851,6 +886,7 @@ simulated function BuildGoldenPathMissionPanel()
 	LibraryPanel.MC.EndOp();
 }
 
+// BuildGoldenPathOptionsPanel()
 simulated function BuildGoldenPathOptionsPanel()
 {
 	LibraryPanel.MC.BeginFunctionOp("UpdateGoldenPathIntel");
@@ -907,11 +943,4 @@ simulated function BuildGoldenPathOptionsPanel()
 	}
 	Button3.Hide();
 	ConfirmButton.Hide();
-}
-
-
-defaultproperties
-{
-	Package = "/ package/gfxAlerts/Alerts";
-	InputState = eInputState_Consume;
 }

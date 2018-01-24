@@ -45,264 +45,16 @@ var localized string m_strStripWeaponUpgradesConfirmDesc;
 var localized string m_strTooltipStripWeapons;
 var localized string m_strVIPCaptureReward;
 
-// Initiate the process of taking a unit's picture. May immediately return the picture if it's available, or return none if the
-// picture isn't yet available but will be taken asynchronously. The provided callback will be invoked when the picture is ready, and
-// the caller should call FinishUnitPicture() when the callback is invoked.
-function static Texture2D TakeUnitPicture(StateObjectReference UnitRef, delegate<XComPhotographer_Strategy.OnPhotoRequestFinished> Callback)
-{
-    local XComPhotographer_Strategy Photographer;
-	local X2ImageCaptureManager CapMan;
-	local Texture2D Pic;
-
-    CapMan = X2ImageCaptureManager(`XENGINE.GetImageCaptureManager());
-	Photographer = `GAME.StrategyPhotographer;
-
-    // First check to see if we already have one
-	Pic = CapMan.GetStoredImage(UnitRef, name("UnitPictureSmall"$UnitRef.ObjectID));
-
-    // Nope: queue one up
-	if (Pic == none)
-	{
-		// if we have a photo queued then setup a callback so we can swap in the image when it is taken
-		if (!Photographer.HasPendingHeadshot(UnitRef, Callback, true))
-		{
-			Photographer.AddHeadshotRequest(UnitRef, 'UIPawnLocation_ArmoryPhoto', 'SoldierPicture_Passport_Armory', 128, 128, Callback, class'X2StrategyElement_DefaultSoldierPersonalities'.static.Personality_ByTheBook(),,true);
-		}
-
-		`GAME.GetGeoscape().m_kBase.m_kCrewMgr.TakeCrewPhotobgraph(UnitRef,,true);
-	}
-
-    return Pic;
-}
-
-// Complete an asynchronous unit picture request. May return 'none' if the callback was invoked for a picture other than the one we expected.
-function static Texture2D FinishUnitPicture(StateObjectReference UnitRef, const out HeadshotRequestInfo ReqInfo, TextureRenderTarget2D RenderTarget)
-{
-    local X2ImageCaptureManager CapMan;
-    local Texture2D Picture;
-    local String TextureName;
-
-    // Is this our picture?
-    if (ReqInfo.UnitRef.ObjectID != UnitRef.ObjectID)
-        return none;
-
-    // Is it the right size?
-    if (ReqInfo.Height != 128)
-        return none;
-
-    TextureName = "UnitPictureSmall"$ReqInfo.UnitRef.ObjectID;
-    CapMan = X2ImageCaptureManager(`XENGINE.GetImageCaptureManager());
-    Picture = RenderTarget.ConstructTexture2DScript(CapMan, TextureName, false, false, false);
-    CapMan.StoreImage(ReqInfo.UnitRef, Picture, name(TextureName));
-
-    return Picture;
-}
-
-// Read the evac delay in the strat layer
-static function int GetCurrentEvacDelay (XComGameState_LWPersistentSquad Squad, XComGameState_LWAlienActivity ActivityState)
-{
-	local int EvacDelay, k;
-	local XComGameState_Unit UnitState;
-	local XComGameState_Unit_LWOfficer OfficerState;
-
-	if (Squad == none)
-		return -1;
-
-	EvacDelay = class'X2Ability_PlaceDelayedEvacZone'.default.DEFAULT_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING];
-
-	EvacDelay += Squad.EvacDelayModifier_SquadSize();
-	EvacDelay += Squad.EvacDelayModifier_Infiltration();
-	EvacDelay += Squad.EvacDelayModifier_Missions();
-	EvacDelay += ActivityState.GetMyTemplate().MissionTree[ActivityState.CurrentMissionLevel].EvacModifier;
-
-	for (k = 0; k < Squad.SquadSoldiersOnMission.Length; k++)
-	{
-		UnitState = Squad.GetSoldier(k);
-		if (class'LWOfficerUtilities'.static.IsOfficer(UnitState))
-		{
-			if (class'LWOfficerUtilities'.static.IsHighestRankOfficerinSquad(UnitState))
-			{
-				OfficerState = class'LWOfficerUtilities'.static.GetOfficerComponent(UnitState);
-				if (OfficerState.HasOfficerAbility('AirController'))
-				{
-					EvacDelay -= class'X2Ability_OfficerAbilitySet'.default.AIR_CONTROLLER_EVAC_TURN_REDUCTION;
-					break;
-				}
-			}
-		}
-	}
-
-	EvacDelay = Clamp (EvacDelay, class'X2Ability_PlaceDelayedEvacZone'.default.MIN_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING], class'X2Ability_PlaceDelayedEvacZone'.default.MAX_EVAC_PLACEMENT_DELAY);
-
-	return EvacDelay;
-
-}
-
-static function string GetTurnsLabel(int kounter)
-{
-	if (kounter == 1)
-		return default.m_strTurnSingular;
-	return default.m_strTurnPlural;
-}
-
-static function bool HasSweepObjective (XComGameState_MissionSite MissionState)
-{
-	local int ObjectiveIndex;
-
-    ObjectiveIndex = 0;
-    if(ObjectiveIndex < MissionState.GeneratedMission.Mission.MissionObjectives.Length)
-    {
-        if(instr(string(MissionState.GeneratedMission.Mission.MissionObjectives[ObjectiveIndex].ObjectiveName), "Sweep") != -1)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-static function bool FullSalvage (XComGameState_MissionSite MissionState)
-{
-	local int ObjectiveIndex;
-
-    ObjectiveIndex = 0;
-    if(ObjectiveIndex < MissionState.GeneratedMission.Mission.MissionObjectives.Length)
-    {
-        if(MissionState.GeneratedMission.Mission.MissionObjectives[ObjectiveIndex].bIsTacticalObjective)
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-static function string GetMissionTypeString (StateObjectReference MissionRef)
-{
-	//local XComGameState_MissionSite MissionState;
-
-	//MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
-
-	if (`SQUADMGR.IsValidInfiltrationMission(MissionRef)) // && MissionState.ExpirationDateTime.m_iYear < 2100)
-	{
-		return default.m_strInfiltrationMission;
-	}
-	else
-	{
-		return default.m_strQuickResponseMission;
-	}
-}
-
-
-static function string GetMissionConcealStatusString (StateObjectReference MissionRef)
-{
-	local MissionSchedule CurrentSchedule;
-	local XComGameState_MissionSite MissionState;
-	local int k;
-	local XGParamTag LocTag;
-	local string ExpandedString;
-
-	MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
-
-	if (MissionState.SelectedMissionData.SelectedMissionScheduleName != '')
-	{
-		`TACTICALMISSIONMGR.GetMissionSchedule(MissionState.SelectedMissionData.SelectedMissionScheduleName, CurrentSchedule);
-	}
-	else
-	{
-		// No mission schedule yet. This generally only happens for missions that spawn outside geoscape elements, like avenger def.
-		// Just look over the possible schedules and pick one to use. It may be wrong if the mission type changes concealment status
-		// based on the schedule, but no current missions do this.
-		`TACTICALMISSIONMGR.GetMissionSchedule(MissionState.GeneratedMission.Mission.MissionSchedules[0], CurrentSchedule);
-	}
-
-	if (CurrentSchedule.XComSquadStartsConcealed)
-	{
-		for (k = 0; k < class'XComGameState_LWListenerManager'.default.MINIMUM_INFIL_FOR_CONCEAL.length; k++)
-		{
-			if (MissionState.GeneratedMission.Mission.sType == class'XComGameState_LWListenerManager'.default.MINIMUM_INFIL_FOR_CONCEAL[k].MissionType)
-			{
-				LocTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
-				LocTag.IntValue0 = round (100 * class'XComGameState_LWListenerManager'.default.MINIMUM_INFIL_FOR_CONCEAL[k].MinInfiltration);
-				ExpandedString = `XEXPAND.ExpandString(default.m_strMinimumInfiltration);
-				return default.m_strConcealedStart @ ExpandedString;
-			}
-		}
-		return default.m_strConcealedStart;
-	}
-	else
-	{
-		return default.m_strRevealedStart;
-	}
-}
-
-static function string GetTimerInfoString (XComGameState_MissionSite MissionState)
-{
-	local int Timer;
-
-	Timer = class'SeqAct_InitializeMIssionTimer'.static.GetInitialTimer (MissionState.GeneratedMission.Mission.MissionFamily);
-	if (Timer > 0)
-	{
-		if (default.ObjectiveTimerMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-		{
-			return default.m_strObjectiveTimer @ string(Timer - 1) @ GetTurnsLabel(Timer);
-		}
-		else
-		{
-			if (default.EvacTimerMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-			{
-				if (default.FixedExitMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-				{
-					return default.m_strExtractionTimer @ string(Timer - 1) $ "+" @ GetTurnsLabel(Timer);
-				}
-				else
-				{
-					return default.m_strExtractionTimer @ string(Timer - 1) @ GetTurnsLabel(Timer);
-				}
-			}
-		}
-	}
-	return "";
-}
-
-static function string GetEvacTypeString (XComGameState_MissionSite MissionState)
-{
-	if (default.EvacFlareMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1 || default.EvacFlareEscapeMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-	{
-		return default.m_strFlareEvac;
-	}
-	else
-	{
-		if (default.FixedExitMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-		{
-			return default.m_strFixedEvacLocation;
-		}
-		else
-		{
-			if (default.DelayedEvacMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-			{
-				return default.m_strDelayedEvac;
-			}
-			else
-			{
-				if (default.NoEvacMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
-				{
-					return default.m_strNoEvac;
-				}
-			}
-		}
-	}
-	return "";
-}
-
-
+// BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReference MissionRef)
 function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReference MissionRef)
 {
-	local XComGameState_LWSquadManager SquadMgr;
+	local SquadManager_XComGameState SquadMgr;
 	local XComGameState_MissionSite MissionState;
-	local XComGameState_LWAlienActivity ActivityState;
+	local AlienActivity_XComGameState ActivityState;
 	local UIPanel MissionExpiryPanel;
 	local UIBGBox MissionExpiryBG;
 	local UIX2PanelHeader MissionExpiryTitle;
-	local XComGameState_MissionSiteRendezvous_LW RendezvousMissionState;
+	//local MissionSite_XComGameState_Rendezvous RendezvousMissionState;
 	local X2CharacterTemplate FacelessTemplate;
 	local String MissionTime;
 	local float TotalMissionHours;
@@ -315,7 +67,7 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 	//if (SquadMgr.IsValidInfiltrationMission(MissionRef) &&
 			//MissionState.ExpirationDateTime.m_iYear < 2100)
 
-	ActivityState = class'XComGameState_LWAlienActivityManager'.static.FindAlienActivityByMission(MissionState);
+	ActivityState = class'AlienActivity_XComGameState_Manager'.static.FindAlienActivityByMission(MissionState);
 	if(ActivityState != none)
 		TotalMissionHours = int(ActivityState.SecondsRemainingCurrentMission() / 3600.0);
 	else
@@ -324,9 +76,9 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 	MissionInfo1 = "<font size=\"16\">";
 	MissionInfo1 $= GetMissionTypeString (MissionRef) @ default.m_strBullet $ " ";
 
-	if (SquadMgr.GetSquadOnMission(MissionRef) != none)
+	if (SquadMgr.Squads.GetSquadOnMission(MissionRef) != none)
 	{
-		EvacFlareTimer = GetCurrentEvacDelay(SquadMgr.GetSquadOnMission(MissionRef),ActivityState);
+		EvacFlareTimer = GetCurrentEvacDelay(SquadMgr.Squads.GetSquadOnMission(MissionRef),ActivityState);
 	}
 	else
 	{
@@ -357,12 +109,12 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 		MissionInfo2 $= default.m_strGetCorpses @ default.m_strBullet $ " ";
 	}
 
-    if (MissionState.GeneratedMission.Mission.sType == "Rendezvous_LW")
-	{
-		RendezvousMissionState = XComGameState_MissionSiteRendezvous_LW(MissionState);
-		FacelessTemplate = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager().FindCharacterTemplate('Faceless');
-		MissionInfo2 $= FacelessTemplate.strCharacterName $ ":" @ RendezvousMissionState.FacelessSpies.Length @ default.m_strBullet $ " ";
-	}
+    //if (MissionState.GeneratedMission.Mission.sType == "Rendezvous_LW")
+	//{
+	//	RendezvousMissionState = XComGameState_MissionSiteRendezvous_LW(MissionState);
+	//	FacelessTemplate = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager().FindCharacterTemplate('Faceless');
+	//	MissionInfo2 $= FacelessTemplate.strCharacterName $ ":" @ RendezvousMissionState.FacelessSpies.Length @ default.m_strBullet $ " ";
+	//}
 	MissionInfo2 $= GetMissionConcealStatusString (MissionRef);
 	MissionTime = class'UISquadSelect_InfiltrationPanel'.static.GetDaysAndHoursString(TotalMissionHours);
 
@@ -392,6 +144,203 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 	MissionExpiryPanel.Show();
 }
 
+// GetCurrentEvacDelay (Squad_XComGameState Squad, AlienActivity_XComGameState ActivityState)
+// Read the evac delay in the strat layer
+private static function int GetCurrentEvacDelay (Squad_XComGameState Squad, AlienActivity_XComGameState ActivityState)
+{
+	local int EvacDelay, k;
+	local XComGameState_Unit UnitState;
+	//local XComGameState_Unit_LWOfficer OfficerState;
+
+	if (Squad == none)
+		return -1;
+
+	EvacDelay = class'EvacZone_X2Ability_PlaceDelayed'.default.DEFAULT_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING];
+
+	EvacDelay += Squad.Soldiers.EvacDelayModifier();
+	EvacDelay += Squad.InfiltrationState.EvacDelayModifier();
+	EvacDelay += Squad.EvacDelayModifier();
+	EvacDelay += ActivityState.GetMyTemplate().MissionTree[ActivityState.CurrentMissionLevel].EvacModifier;
+
+	/*
+	for (k = 0; k < Squad.SquadSoldiersOnMission.Length; k++)
+	{
+		UnitState = Squad.GetSoldier(k);
+		if (class'LWOfficerUtilities'.static.IsOfficer(UnitState))
+		{
+			if (class'LWOfficerUtilities'.static.IsHighestRankOfficerinSquad(UnitState))
+			{
+				OfficerState = class'LWOfficerUtilities'.static.GetOfficerComponent(UnitState);
+				if (OfficerState.HasOfficerAbility('AirController'))
+				{
+					EvacDelay -= class'X2Ability_OfficerAbilitySet'.default.AIR_CONTROLLER_EVAC_TURN_REDUCTION;
+					break;
+				}
+			}
+		}
+	}
+	*/
+
+	EvacDelay = Clamp (EvacDelay, class'EvacZone_X2Ability_PlaceDelayed'.default.MIN_EVAC_PLACEMENT_DELAY[`CAMPAIGNDIFFICULTYSETTING], class'EvacZone_X2Ability_PlaceDelayed'.default.MAX_EVAC_PLACEMENT_DELAY);
+
+	return EvacDelay;
+
+}
+
+// HasSweepObjective (XComGameState_MissionSite MissionState)
+static function bool HasSweepObjective (XComGameState_MissionSite MissionState)
+{
+	local int ObjectiveIndex;
+
+    ObjectiveIndex = 0;
+    if(ObjectiveIndex < MissionState.GeneratedMission.Mission.MissionObjectives.Length)
+    {
+        if(instr(string(MissionState.GeneratedMission.Mission.MissionObjectives[ObjectiveIndex].ObjectiveName), "Sweep") != -1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// FullSalvage (XComGameState_MissionSite MissionState)
+static function bool FullSalvage (XComGameState_MissionSite MissionState)
+{
+	local int ObjectiveIndex;
+
+    ObjectiveIndex = 0;
+    if(ObjectiveIndex < MissionState.GeneratedMission.Mission.MissionObjectives.Length)
+    {
+        if(MissionState.GeneratedMission.Mission.MissionObjectives[ObjectiveIndex].bIsTacticalObjective)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// GetMissionTypeString (StateObjectReference MissionRef)
+static function string GetMissionTypeString (StateObjectReference MissionRef)
+{
+	//local XComGameState_MissionSite MissionState;
+
+	//MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
+
+	if (`SQUADMGR.IsValidInfiltrationMission(MissionRef)) // && MissionState.ExpirationDateTime.m_iYear < 2100)
+	{
+		return default.m_strInfiltrationMission;
+	}
+	else
+	{
+		return default.m_strQuickResponseMission;
+	}
+}
+
+// GetMissionConcealStatusString (StateObjectReference MissionRef)
+static function string GetMissionConcealStatusString (StateObjectReference MissionRef)
+{
+	local MissionSchedule CurrentSchedule;
+	local XComGameState_MissionSite MissionState;
+	local int k;
+	local XGParamTag LocTag;
+	local string ExpandedString;
+
+	MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(MissionRef.ObjectID));
+
+	if (MissionState.SelectedMissionData.SelectedMissionScheduleName != '')
+	{
+		`TACTICALMISSIONMGR.GetMissionSchedule(MissionState.SelectedMissionData.SelectedMissionScheduleName, CurrentSchedule);
+	}
+	else
+	{
+		// No mission schedule yet. This generally only happens for missions that spawn outside geoscape elements, like avenger def.
+		// Just look over the possible schedules and pick one to use. It may be wrong if the mission type changes concealment status
+		// based on the schedule, but no current missions do this.
+		`TACTICALMISSIONMGR.GetMissionSchedule(MissionState.GeneratedMission.Mission.MissionSchedules[0], CurrentSchedule);
+	}
+
+	if (CurrentSchedule.XComSquadStartsConcealed)
+	{
+		for (k = 0; k < class'Squad_XComGameState_Listener'.default.MINIMUM_INFIL_FOR_CONCEAL.length; k++)
+		{
+			if (MissionState.GeneratedMission.Mission.sType == class'Squad_XComGameState_Listener'.default.MINIMUM_INFIL_FOR_CONCEAL[k].MissionType)
+			{
+				LocTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
+				LocTag.IntValue0 = round (100 * class'Squad_XComGameState_Listener'.default.MINIMUM_INFIL_FOR_CONCEAL[k].MinInfiltration);
+				ExpandedString = `XEXPAND.ExpandString(default.m_strMinimumInfiltration);
+				return default.m_strConcealedStart @ ExpandedString;
+			}
+		}
+		return default.m_strConcealedStart;
+	}
+	else
+	{
+		return default.m_strRevealedStart;
+	}
+}
+
+// GetTimerInfoString (XComGameState_MissionSite MissionState)
+static function string GetTimerInfoString (XComGameState_MissionSite MissionState)
+{
+	local int Timer;
+
+	Timer = class'Infiltration_SeqAct_InitializeMissionTimer'.static.GetInitialTimer(MissionState.GeneratedMission.Mission.MissionFamily);
+	if (Timer > 0)
+	{
+		if (default.ObjectiveTimerMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+		{
+			return default.m_strObjectiveTimer @ string(Timer - 1) @ GetTurnsLabel(Timer);
+		}
+		else
+		{
+			if (default.EvacTimerMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+			{
+				if (default.FixedExitMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+				{
+					return default.m_strExtractionTimer @ string(Timer - 1) $ "+" @ GetTurnsLabel(Timer);
+				}
+				else
+				{
+					return default.m_strExtractionTimer @ string(Timer - 1) @ GetTurnsLabel(Timer);
+				}
+			}
+		}
+	}
+	return "";
+}
+
+// GetEvacTypeString (XComGameState_MissionSite MissionState)
+static function string GetEvacTypeString (XComGameState_MissionSite MissionState)
+{
+	if (default.EvacFlareMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1 || default.EvacFlareEscapeMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+	{
+		return default.m_strFlareEvac;
+	}
+	else
+	{
+		if (default.FixedExitMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+		{
+			return default.m_strFixedEvacLocation;
+		}
+		else
+		{
+			if (default.DelayedEvacMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+			{
+				return default.m_strDelayedEvac;
+			}
+			else
+			{
+				if (default.NoEvacMissions.Find (MissionState.GeneratedMission.Mission.MissionName) != -1)
+				{
+					return default.m_strNoEvac;
+				}
+			}
+		}
+	}
+	return "";
+}
+
+// GetMouseCoords()
 static function vector2d GetMouseCoords()
 {
 	local PlayerController PC;
@@ -411,6 +360,7 @@ static function vector2d GetMouseCoords()
 	return vMouseCursorPos;
 }
 
+// GetHTMLAverageScatterText(float value, optional int places = 2)
 static function string GetHTMLAverageScatterText(float value, optional int places = 2)
 {
 	local XGParamTag LocTag;
@@ -450,4 +400,13 @@ static function string GetHTMLAverageScatterText(float value, optional int place
 	ReturnString = `XEXPAND.ExpandString(default.m_sAverageScatterText);
 
 	return class'UIUtilities_Text'.static.GetColoredText(ReturnString, eUIState_Bad, class'UIUtilities_Text'.const.BODY_FONT_SIZE_3D);
+}
+
+// GetTurnsLabel(int kounter)
+// Returns Singluar or Plural
+private static function string GetTurnsLabel(int kounter)
+{
+	if (kounter == 1)
+		return default.m_strTurnSingular;
+	return default.m_strTurnPlural;
 }

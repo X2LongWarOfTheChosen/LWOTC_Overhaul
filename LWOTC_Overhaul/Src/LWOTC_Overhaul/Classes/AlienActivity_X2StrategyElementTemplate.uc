@@ -115,7 +115,7 @@ function AlienActivity_XComGameState CreateInstanceFromTemplate(StateObjectRefer
 {
 	local AlienActivity_XComGameState ActivityState;
 
-	ActivityState = AlienActivity_XComGameState(NewGameState.CreateStateObject(class'AlienActivity_XComGameState'));
+	ActivityState = AlienActivity_XComGameState(NewGameState.CreateNewStateObject(class'AlienActivity_XComGameState'));
 	if (Len(ForceMission.sType) > 0)
 	{
 		ActivityState.ForceMission = ForceMission;
