@@ -36,7 +36,7 @@ simulated function StateObjectReference FindBestPrimaryRegion(XComGameState NewG
 	for (k = 0; k < PrimaryRegions.Length; k++)
 	{
 		RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(PrimaryRegions[k].ObjectID));
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState);
 		
 		if (RegionalAI == none)
 		{

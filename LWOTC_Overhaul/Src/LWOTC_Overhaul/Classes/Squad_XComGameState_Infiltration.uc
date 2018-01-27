@@ -17,6 +17,7 @@ var config array<float>		InfiltrationHaltPoints;				// infiltration values at wh
 var array<bool>				InfiltrationPointPassed;			// recordings of when a particular point has been passed
 
 
+var int							ParentObjectId;
 var TDateTime					StartInfiltrationDateTime;		// the time when the current infiltration began
 var StateObjectReference		CurrentMission;					// the current mission being deployed to -- none if no mission
 var float						CurrentInfiltration;			// the current infiltration progress against the mission
@@ -83,7 +84,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 	UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update Infiltration Progress");
 	if(PossibleInfiltrationUpdate - CurrentInfiltration >= 0.01 || PossibleInfiltrationUpdate >= 2.0)
 	{
-		UpdateSquad = Squad_XComGameState(UpdateState.CreateStateObject(class'Squad_XComGameState', ObjectID));
+		UpdateSquad = Squad_XComGameState(UpdateState.CreateStateObject(class'Squad_XComGameState', ParentObjectId));
 		UpdateSquad.CurrentInfiltration = PossibleInfiltrationUpdate;
 		UpdateState.AddStateObject(UpdateSquad);
 	}
@@ -152,7 +153,7 @@ function int GetAlertnessModifierForCurrentInfiltration(optional XComGameState U
 	if(UpdateState == none)
 	{
 		UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update Alertness Modifier from Infiltration");
-		UpdateSquad = Squad_XComGameState(UpdateState.CreateStateObject(class'Squad_XComGameState', ObjectID));
+		UpdateSquad = Squad_XComGameState(UpdateState.CreateStateObject(class'Squad_XComGameState', ParentObjectId));
 		bUpdateSelf = true;
 	}
 

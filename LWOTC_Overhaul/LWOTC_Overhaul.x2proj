@@ -31,13 +31,73 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\Infiltration_SeqAct_InitializeMissionTimer.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_BuildResearchFacility.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_COINOps.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_COINResearch.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_CounterInsurgency.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Foothold.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Generic.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_HighValuePrisoner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Raid.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Invasion.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Logistics.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_OffworldReinforcements.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_PoliticalPrisoner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Propaganda.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_ProtectData.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_ProtectRegion.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_ProtectResearch.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_RegionalAvatarResearch.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Reinforce.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Rendezvous.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Repression.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_Snare.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_TroopManeuvers.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState_Squads.uc">
@@ -65,6 +125,24 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIPersonnel_SquadBarracks.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScrollingTextField.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UISquadClassItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UISquadContainer.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UISquadListItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UISquadListItem_Small.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UISquad_DropDown.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIUtilities_LWOTC.uc">
@@ -196,7 +274,40 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_SafestRegion.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_DefaultAlienActivities.uc">
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_MinRebels.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_MinWorkingRebels.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_FullOutpostJobBuckets.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_RetalMixer.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_ProtectResearch.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_Rendezvous.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_Terror.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityDetectionCalc_TroopManeuvers.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_HasAdviserofClass.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_RNG_Region.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_HasFaceless.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_MinRebelsOnJob.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

@@ -34,7 +34,7 @@ function int GetDesiredAlertLevel (XComGameState_WorldRegion RegionState)
 
 	History = `XCOMHISTORY;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI (RegionState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion (RegionState);
 
 	DesiredAlertLevel = RegionalAI.LocalVigilanceLevel;
 
@@ -103,7 +103,7 @@ function int GetDesiredAlertLevel (XComGameState_WorldRegion RegionState)
 	foreach RegionState.LinkedRegions (LinkedRegionRef)
 	{
 		NeighborRegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(LinkedRegionRef.ObjectID));
-        NeighborRegionStateAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(NeighborRegionState);
+        NeighborRegionStateAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(NeighborRegionState);
 		if (NeighborRegionStateAI.bLiberated)
 		{
 			DesiredAlertLevel += 2;
@@ -132,7 +132,7 @@ function XComGameState_WorldRegion FindBestReinforceDestRegion(XComGameState New
 	foreach PrimaryRegions(DestRegionRef)
 	{
 		DestRegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(DestRegionRef.ObjectID));
-		DestRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(DestRegionState, NewGameState);
+		DestRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(DestRegionState, NewGameState);
 		if (DestRegionalAI == none)
 		{
 			`REDSCREEN("Reinforce Region ERROR : No Regional AI  " $ DestRegionState.GetMyTemplate().DisplayName );
@@ -193,7 +193,7 @@ function XComGameState_WorldRegion FindBestReinforceOrigRegion(XComGameState_Wor
 		OrigRegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(OrigRegionRef.ObjectID));
 		//`LWTRACE ("Reinforcements Origin Testing of" @ OrigRegionState.GetMyTemplate().DisplayName);
 
-		OrigRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(OrigRegionState, NewGameState);
+		OrigRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(OrigRegionState, NewGameState);
 		if (OrigRegionalAI == none)
 		{
 			`REDSCREEN ("FindBestReinforceOrigRegion: No Regional AI for" @ OrigRegionState.GetMyTemplate().DisplayName);
@@ -236,7 +236,7 @@ function XComGameState_WorldRegion FindBestReinforceOrigRegion(XComGameState_Wor
 		// Is the situation dire that I should send someone anyway, I'll see what I can spare -- if it's not so bad here or I got a bunch
 		If (CurrentDelta < 1 && (CurrentDelta >= -3 || OrigRegionalAI.LocalAlertLevel > 8))
 		{
-			DestRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(DestRegionState);
+			DestRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(DestRegionState);
 			// How bad is it in the destination
 			if (DestRegionalAI.LocalAlertLevel - GetDesiredAlertLevel (DestRegionState) - GetNumReinforceActivitiesOriginatingInRegion(DestRegionState.GetReference()) <= -3)
 			{

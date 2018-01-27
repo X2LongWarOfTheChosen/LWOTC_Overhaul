@@ -41,7 +41,7 @@ simulated function XComGameState_WorldRegion FindInvasionTarget(XComGameState Ne
 		foreach RegionState.LinkedRegions(OrigRegionRef)
 		{
 			NeighborRegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(OrigRegionRef.ObjectID));
-			NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(NeighborRegionState, NewGameState);
+			NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(NeighborRegionState, NewGameState);
 
 			if (NeighborRegionAI == none)
 			{
@@ -100,7 +100,7 @@ function XComGameState_WorldRegion FindInvasionOrig(XComGameState_WorldRegion De
 	foreach DestRegionState.LinkedRegions(OrigRegionRef)
 	{
 		NeighborRegionState = XComGameState_WorldRegion(`XCOMHISTORY.GetGameStateForObjectID(OrigRegionRef.ObjectID));
-		NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(NeighborRegionState, NewGameState);
+		NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(NeighborRegionState, NewGameState);
 		If (!NeighborRegionAI.bLiberated && NeighborRegionAI.LocalAlertLevel >= HighestAlert && NeighborRegionAI.LocalAlertLevel >= default.INVASION_MIN_ALERT_TO_LAUNCH)
 		{
 			HighestAlert = NeighborRegionAI.LocalAlertLevel;
@@ -109,7 +109,7 @@ function XComGameState_WorldRegion FindInvasionOrig(XComGameState_WorldRegion De
 	foreach DestRegionState.LinkedRegions(OrigRegionRef)
 	{
 		NeighborRegionState = XComGameState_WorldRegion(`XCOMHISTORY.GetGameStateForObjectID(OrigRegionRef.ObjectID));
-		NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(NeighborRegionState, NewGameState);
+		NeighborRegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(NeighborRegionState, NewGameState);
 		If (!NeighborRegionAI.bLiberated && NeighborRegionAI.LocalAlertLevel >= HighestAlert)
 		{
 			OrigCandidates.AddItem (NeighborRegionState);

@@ -1,4 +1,4 @@
-class Mission_X2StrategyElement_OffworldReinforcements extends X2StrategyElement config(LWOTC_Missions);
+class Mission_X2StrategyElement_OffworldReinforcements extends Mission_X2StrategyElement_Generic config(LWOTC_Missions);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
@@ -13,10 +13,10 @@ var config int EMERGENCY_REINFORCEMENT_PRIMARY_REGION_ALERT_BONUS;
 var config int EMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;
 var config int ADJACENT_REGIONS_REINFORCED_BY_REGULAR_ALERT_UFO;
 
-var config int SUPEREMERGENCY_REINFORCEMENT_PRIMARY_REGION_ALERT_BONUS;		//OK
-var config int SUPEREMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;//OK
+var config int SUPEREMERGENCY_REINFORCEMENT_PRIMARY_REGION_ALERT_BONUS;
+var config int SUPEREMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;
 var config int ADJACENT_REGIONS_REINFORCED_BY_SUPEREMERGENCY_ALERT_UFO;
-var config int SUPEREMERGENCY_ALERT_UFO_GLOBAL_COOLDOWN_DAYS;			//OK
+var config int SUPEREMERGENCY_ALERT_UFO_GLOBAL_COOLDOWN_DAYS;
 
 var name ScheduledOffworldReinforcementsName;
 var name EmergencyOffworldReinforcementsName;
@@ -104,7 +104,7 @@ static function OnScheduledOffworldReinforcementsComplete(bool bAlienSuccess, Al
 	{
 		foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 		{
-			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 			RegionalAI.LocalForceLevel += 1;
 			`LWTRACE("ScheduledOffworldReinforcements : Activity Complete, Alien Win, Increasing ForceLevel by 1 in " $ RegionState.GetMyTemplate().DisplayName );
 		}
@@ -115,7 +115,7 @@ static function OnScheduledOffworldReinforcementsComplete(bool bAlienSuccess, Al
 		RegionState = XComGameState_WorldRegion(NewGameState.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
 		if(RegionState == none)
 			RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 		RegionalAI.AddVigilance (NewGameState, 2);
 	}
 }
@@ -280,7 +280,7 @@ static function OnEmergencyOffworldReinforcementsComplete(bool bAlienSuccess, Al
 	RegionState = XComGameState_WorldRegion(NewGameState.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
 	if(RegionState == none)
 		RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 	if(bAlienSuccess)
 	{
 		`LWTRACE("EmergencyOffworldReinforcementsComplete : Alien Success, adding AlertLevel to primary and some surrounding regions");
@@ -297,7 +297,7 @@ static function OnEmergencyOffworldReinforcementsComplete(bool bAlienSuccess, Al
 			RegionLinks.Remove(RandIndex, 1);
 			if (AdjacentRegion != none)
 			{
-				AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(AdjacentRegion, NewGameState, true);
+				AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(AdjacentRegion, NewGameState, true);
 				AdjacentRegionalAI.LocalAlertLevel += default.EMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;
 			}
 		}
@@ -381,7 +381,7 @@ static function OnSuperEmergencyOffworldReinforcementsComplete(bool bAlienSucces
 	if(RegionState == none)
 		RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 
 	if(bAlienSuccess)
 	{
@@ -397,7 +397,7 @@ static function OnSuperEmergencyOffworldReinforcementsComplete(bool bAlienSucces
 			RegionLinks.Remove(RandIndex, 1);
 			if (AdjacentRegion != none)
 			{
-				AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(AdjacentRegion, NewGameState, true);
+				AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(AdjacentRegion, NewGameState, true);
 				AdjacentRegionalAI.LocalAlertLevel += default.SUPEREMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;
 			}
 		}

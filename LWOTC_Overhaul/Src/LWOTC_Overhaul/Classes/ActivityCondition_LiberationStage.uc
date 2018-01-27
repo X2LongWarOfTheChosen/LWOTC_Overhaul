@@ -15,7 +15,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 {
 	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 	
 	//`LWTRACE ("X2LWActivityCondition_LiberationStage" @ Region.GetMyTemplateName() @ "Checking:" @ NoStagesComplete @ Stage1Complete @ Stage2Complete @ "Status:" @ RegionalAI.LiberateStage1Complete @ RegionalAI.LiberateStage2Complete);
 

@@ -24,7 +24,7 @@ simulated function StateObjectReference FindBestPrimaryRegion(XComGameState NewG
 	foreach PrimaryRegions(RegionRef)
 	{
 		RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(RegionRef.ObjectID));
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState);
 		if (RegionalAI == none)
 		{
 			`LWTRACE("GetScheduledOffworldReinforcementsPrimaryRegion: Can't Find Regional AI for" @ RegionState.GetMyTemplate().DisplayName);

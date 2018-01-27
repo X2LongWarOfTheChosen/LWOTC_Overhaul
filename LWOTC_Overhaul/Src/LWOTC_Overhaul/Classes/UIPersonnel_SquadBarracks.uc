@@ -47,6 +47,7 @@ var localized string strDefaultSquadBiography;
 
 var config array<string> SquadImagePaths;
 
+// InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 {
 	// Init UI
@@ -154,7 +155,7 @@ simulated function OnImageScrollButtonClicked(UIButton Button)
 {
 	local XComGameState NewGameState;
 	local int CurrentIndex;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 	
 	Squad = GetCurrentSquad();
 
@@ -231,16 +232,16 @@ simulated function CreateSortHeaders()
 
 }
 
-simulated function XComGameState_LWPersistentSquad GetCurrentSquad()
+simulated function Squad_XComGameState GetCurrentSquad()
 {
 	local StateObjectReference SquadRef;
-	local XComGameState_LWPersistentSquad SquadState;
+	local Squad_XComGameState SquadState;
 
 	if(CurrentSquadSelection < 0)
 		return none;
 
 	SquadRef = UISquadListItem(m_kSquadList.GetItem(CurrentSquadSelection)).SquadRef;
-	SquadState = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(SquadRef.ObjectID));
+	SquadState = Squad_XComGameState(`XCOMHISTORY.GetGameStateForObjectID(SquadRef.ObjectID));
 	return SquadState;
 }
 
@@ -272,7 +273,7 @@ simulated function OnReceiveFocus()
 	super(UIScreen).OnReceiveFocus();
 }
 
-simulated function bool CanTransferSoldier(StateObjectReference UnitRef, optional XComGameState_LWPersistentSquad SquadState)
+simulated function bool CanTransferSoldier(StateObjectReference UnitRef, optional Squad_XComGameState SquadState)
 {
     local XComGameState_Unit Unit;
 	local array<XComGameState_Unit> SquadSoldiers;
@@ -290,12 +291,12 @@ simulated function bool CanTransferSoldier(StateObjectReference UnitRef, optiona
 	if(SquadState != none)
 	{
 		//can't add soldiers to squads that are on a mission
-		if(SquadState.bOnMission || SquadState.CurrentMission.ObjectID > 0)
+		if(SquadState.bOnMission || SquadState.InfiltrationState.CurrentMission.ObjectID > 0)
 			if(bViewUnassignedSoldiers)
 				return false;
 
 		//can't add to a max-size squad
-		SquadSoldiers = SquadState.GetSoldiers();
+		SquadSoldiers = SquadState.Soldiers.GetSoldiers();
 		NumSoldiers = SquadSoldiers.Length;
 		MaxSize = class'XComGameState_LWSquadManager'.default.MAX_SQUAD_SIZE;
 		if(NumSoldiers >= MaxSize)
@@ -338,7 +339,7 @@ simulated function UpdateNavHelp()
 //squad header info above the individual soldier listings
 simulated function UpdateSquadHeader()
 {
-	local XComGameState_LWPersistentSquad SquadState;
+	local Squad_XComGameState SquadState;
 	local int i;
 	local string HeaderString, MissionsString;
 	local XGParamTag ParamTag;
@@ -390,7 +391,7 @@ simulated function UpdateSquadHeader()
 			SelectOrViewBtn.SetDisabled(false);
 
 		RenameSquadBtn.Show();
-		if (SquadState.bOnMission || SquadState.CurrentMission.ObjectID > 0)
+		if (SquadState.bOnMission || SquadState.InfiltrationState.CurrentMission.ObjectID > 0)
 			DeleteSquadBtn.Hide();
 		else
 			DeleteSquadBtn.Show();
@@ -418,21 +419,21 @@ simulated function UpdateSquadHeader()
 //squad list
 simulated function UpdateSquadList()
 {
-	local XComGameState_LWSquadManager SquadMgr;
+	local SquadManager_XComGameState SquadMgr;
 	local int SquadListLength, idx, idx2;
 	local UISquadListItem SquadListItem;
 
 	SquadMgr = `SQUADMGR;
-	SquadListLength = SquadMgr.Squads.Length;
+	SquadListLength = SquadMgr.Squads.Squads.Length;
 	for(idx = 0; idx < SquadListLength; idx ++)
 	{
 		SquadListItem = UISquadListItem(m_kSquadList.GetItem(idx));
 		if(SquadListItem == none)
 		{
 			SquadListItem = UISquadListItem(m_kSquadList.CreateItem(class'UISquadListItem'));
-			SquadListItem.InitSquadListItem(SquadMgr.Squads[idx]);
+			SquadListItem.InitSquadListItem(SquadMgr.Squads.Squads[idx]);
 		}
-		SquadListItem.SquadRef = SquadMgr.Squads[idx];
+		SquadListItem.SquadRef = SquadMgr.Squads.Squads[idx];
 		SquadListItem.Update();
 		SquadListItem.Show();
 	}
@@ -451,15 +452,15 @@ simulated function UpdateSquadList()
 
 simulated function UpdateData()
 {
-	local XComGameState_LWSquadManager SquadMgr;
+	local SquadManager_XComGameState SquadMgr;
 
 	m_arrSoldiers.Length = 0;
 	SquadMgr = `SQUADMGR;
 
 	if(CurrentSquadSelection < 0 || bViewUnassignedSoldiers)
-		m_arrSoldiers = SquadMgr.GetUnassignedSoldiers();		
+		m_arrSoldiers = SquadMgr.Squads.GetUnassignedSoldiers();		
 	else
-		m_arrSoldiers = SquadMgr.GetSquad(CurrentSquadSelection).GetSoldierRefs(true);
+		m_arrSoldiers = SquadMgr.Squads.GetSquad(CurrentSquadSelection).GetSoldierRefs(true);
 }
 
 //used by UIPersonnel.RefreshData to determine what the soldier list should be
@@ -483,7 +484,7 @@ simulated function UpdateList()
 {
 	local int i;
 	local UIPersonnel_ListItem UnitItem;
-	local XComGameState_LWPersistentSquad SquadState;
+	local Squad_XComGameState SquadState;
 	
 	super.UpdateList();
 
@@ -498,7 +499,7 @@ simulated function UpdateList()
 		// not on the mission by showing them with lower alpha.
 		if(SquadState != none && 
 			SquadState.IsDeployedOnMission() &&
-			!SquadState.IsSoldierOnMission(UnitItem.UnitRef))
+			!SquadState.Soldiers.IsSoldierOnMission(UnitItem.UnitRef))
 		{
 			UnitItem.SetAlpha(30);
 		}
@@ -529,7 +530,7 @@ simulated function SquadListButtonCallback( UIList kList, int index )
 simulated function OnSoldierSelected( UIList kList, int index )
 {
 	local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad SquadState;
+	local Squad_XComGameState SquadState;
 	local UIPersonnel_ListItem UnitItem;
 	local XComGameState_Unit UnitState;
 
@@ -550,13 +551,13 @@ simulated function OnSoldierSelected( UIList kList, int index )
 		return;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Transferring Soldier");
-	SquadState = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', SquadState.ObjectID));
+	SquadState = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', SquadState.ObjectID));
 	NewGameState.AddStateObject(SquadState);
 
 	if(bViewUnassignedSoldiers)
-		SquadState.AddSoldier(UnitState.GetReference());
+		SquadState.Soldiers.AddSoldier(UnitState.GetReference());
 	else
-		SquadState.RemoveSoldier(UnitState.GetReference());
+		SquadState.Soldiers.RemoveSoldier(UnitState.GetReference());
 
 	`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 
@@ -582,14 +583,14 @@ function OnRenameClicked(UIButton Button)
 function OnNameInputBoxClosed(string text)
 {
 	local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 
 	`LWTRACE("SquadBarracks: text=" $ text $ ", CurrentSquadSelect=" $ CurrentSquadSelection);
 	if(text != "" && CurrentSquadSelection >= 0)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Renaming Squad");
 		Squad = GetCurrentSquad();
-		Squad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', Squad.ObjectID));
+		Squad = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', Squad.ObjectID));
 		Squad.sSquadName = text;
 		Squad.bTemporary = false;
 		NewGameState.AddStateObject(Squad);
@@ -619,13 +620,13 @@ function OnEditBiographyClicked(UIButton Button)
 function OnBackgroundInputBoxClosed(string text)
 {
 	local XComGameState NewGameState;
-	local XComGameState_LWPersistentSquad Squad;
+	local Squad_XComGameState Squad;
 
 	if(text != "" && CurrentSquadSelection >= 0)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Edit Squad Biography");
 		Squad = GetCurrentSquad();
-		Squad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', Squad.ObjectID));
+		Squad = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', Squad.ObjectID));
 		Squad.sSquadBiography = text;
 		NewGameState.AddStateObject(Squad);
 		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -683,7 +684,7 @@ function OnViewUnassignedClicked(UIButton Button)
 // callback from clicking the view unassigned button
 function OnCreateSquadClicked(UIButton Button)
 {
-	`SQUADMGR.CreateEmptySquad();
+	`SQUADMGR.Squads.CreateEmptySquad();
 	CurrentSquadSelection = m_kSquadList.GetItemCount();
 	RefreshAllData();
 }
@@ -692,9 +693,9 @@ function OnCreateSquadClicked(UIButton Button)
 function OnEditOrSelectClicked(UIButton Button)
 {
 	local XComGameState UpdateState;
-	local XComGameState_LWPersistentSquad SquadState;
-	local XComGameState_LWSquadManager SquadMgr;
-	local XComGameState_LWSquadManager UpdatedSquadMgr;
+	local Squad_XComGameState SquadState;
+	local SquadManager_XComGameState SquadMgr;
+	local SquadManager_XComGameState UpdatedSquadMgr;
 	local UISquadSelect SquadSelect;
 	local UISquadContainer SquadContainer;
 
@@ -707,7 +708,7 @@ function OnEditOrSelectClicked(UIButton Button)
 		{
 			UpdateState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Assign persistent squad as current mission squad");
 			SquadMgr = `SQUADMGR;
-			UpdatedSquadMgr = XComGameState_LWSquadManager(UpdateState.CreateStateObject(SquadMgr.Class, SquadMgr.ObjectID));
+			UpdatedSquadMgr = SquadManager_XComGameState(UpdateState.CreateStateObject(SquadMgr.Class, SquadMgr.ObjectID));
 			UpdateState.AddStateObject(UpdatedSquadMgr);
 			UpdatedSquadMgr.LaunchingMissionSquad = SquadState.GetReference();
 

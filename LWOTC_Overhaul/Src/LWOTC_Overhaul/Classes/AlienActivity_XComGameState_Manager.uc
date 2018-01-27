@@ -160,7 +160,7 @@ function UpdateGameBoard()
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Update Regional AIs");
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 
 		if (!RegionalAI.UpdateRegionalAI(NewGameState))
 			NewGameState.PurgeGameStateForObjectID(RegionalAI.ObjectID);
@@ -207,7 +207,7 @@ function UpdatePreMission(XComGameState StartGameState, XComGameState_MissionSit
 	}
 	RegionState = MissionState.GetWorldRegion();
 	if (RegionState == none) { return; }
-	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 	if (RegionalAIState != none && RegionalAIState.bLiberated)
 	{
 		// set the popular support high so that civs won't be hostile
@@ -355,7 +355,7 @@ static function UpdateMissionData(XComGameState_MissionSite MissionSite)
 	InfiltratingSquad = SquadMgr.Squads.GetSquadOnMission(MissionSite.GetReference());
 	ActivityState = FindAlienActivityByMission(MissionSite);
 	RegionState = MissionSite.GetWorldRegion();
-	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 
 	//ForceLevel : what types of aliens are present
 	if(ActivityState != none && ActivityState.GetMyTemplate().GetMissionForceLevelFn != none)
@@ -429,7 +429,7 @@ static function int GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 	
 	ActivityState = FindAlienActivityByMission(MissionSite);
 	RegionState = MissionSite.GetWorldRegion();
-	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionalAIState = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 	if(ActivityState != none && ActivityState.GetMyTemplate().GetMissionAlertLevelFn != none)
 	{
 		AlertLevel = ActivityState.GetMyTemplate().GetMissionAlertLevelFn(ActivityState, MissionSite, none);
@@ -661,7 +661,7 @@ static function int GetGlobalVigilance()
 
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			SumVigilance += RegionalAI.LocalVigilanceLevel;
@@ -682,7 +682,7 @@ static function int GetGlobalAlert()
 
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			SumAlert += RegionalAI.LocalAlertLevel;
@@ -700,7 +700,7 @@ static function int GetNumAlienRegions()
 
 	foreach `XCOMHistory.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 	{
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(!RegionalAI.bLiberated)
 		{
 			kount += 1;

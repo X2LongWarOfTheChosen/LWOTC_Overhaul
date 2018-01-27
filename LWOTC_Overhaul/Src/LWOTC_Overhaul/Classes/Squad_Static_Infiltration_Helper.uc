@@ -380,7 +380,7 @@ static function float GetLiberationFactor(XComGameState_MissionSite MissionState
 	local float LiberationFactor;
 
 	RegionState = MissionState.GetWorldRegion();
-	RegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+	RegionAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 	LiberationFactor = default.InfiltrationLiberationFactor[0];
 	if (RegionAI.LiberateStage1Complete)
 	{

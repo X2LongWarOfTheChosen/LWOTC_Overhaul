@@ -1,3 +1,8 @@
+//---------------------------------------------------------------------------------------
+//  FILE:    ActivityCondition_Month
+//  AUTHOR:  JohnnyLump / Pavonis Interactive
+//	PURPOSE: ?
+//---------------------------------------------------------------------------------------
 class ActivityCondition_Month extends ActivityCondition_LWOTC config(LW_Activities);
 
 var int FirstMonthPossible; //Note game starts at month 0

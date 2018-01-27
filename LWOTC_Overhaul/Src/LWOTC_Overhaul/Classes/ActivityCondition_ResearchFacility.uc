@@ -42,7 +42,7 @@ simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, 
 	foreach ActivityCreation.ActivityStates(ActivityState)
 	{
 		RegionState = XComGameState_WorldRegion(History.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState);
 		if(RegionalAI.bHasResearchFacility && !ActivityState.bDiscovered && !bBuildingResearchFacility)
 		{
 			bMeetsCondition = true;
@@ -81,7 +81,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 
 	bMeetsCondition = true;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 	if(!RegionalAI.bHasResearchFacility && bRequiresAlienResearchFacilityInRegion)
 		bMeetsCondition = false;
 	if(RegionalAI.bHasResearchFacility && !bAllowedAlienResearchFacilityInRegion)

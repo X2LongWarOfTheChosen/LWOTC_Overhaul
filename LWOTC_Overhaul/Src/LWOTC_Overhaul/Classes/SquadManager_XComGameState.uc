@@ -111,6 +111,7 @@ event OnCreation( optional X2DataTemplate InitTemplate )
 {
 	super.OnCreation(InitTemplate);
 	Squads = new class'SquadManager_XComGameState_Squads';
+	Squads.ParentObjectId = ObjectId;
 }
 
 // UpdateSquadPostMission(optional StateObjectReference MissionRef, optional bool bCompletedMission)
@@ -418,16 +419,17 @@ function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object 
 	return ELR_NoInterrupt;
 }
 
-//selects a squad that matches a persistent squad 
+// ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
+// selects a squad that matches a persistent squad 
 function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
 {
 	local XComGameStateHistory				History;
 	//local XComGameState						NewGameState;
 	local XComGameState_HeadquartersXCom	XComHQ, UpdatedXComHQ;
-	local UISquadSelect_LW					SquadSelect;
-	local XComGameState_LWSquadManager		UpdatedSquadMgr;
+	local UISquadSelect						SquadSelect;
+	local SquadManager_XComGameState		UpdatedSquadMgr;
 	local StateObjectReference				SquadRef;
-	local XComGameState_LWPersistentSquad	SquadState;
+	local Squad_XComGameState				SquadState;
 	local bool								bInSquadEdit;
 	local GeneratedMissionData				MissionData;
 	local int								MaxSoldiersInSquad;
@@ -441,7 +443,7 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	}
 	`LWTRACE("ConfigureSquadOnEnterSquadSelect : Parsed XComHQ.");
 
-	SquadSelect = UISquadSelect_LW(GetSquadSelect());
+	SquadSelect = GetSquadSelect();
 	if(SquadSelect == none)
 	{
 		`REDSCREEN("ConfigureSquadOnEnterSquadSelect event triggered with UISquadSelect not in screenstack.");
@@ -463,19 +465,19 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	else	
 		SquadRef = GetBestSquad();
 
-	UpdatedSquadMgr = XComGameState_LWSquadManager(NewGameState.CreateStateObject(Class, ObjectID));
+	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(Class, ObjectID));
 	NewGameState.AddStateObject(UpdatedSquadMgr);
 
 	if(SquadRef.ObjectID > 0)
-		SquadState = XComGameState_LWPersistentSquad(History.GetGameStateForObjectID(SquadRef.ObjectID));
+		SquadState = Squad_XComGameState(History.GetGameStateForObjectID(SquadRef.ObjectID));
 	else
-		SquadState = UpdatedSquadMgr.CreateEmptySquad(,, NewGamestate, true);  // create new, empty, temporary squad
+		SquadState = UpdatedSquadMgr.Squads.CreateEmptySquad(,, NewGamestate, true);  // create new, empty, temporary squad
 
 	UpdatedSquadMgr.LaunchingMissionSquad = SquadState.GetReference();
 
 	UpdatedXComHQ = XComGameState_HeadquartersXCom(NewGameState.CreateStateObject(XComHQ.Class, XComHQ.ObjectID));
 	NewGameState.AddStateObject(UpdatedXComHQ);
-	UpdatedXComHQ.Squad = SquadState.GetDeployableSoldierRefs(MissionData.Mission.AllowDeployWoundedUnits); 
+	UpdatedXComHQ.Squad = SquadState.Soldiers.GetDeployableSoldierRefs(MissionData.Mission.AllowDeployWoundedUnits); 
 
 	MaxSoldiersInSquad = SquadSelect.GetMaxSoldiersAllowedOnMission(MissionData.Mission);
 	if (UpdatedXComHQ.Squad.Length > MaxSoldiersInSquad)

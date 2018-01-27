@@ -53,7 +53,7 @@ simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, 
 
 	foreach History.IterateByClassType(class'XComGameState_WorldRegion', Region)
 	{
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 		if(!RegionalAI.bLiberated)
 		{
 			SumAlert += RegionalAI.LocalAlertLevel;
@@ -86,7 +86,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 
 	bMeetsCondition = true;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 	AlertVigilanceDiff = RegionalAI.LocalAlertLevel - RegionalAI.LocalVigilanceLevel;
 
 	if(RegionalAI.LocalAlertLevel < MinAlert || (ActivityCreation.ActivityTemplate.MinAlert > 0 && RegionalAI.LocalAlertLevel < ActivityCreation.ActivityTemplate.MinAlert))

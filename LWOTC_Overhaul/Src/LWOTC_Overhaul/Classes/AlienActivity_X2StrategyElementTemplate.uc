@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    X2LWAlienActivityTemplate.uc
+//  FILE:    AlienActivity_X2StrategyElementTemplate.uc
 //  AUTHOR:  Amineri / Pavonis Interactive
 //	PURPOSE: Creates templates for Alien Activities, which alien strategy AI pursues, and XCOM tries to discover to generate missions
 //---------------------------------------------------------------------------------------

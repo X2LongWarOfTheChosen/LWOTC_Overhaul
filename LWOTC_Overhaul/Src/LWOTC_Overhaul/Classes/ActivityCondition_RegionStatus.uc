@@ -32,7 +32,7 @@ function bool ContactedOrAdjacentToContacted (XComGameState_WorldRegion Region, 
 	foreach Region.LinkedRegions (LinkedRegionRef)
 	{
 		NeighborRegionState = XComGameState_WorldRegion(`XCOMHISTORY.GetGameStateForObjectID(LinkedRegionRef.ObjectID));
-		NeighborRegionStateAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(NeighborRegionState);
+		NeighborRegionStateAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(NeighborRegionState);
 		if (NeighborRegionState.HaveMadeContact() && !NeighborRegionStateAI.bLiberated)
 		{
 			return true;
@@ -49,7 +49,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 
 	bMeetsCondition = true;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 	if(RegionalAI.bLiberated && !bAllowInLiberated)
 		bMeetsCondition = false;
 		

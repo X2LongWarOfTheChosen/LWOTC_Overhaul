@@ -1,4 +1,4 @@
-class Mission_X2StrategyElement_ProtectRegion extends X2StrategyElement config(LWOTC_Missions);
+class Mission_X2StrategyElement_ProtectRegion extends Mission_X2StrategyElement_Generic config(LWOTC_Missions);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
@@ -94,7 +94,7 @@ static function OnLiberateStage1Complete(bool bAlienSuccess, AlienActivity_XComG
 			return;
 		}
 
-		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(PrimaryRegionState, NewGameState, true);
+		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(PrimaryRegionState, NewGameState, true);
 		PrimaryRegionalAI.LiberateStage1Complete = true;
 
 		`XEVENTMGR.TriggerEvent('LiberateStage1Complete', , , NewGameState); // this is needed to advance objective LW_T2_M0_S2
@@ -163,7 +163,7 @@ static function OnLiberateStage2Complete(bool bAlienSuccess, AlienActivity_XComG
 			return;
 		}
 
-		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(PrimaryRegionState, NewGameState, true);
+		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(PrimaryRegionState, NewGameState, true);
 		PrimaryRegionalAI.LiberateStage2Complete = true;
 		`LWTRACE("ProtectRegionMid Complete");
 		`LWTRACE("PrimaryRegionalAI.LiberateStage1Complete = " $ PrimaryRegionalAI.LiberateStage1Complete);
@@ -292,7 +292,7 @@ static function array<name> ProtectRegionMissionRewards (AlienActivity_XComGameS
 			break;
 		case 'AssaultAlienBase_LW':
 			RewardArray[0] = 'Reward_Dummy_Materiel';
-			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(PrimaryRegionState, NewGameState, true);
+			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(PrimaryRegionState, NewGameState, true);
 			if (RegionalAI.NumTimesLiberated == 0)
 			{
 				if (CanAddPOI())
@@ -303,7 +303,7 @@ static function array<name> ProtectRegionMissionRewards (AlienActivity_XComGameS
 			}
 			break;
 		case 'Jailbreak_LW':
-			NumRebels = `SYNC_RAND_STATIC(class'Mission_X2StrategyElement_LWOTC'.default.POLITICAL_PRISONERS_REBEL_REWARD_MAX - class'Mission_X2StrategyElement_LWOTC'.default.POLITICAL_PRISONERS_REBEL_REWARD_MIN + 1) + class'Mission_X2StrategyElement_LWOTC'.default.POLITICAL_PRISONERS_REBEL_REWARD_MIN;
+			NumRebels = `SYNC_RAND_STATIC(class'Mission_X2StrategyElement_PoliticalPrisoner'.default.POLITICAL_PRISONERS_REBEL_REWARD_MAX - class'Mission_X2StrategyElement_PoliticalPrisoner'.default.POLITICAL_PRISONERS_REBEL_REWARD_MIN + 1) + class'Mission_X2StrategyElement_PoliticalPrisoner'.default.POLITICAL_PRISONERS_REBEL_REWARD_MIN;
 			AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
 			if (NumRebels > 0 && AlienHQ.CapturedSoldiers.Length > 0)
 			{
@@ -346,7 +346,7 @@ static function OnProtectRegionActivityComplete(bool bAlienSuccess, AlienActivit
 
 		RemoveOrAdjustExistingActivitiesFromRegion(PrimaryRegionState, NewGameState);
 
-		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(PrimaryRegionState, NewGameState, true);
+		PrimaryRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(PrimaryRegionState, NewGameState, true);
 		PrimaryRegionalAI.bLiberated = true;
 
 		if (PrimaryRegionalAI.NumTimesLiberated == 0)
@@ -380,7 +380,7 @@ static function OnProtectRegionActivityComplete(bool bAlienSuccess, AlienActivit
 
 		foreach `XCOMHistory.IterateByClassType(class'XComGameState_WorldRegion', RegionState)
 		{
-			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+			RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 			if (!RegionalAI.bLiberated)
 			{
 				RegionalAI.AddVigilance(NewGameState, 1);
@@ -403,7 +403,7 @@ static function OnProtectRegionActivityComplete(bool bAlienSuccess, AlienActivit
 				if(ControlledLinkedAlertLevelIncreases[idx] > 0)
 				{
 					RegionState = ControlledLinkedRegions[idx];
-					AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState, NewGameState, true);
+					AdjacentRegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState, NewGameState, true);
 					AdjacentRegionalAI.LocalAlertLevel += ControlledLinkedAlertLevelIncreases[idx];
 				}
 			}

@@ -144,7 +144,7 @@ function float GetDetectionChance(AlienActivity_XComGameState ActivityState, Ali
 	if (default.USE_DETECTION_FORCE_LEVEL_MODIFIERS[`CAMPAIGNDIFFICULTYSETTING])
 	{
 	    RegionState = GetRegion(ActivityState);
-		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(RegionState);
+		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(RegionState == none)
 		{
 			`REDSCREEN("Cannot find region for activity " $ ActivityState.GetMyTemplateName());

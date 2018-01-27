@@ -32,6 +32,7 @@ event OnCreation( optional X2DataTemplate InitTemplate )
 	super.OnCreation(InitTemplate);
 	Soldiers = new class'Squad_XComGameState_Soldiers';
 	InfiltrationState =  new class'Squad_XComGameState_Infiltration';
+	InfiltrationState.ParentObjectId = ObjectId;
 }
 
 // InitSquad(optional string sName = "", optional bool Temp = false)

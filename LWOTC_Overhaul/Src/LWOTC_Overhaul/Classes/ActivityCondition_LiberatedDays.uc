@@ -15,7 +15,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 	local int iDaysPassed;
 	local WorldRegion_XComGameState_AlienStrategyAI RegionalAI;
 
-	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAI(Region, NewGameState);
+	RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(Region, NewGameState);
 	if(RegionalAI.bLiberated)
 	{
 		CurrentTime = class'XComGameState_GeoscapeEntity'.static.GetCurrentTime();
