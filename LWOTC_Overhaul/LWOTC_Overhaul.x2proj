@@ -31,6 +31,15 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\Infiltration_SeqAct_InitializeMissionTimer.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_OffworldReinforcements.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_ProtectRegion.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState_Squads.uc">
       <SubType>Content</SubType>
     </Content>
@@ -113,6 +122,78 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_XComGameState_EvacSpawner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_LiberationStage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_AlertVigilance.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_AvatarRevealed.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_Days.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_FacilityLeadItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_GeneralOpsCap.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_LiberatedDays.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_MinLiberatedRegions.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_Month.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_NumberActivities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_POIAvailable.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_RegionStatus.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_ResearchFacility.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_RestrictedActivity.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCondition_RNG.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCooldown_Global.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCooldown_UFO.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_AlertUFOLandingRegion.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_FurthestAway.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_Invasion.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_MostDangerous.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_ProtectResearch.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_Reinforce.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\ActivityCreation_SafestRegion.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_DefaultAlienActivities.uc">
