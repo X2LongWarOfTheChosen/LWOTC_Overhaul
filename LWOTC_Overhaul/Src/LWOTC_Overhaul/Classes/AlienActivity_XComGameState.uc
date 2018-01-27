@@ -165,7 +165,7 @@ function bool Update(XComGameState NewGameState)
 	if(MissionState != none && class'X2StrategyGameRulesetDataStructures'.static.LessThan(MissionState.ExpirationDateTime, class'XComGameState_GeoscapeEntity'.static.GetCurrentTime()))
 	{
 		bUpdated = true;
-		if(`SQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
+		if(`SQUADMGR.Squads.GetSquadOnMission(CurrentMissionRef) == none)
 		{
 			bNeedsUpdateMissionFailure = true;
 			bFailedFromMissionExpiration = true;
@@ -185,7 +185,7 @@ function bool Update(XComGameState NewGameState)
 		if(ActivityTemplate.CanBeCompletedFn == none || ActivityTemplate.CanBeCompletedFn(self, NewGameState))
 		{
 			bUpdated = true;
-			if(CurrentMissionRef.ObjectID == 0 || `SQUADMGR.GetSquadOnMission(CurrentMissionRef) == none)
+			if(CurrentMissionRef.ObjectID == 0 || `SQUADMGR.Squads.GetSquadOnMission(CurrentMissionRef) == none)
 			{
 				if(CurrentMissionRef.ObjectID > 0)  // there is a mission, but no squad attached to it
 				{
@@ -306,7 +306,7 @@ function UpdateGameBoard()
 			}
 			else
 			{
-				ActivityState.SpawnMissionPopup();
+				//ActivityState.SpawnMissionPopup();
 			}
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Toggle Mission Appeared Popup");
 			ActivityState = AlienActivity_XComGameState(NewGameState.CreateStateObject(class'AlienActivity_XComGameState', ObjectID));
@@ -344,6 +344,7 @@ function SpawnInfiltrationUI()
 }
 
 // SpawnMissionPopup()
+/*
 function SpawnMissionPopup()
 {
 	local UIAlert Alert;
@@ -359,7 +360,7 @@ function SpawnMissionPopup()
 		return;
 
 	Alert = HQPres.Spawn(class'UIAlert', HQPres);
-	Alert.eAlert = GetAlertType(MissionState);
+	Alert.eAlertName = GetAlertType(MissionState);
 	Alert.bInstantInterp = false;
 	Alert.Mission = MissionState;
 	Alert.fnCallback = MissionAlertCB;
@@ -382,6 +383,7 @@ simulated function MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional
 			`HQPRES.StrategyMap2D.ToggleScan();
 	}
 }
+*/
 
 // SecondsRemainingCurrentMission()
 function float SecondsRemainingCurrentMission()
@@ -654,7 +656,8 @@ function SetMissionData(name MissionFamily, XComGameState_MissionSite MissionSta
 
 	MissionState.GeneratedMission.MissionQuestItemTemplate = MissionMgr.ChooseQuestItemTemplate(MissionState.Source, MissionReward, MissionState.GeneratedMission.Mission, (MissionState.DarkEvent.ObjectID > 0));
 
-	MissionState.SetBuildTime(0);
+	// TODO: implement build time
+	//MissionState.SetBuildTime(0);
 	MissionState.bHasSeenSkipPopup = true;
 
 	if(MissionState.GeneratedMission.Mission.sType == "")

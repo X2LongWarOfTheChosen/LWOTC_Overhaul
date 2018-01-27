@@ -11,7 +11,7 @@ var config float PER_FACELESS_TERROR_DETECTION_MODIFIER;
 function float GetDetectionChance(AlienActivity_XComGameState ActivityState, AlienActivity_X2StrategyElementTemplate ActivityTemplate) //, XComGameState_LWOutpost OutpostState)
 {
 	local float DetectionChance;
-	local int k;
+	//local int k;
 
 	DetectionChance = super.GetDetectionChance(ActivityState, ActivityTemplate); //, OutpostState);
 

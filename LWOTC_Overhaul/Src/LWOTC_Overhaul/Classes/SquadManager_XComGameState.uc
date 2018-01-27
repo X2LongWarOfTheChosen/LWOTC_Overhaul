@@ -167,7 +167,6 @@ function SetupSquadManagerInterface()
 }
 
 // Enable the Squad Manager menu
-/* DO WITH LISTENER
 function EnableSquadManagementMenu(optional bool forceAlert = false)
 {
     local string AlertIcon;
@@ -224,8 +223,6 @@ simulated function GoToSquadManagement(optional StateObjectReference Facility)
 		HQPres.ScreenStack.Push(kPersonnelList);
 	}
 }
-
-*/
 
 // OnPersonnelSelected(StateObjectReference selectedUnitRef)
 simulated function OnPersonnelSelected(StateObjectReference selectedUnitRef)

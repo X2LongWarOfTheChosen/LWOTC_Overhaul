@@ -47,7 +47,7 @@ simulated function StateObjectReference FindBestPrimaryRegion(XComGameState NewG
 		if (RegionalAI.bLiberated)
 			continue;
 
-		if (RegionalAI.LocalAlertLevel > class'X2LWActivityCreation_Reinforce'.default.MAX_ALERT_FOR_REINFORCE)
+		if (RegionalAI.LocalAlertLevel > class'ActivityCreation_Reinforce'.default.MAX_ALERT_FOR_REINFORCE)
 			continue;
 
 		if (ResistanceHQ.NumMonths == 0 && RegionState.IsStartingRegion())

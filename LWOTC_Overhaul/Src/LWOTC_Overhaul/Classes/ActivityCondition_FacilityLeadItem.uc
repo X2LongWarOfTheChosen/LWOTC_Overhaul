@@ -38,7 +38,7 @@ simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, 
 	foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 	{
 		// How many facilities are running this activity
-		if (ActivityState.GetMyTemplateName() == class'AlienActivity_X2StrategyElementTemplate'.default.RegionalAvatarResearchName)
+		if (ActivityState.GetMyTemplateName() == class'Mission_X2StrategyElement_RegionalAvatarResearch'.default.RegionalAvatarResearchName)
 		{
 			TotalFacilities += 1;
 			// How many have we already revealed
@@ -49,7 +49,7 @@ simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, 
 		}	
 
 		// How many of this activity are already running and Leads already available?
-		if (ActivityState.GetMyTemplateName() == class'AlienActivity_X2StrategyElementTemplate'.default.ProtectResearchName)
+		if (ActivityState.GetMyTemplateName() == class'Mission_X2StrategyElement_ProtectResearch'.default.ProtectResearchName)
 		{
 			FacilitiesAlreadyAccessible += 1;
 		}
