@@ -3,4 +3,6 @@
 
 `define ACTIVITYMGR class'AlienActivity_XComGameState_Manager'.static.GetAlienActivityManager()
 
+`define PODMGR class'Pods_XComGameState_Manager'.static.GetPodManager()
+
 `define LWTrace(msg,cond,tag) `Log(`msg, `cond, 'LWTrace')

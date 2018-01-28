@@ -2,12 +2,35 @@ class X2DownloadableContentInfo_LWOTC_Overhaul extends X2DownloadableContentInfo
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
+struct SocketReplacementInfo
+{
+	var name TorsoName;
+	var string SocketMeshString;
+	var bool Female;
+};
+var config array<SocketReplacementInfo> SocketReplacements;
+
+struct PlotObjectiveMod
+{
+	var string MapName;
+	var array<String> ObjectiveTags;
+};
+var config array<PlotObjectiveMod> PlotObjectiveMods;
+
+var config bool ShouldCleanupObsoleteUnits;
+var config array<name> CharacterTypesExemptFromCleanup;
+
+var config array<name> CharacterTypesExceptFromInfiltrationModifiers;
+
+// Configurable list of parcels to remove from the game.
+var config array<String> ParcelsToRemove;
+
 /// <summary>
 /// Called when the player starts a new campaign while this DLC / Mod is installed
 /// </summary>
 static event InstallNewCampaign(XComGameState StartState)
 {
-	class'XComGameState_LWListenerManager'.static.CreateListenerManager(StartState);
+	class'Listener_XComGameState_Manager'.static.CreateListenerManager(StartState);
 	class'SquadManager_XComGameState'.static.CreateSquadManager(StartState);
 
 	//class'XComGameState_LWOutpostManager'.static.CreateOutpostManager(StartState);
@@ -63,7 +86,7 @@ static function LimitStartingSquadSize(XComGameState StartState)
 /// </summary>
 static event OnLoadedSavedGame()
 {
-	class'XComGameState_LWListenerManager'.static.CreateListenerManager();
+	class'Listener_XComGameState_Manager'.static.CreateListenerManager();
 	class'SquadManager_XComGameState'.static.CreateSquadManager();
 	//class'XComGameState_LWOutpostManager'.static.CreateOutpostManager();
 	class'AlienActivity_XComGameState_Manager'.static.CreateAlienActivityManager();
@@ -98,7 +121,7 @@ static event OnLoadedSavedGameToStrategy()
 
 	//this method can handle case where RegionalAI components already exist
 	class'WorldRegion_XComGameState_AlienStrategyAI_Con'.static.InitializeRegionalAIs();
-	class'XComGameState_LWListenerManager'.static.RefreshListeners();
+	class'Listener_XComGameState_Manager'.static.RefreshListeners();
 
 	class'Override_HookCreation'.static.UpdateBlackMarket();
 	RemoveDarkEventObjectives();
@@ -263,11 +286,13 @@ static function CleanupObsoleteTacticalGamestate()
 	idx = 0;
 	foreach ArchiveState.IterateByClassType(class'XComGameState_BaseObject', BaseObject)
 	{
+		/* TODO
 		if (GameInfo.TransientTacticalClassNames.Find( BaseObject.Class.Name ) != -1)
 		{
 			NewGameState.RemoveStateObject(BaseObject.ObjectID);
 			idx++;
 		}
+		*/
 	}
 	`LWTRACE("REMOVED " $ idx $ " tactical transient gamestates when loading into strategy");
 	if (default.ShouldCleanupObsoleteUnits)
@@ -293,6 +318,32 @@ static function CleanupObsoleteTacticalGamestate()
 	`LWTRACE("REMOVED " $ idx2 $ " obsolete enemy item gamestates when loading into strategy");
 
 	History.AddGameStateToHistory(NewGameState);
+}
+
+// UnitTypeShouldBeCleanedUp(XComGameState_Unit UnitState)
+static function bool UnitTypeShouldBeCleanedUp(XComGameState_Unit UnitState)
+{
+	local X2CharacterTemplate CharTemplate;
+	local name CharTemplateName;
+	local int ExcludeIdx;
+
+	CharTemplate = UnitState.GetMyTemplate();
+	if (CharTemplate == none) { return false; }
+	CharTemplateName = UnitState.GetMyTemplateName();
+	if (CharTemplateName == '') { return false; }
+	if (class'LWOTC_DLCHelpers'.static.IsAlienRuler(CharTemplateName)) { return false; }
+	if (!CharTemplate.bIsSoldier)
+	{
+		if (CharTemplate.bIsAlien || CharTemplate.bIsAdvent || CharTemplate.bIsCivilian)
+		{
+			ExcludeIdx = default.CharacterTypesExemptFromCleanup.Find(CharTemplateName);
+			if (ExcludeIdx == -1)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 /// <summary>
@@ -379,17 +430,17 @@ static function ResetDelayedEvac(XComGameState StartGameState)
 // Reset the reinforcements system for the new mission.
 static function ResetReinforcements(XComGameState StartGameState)
 {
-	local XComGameState_LWReinforcements Reinforcements;
+	local Reinforcements_XComGameState Reinforcements;
 
-	Reinforcements = XComGameState_LWReinforcements(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWReinforcements', true));
+	Reinforcements = Reinforcements_XComGameState(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'Reinforcements_XComGameState', true));
 
 	if (Reinforcements == none)
 	{
-		Reinforcements = XComGameState_LWReinforcements(StartGameState.CreateStateObject(class'XComGameState_LWReinforcements'));
+		Reinforcements = Reinforcements_XComGameState(StartGameState.CreateStateObject(class'Reinforcements_XComGameState'));
 	}
 	else
 	{
-		Reinforcements = XComGameState_LWReinforcements(StartGameState.CreateStateObject(class'XComGameState_LWReinforcements', Reinforcements.ObjectID));
+		Reinforcements = Reinforcements_XComGameState(StartGameState.CreateStateObject(class'Reinforcements_XComGameState', Reinforcements.ObjectID));
 	}
 
 	Reinforcements.Reset();
@@ -399,9 +450,9 @@ static function ResetReinforcements(XComGameState StartGameState)
 // InitializePodManager(XComGameState StartGameState)
 static function InitializePodManager(XComGameState StartGameState)
 {
-	local XComGameState_LWPodManager PodManager;
+	local Pods_XComGameState_Manager PodManager;
 
-	PodManager = XComGameState_LWPodManager(StartGameState.CreateStateObject(class'XComGameState_LWPodManager'));
+	PodManager = Pods_XComGameState_Manager(StartGameState.CreateStateObject(class'Pods_XComGameState_Manager'));
 	`LWTrace("Created pod manager");
 	StartGameState.AddStateObject(PodManager);
 }
@@ -411,7 +462,7 @@ static function InitializePodManager(XComGameState StartGameState)
 /// </summary>
 static event OnPostMission()
 {
-	class'XComGameState_LWListenerManager'.static.RefreshListeners();
+	class'Listener_XComGameState_Manager'.static.RefreshListeners();
 	class'Override_HookCreation'.static.UpdateBlackMarket();
 	`SQUADMGR.UpdateSquadPostMission(, true); // completed mission
 	// `LWOUTPOSTMGR.UpdateOutpostsPostMission();
@@ -422,14 +473,15 @@ static event OnPostMission()
 /// </summary>
 static event OnPostTemplatesCreated()
 {
-	local XComParcelManager ParcelMgr;
-	local int i;
-	local int j;
-	local int k;
+	//local XComParcelManager ParcelMgr;
+	//local int i;
+	//local int j;
+	//local int k;
 
 	//`LWDEBUG("Starting OnPostTemplatesCreated");
-	class'LWTemplateMods_Utilities'.static.UpdateTemplates();
+	class'Override_TemplateMods_Utilities'.static.UpdateTemplates();
 
+	/* Requires Hook TODO
 	// Go over the plot list and add new objectives to certain plots.
 	ParcelMgr = `PARCELMGR;
 	if (ParcelMgr != none)
@@ -462,6 +514,7 @@ static event OnPostTemplatesCreated()
 			}
 		}
 	}
+	*/
 }
 
 /// <summary>
@@ -500,7 +553,7 @@ static function bool UpdateShadowChamberMissionInfo(StateObjectReference Mission
 /// </summary>
 static function bool AbilityTagExpandHandler(string InString, out string OutString)
 {
-	class'Override_AbilityTag'.static.AbilityTagExpandHandler(InString, OutString);
+	return class'Override_AbilityTag'.static.AbilityTagExpandHandler(InString, OutString);
 }
 
 /// <summary>
@@ -601,7 +654,7 @@ static function string DLCAppendSockets(XComUnitPawn Pawn)
 /// Calls DLC specific handlers to override spawn location
 /// enlarge the deployable area so can spawn more units
 /// </summary>
-static function bool GetValidFloorSpawnLocations(out array<Vector> FloorPoints, XComGroupSpawn SpawnPoint)
+static function bool GetValidFloorSpawnLocations(out array<Vector> FloorPoints, float SpawnSizeOverride, XComGroupSpawn SpawnPoint)
 {
 	local TTile RootTile, Tile;
 	local array<TTile> FloorTiles;
@@ -623,11 +676,11 @@ static function bool GetValidFloorSpawnLocations(out array<Vector> FloorPoints, 
 		NumSoldiers = 8;
 
 	// On certain mission types we need to reserve space for more units in the spawn area.
-	switch (class'Utilities_LW'.static.CurrentMissionType())
+	switch (class'Utilities_LWOTC'.static.CurrentMissionType())
 	{
 	case "RecruitRaid_LW":
 		// Recruit raid spawns rebels with the squad, so we need lots of space for the rebels + liaison.
-		NumSoldiers += class'X2StrategyElement_DefaultAlienActivities'.default.RAID_MISSION_MAX_REBELS + 1;
+		NumSoldiers += class'Mission_X2StrategyElement_Generic'.default.RAID_MISSION_MAX_REBELS + 1;
 		break;
 	case "Terror_LW":
 	case "Defend_LW":

@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    UIUtilities_LW
+//  FILE:    UIUtilities_LWOTC
 //  AUTHOR:  tracktwo / Pavonis Interactive
 //
 //  PURPOSE: Miscellanous UI helper routines

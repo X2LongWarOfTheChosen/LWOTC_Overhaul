@@ -3,17 +3,18 @@ class Override_AbilityTag extends Object;
 static function bool AbilityTagExpandHandler(string InString, out string OutString)
 {
 	local name Type;
-	local UITacticalHUD TacticalHUD;
-	local StateObjectReference UnitRef;
-	local XComGameState_Unit UnitState;
-	local int NumTiles;
+	//local UITacticalHUD TacticalHUD;
+	//local StateObjectReference UnitRef;
+	//local XComGameState_Unit UnitState;
+	//local int NumTiles;
 
 	Type = name(InString);
 	switch(Type)
 	{
 		case 'EVACDELAY_LW':
-			OutString = string(class'X2Ability_PlaceDelayedEvacZone'.static.GetEvacDelay());
+			OutString = string(class'EvacZone_X2Ability_PlaceDelayed'.static.GetEvacDelay());
 			return true;
+		/*
 		case 'INDEPENDENT_TRACKING_BONUS_TURNS_LW':
 			OutString = string(class'X2Effect_LWHoloTarget'.default.INDEPENDENT_TARGETING_NUM_BONUS_TURNS);
 			return true;
@@ -139,6 +140,7 @@ static function bool AbilityTagExpandHandler(string InString, out string OutStri
 		case 'SPRINTER_MOBILITY_LW':
 			Outstring = string(class'X2Ability_LW_RangerAbilitySet'.default.SPRINTER_MOBILITY);
 			return true;
+		*/
 		default:
 			return false;
 	}

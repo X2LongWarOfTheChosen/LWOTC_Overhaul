@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    LWDLCHelpers
+//  FILE:    LWOTC_DLCHelpers
 //  AUTHOR:  amineri / Pavonis Interactive
 //
 //  PURPOSE: Helpers for interfacing with Firaxis DLC
@@ -163,7 +163,7 @@ static function bool IsAlienRuler(name CharacterTemplateName)
 	}
 }
 
-//class'LWDLCHelpers'.static.IsUnitOnMission(UnitState)
+//class'LWOTC_DLCHelpers'.static.IsUnitOnMission(UnitState)
 // helper for sparks to resolve if a wounded spark is on a mission, since that status can override the OnMission one
 static function bool IsUnitOnMission(XComGameState_Unit UnitState)
 {
@@ -191,7 +191,7 @@ static function bool IsUnitOnMission(XComGameState_Unit UnitState)
 	return false;
 }
 
-//class'LWDLCHelpers'.static.SetOnMissionStatus(UnitState, NewGameState)
+//class'LWOTC_DLCHelpers'.static.SetOnMissionStatus(UnitState, NewGameState)
 // helper for sparks to update healing project and staffslot
 static function SetOnMissionStatus(XComGameState_Unit UnitState, XComGameState NewGameState)
 {

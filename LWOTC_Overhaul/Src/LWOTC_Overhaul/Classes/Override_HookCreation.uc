@@ -5,7 +5,7 @@ static function UpdateBlackMarket()
 	local XComGameState NewGameState;
 	local XComGameStateHistory History;
 	local XComGameState_BlackMarket BlackMarket;
-	local XComGameState_LWListenerManager ListenerMgr;
+	local Listener_XComGameState_Manager ListenerMgr;
 
 	History = `XCOMHISTORY;
 	BlackMarket = XComGameState_BlackMarket(History.GetSingleGameStateObjectForClass(class'XComGameState_BlackMarket'));
@@ -21,10 +21,10 @@ static function UpdateBlackMarket()
 
 		History.AddGameStateToHistory(NewGameState);
 
-		ListenerMgr = class'XComGameState_LWListenerManager'.static.GetListenerManager();
+		ListenerMgr = class'Listener_XComGameState_Manager'.static.GetListenerManager();
 		if (ListenerMgr != none)
 		{
-			ListenerMgr.OnOverrideBlackMarketGoods(BlackMarket, BlackMarket, none, '');
+			ListenerMgr.OnOverrideBlackMarketGoods(BlackMarket, BlackMarket, none, '', none);
 		}
 
 	}
@@ -33,7 +33,7 @@ static function UpdateBlackMarket()
 static function UnlockBlackMarket(XComGameState StartState)
 {
 	local XComGameState_BlackMarket BlackMarket;
-	local XComGameState_LWListenerManager ListenerMgr;
+	local Listener_XComGameState_Manager ListenerMgr;
 
 	foreach StartState.IterateByClassType(class'XComGameState_BlackMarket', BlackMarket)
 	{
@@ -41,12 +41,12 @@ static function UnlockBlackMarket(XComGameState StartState)
 	}
 	BlackMarket.ShowBlackMarket(StartState, true);
 
-	foreach StartState.IterateByClassType(class'XComGameState_LWListenerManager', ListenerMgr)
+	foreach StartState.IterateByClassType(class'Listener_XComGameState_Manager', ListenerMgr)
 	{
 		break;
 	}
 	if (ListenerMgr != none)
 	{
-		ListenerMgr.OnOverrideBlackMarketGoods(BlackMarket, BlackMarket, StartState, '');
+		ListenerMgr.OnOverrideBlackMarketGoods(BlackMarket, BlackMarket, StartState, '', none);
 	}
 }

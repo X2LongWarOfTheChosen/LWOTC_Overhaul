@@ -34,7 +34,85 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\HelpTemplate_X2StrategyElement.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_Avenger.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_EndOfMonth.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_Mission.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_Units.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\LWOTC_DLCHelpers.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\LWOTC_Version.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_CharacterMod.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_DarkEvents.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_DelayedEvac.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_EditGTSProjects.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_HackRewards.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_ModifyAbilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_ModifyGrenadeEffects.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_POIs.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_ReconfigureFacilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_ReconfigureGear.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_RecoverItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_RemovePPClasses.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_Rewards.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_RewireTechTree.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_StaffSlots.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_SwapExplosiveDamageFalloff.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_UpdateQuestItems.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_Utilities.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Mission_TacticalUnitSpawner.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_JobTemplate_DefaultJobSet.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_JobTemplate.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_BuildResearchFacility.uc">
@@ -118,6 +196,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\Override_Tech.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_XComGameState_Manager.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\SquadManager_XComGameState_Squads.uc">
       <SubType>Content</SubType>
     </Content>
@@ -139,6 +220,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\UIButtonIconPC.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIDarkEventListItem.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIMission_LaunchDelayedMission.uc">
       <SubType>Content</SubType>
     </Content>
@@ -146,6 +230,39 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIPersonnel_SquadBarracks.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_AdventOperations.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_ArmoryWeaponUpgrade.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_Armory_MainMenu.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_AvengerHUD.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_DropShipBriefing_MissionStart.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_ResistanceReport.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_Shell.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_SkyrangerArrives.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_SquadSelect.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_TacticalHUD.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIScreenListener_ViewObjectives.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIScrollingTextField.uc">
@@ -172,6 +289,9 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\UISquad_DropDown.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\UIStrategyMapItem_Mission_LWOTC.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\UIUtilities_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
@@ -188,6 +308,12 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\EvacZone_X2Condition_PlaceDelayedPermitted.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2AbilityCooldown_AllInstances.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Condition_MasteredEnemy.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\LWOTC_Overhaul\Classes\X2DownloadableContentInfo_LWOTC_Overhaul.uc">
@@ -340,10 +466,64 @@
     <Content Include="Src\LWOTC_Overhaul\Classes\Mission_X2StrategyElement_DefaultRewards.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\X2DownloadableContentInfo_LW_Overhaul.uc">
+    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_Manager.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\LWOTC_Overhaul\Classes\Listener_XComGameState_Manager.uc">
+    <Content Include="Src\LWOTC_Overhaul\Classes\Reinforcements_XComGameState.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_XComGameState_Job.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_XComGameState_Job_Flank.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Pods_XComGameState_Job_MoveToLocation.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\Override_TemplateMods_Template.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_ApplyExplosiveFalloffWeaponDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_CancelLongRangePenalty.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_DeathFromAbove_LW.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_DLC2_HideSpecialTurnOverlay.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_Guardian_LW.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_HunkerDown_LW.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_HuntersInstinctDamage_LW.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_MaybeApplyDirectionalWorldDamage.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_SerialCritReduction.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Effect_TransferMecToOutpost.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\DarkEvents_X2StrategyElement.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\HackReward_Templates.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2Item_DefaultWeaponMods_LW.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\LWOTC_Overhaul\Classes\X2StrategyElement_MissionSiteDescriptions_LWOTC.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

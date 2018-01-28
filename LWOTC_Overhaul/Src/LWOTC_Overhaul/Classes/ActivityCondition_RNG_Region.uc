@@ -57,7 +57,7 @@ simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC Activity
 
 		//if (UseFaceless)
 		//{
-		//	CheckValue += OutPostState.GetNumFaceless() * default.FACELESS_ROLL_MODIFIER[`DIFFICULTYSETTING];
+		//	CheckValue += OutPostState.GetNumFaceless() * default.FACELESS_ROLL_MODIFIER[`CAMPAIGNDIFFICULTYSETTING];
 		//}
 
 		RandValue = `SYNC_FRAND() * 100.0;

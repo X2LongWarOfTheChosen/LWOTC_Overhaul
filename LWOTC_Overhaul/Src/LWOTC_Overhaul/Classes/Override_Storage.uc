@@ -1,4 +1,8 @@
-class Override_Storage extends Object;
+class Override_Storage extends Object config(LWOTC_Overhaul);
+
+`include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
+var config array<name> UnlimitedItemsAdded;
 
 // This handles updating storage in order to create new unlimited items of various flavors
 static function UpdateStorage()
@@ -19,7 +23,7 @@ static function UpdateStorage()
 
 	bAddedAnyItem = false;
 
-	foreach class'LWTemplateMods'.default.UnlimitedItemsAdded(ItemName)
+	foreach default.UnlimitedItemsAdded(ItemName)
 	{
 	if(AddItemToStorage(ItemName, ItemTemplateMgr, XComHQ, NewGameState))
 		bAddedAnyItem = true;
@@ -102,6 +106,6 @@ static function bool UpdateOneSoldier(XComGameState_Unit UnitState, XComGameStat
 	UnitState.SetBaseMaxStat(eStat_UtilityItems, 3.0f);
 	UnitState.SetCurrentStat(eStat_UtilityItems, 3.0f);
 
-	class'XComGameState_LWListenerManager'.static.GiveDefaultUtilityItemsToSoldier(UnitState, StartState);
+	class'Listener_XComGameState_EndOfMonth'.static.GiveDefaultUtilityItemsToSoldier(UnitState, StartState);
 	return true;
 }

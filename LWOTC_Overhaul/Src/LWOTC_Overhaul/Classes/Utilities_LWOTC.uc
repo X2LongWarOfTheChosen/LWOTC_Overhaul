@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    Utilities_LW
+//  FILE:    Utilities_LWOTC
 //  AUTHOR:  tracktwo (Pavonis Interactive)
 //
 //  PURPOSE: Miscellaneous helper routines.
@@ -41,4 +41,64 @@ function static bool GetMissionSettings(XComGameState_MissionSite MissionSite, o
     // Neither
     `redscreen("GetMissionSettings: No entry for " $ MissionName $ " / " $ MissionFamilyName);
     return false;
+}
+
+// CurrentMissionType()
+function static string CurrentMissionType()
+{
+    local XComGameStateHistory History;
+    local XComGameState_BattleData BattleData;
+    local GeneratedMissionData GeneratedMission;
+    local XComGameState_HeadquartersXCom XComHQ;
+
+    History = `XCOMHISTORY;
+    XComHQ = `XCOMHQ;
+
+    BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+    GeneratedMission = XComHQ.GetGeneratedMissionData(BattleData.m_iMissionID);
+    if (GeneratedMission.Mission.sType == "")
+    {
+        // No mission type set. This is probably a tactical quicklaunch.
+        return `TACTICALMISSIONMGR.arrMissions[BattleData.m_iMissionType].sType;
+    }
+
+    return GeneratedMission.Mission.sType;
+}
+
+// CurrentMissionFamily()
+function static string CurrentMissionFamily()
+{
+    local XComGameStateHistory History;
+    local XComGameState_BattleData BattleData;
+    local GeneratedMissionData GeneratedMission;
+    local XComGameState_HeadquartersXCom XComHQ;
+
+    History = `XCOMHISTORY;
+    XComHQ = `XCOMHQ;
+
+    BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+    GeneratedMission = XComHQ.GetGeneratedMissionData(BattleData.m_iMissionID);
+    if (GeneratedMission.Mission.MissionFamily == "")
+    {
+        // No mission type set. This is probably a tactical quicklaunch.
+        return `TACTICALMISSIONMGR.arrMissions[BattleData.m_iMissionType].MissionFamily;
+    }
+
+    return GeneratedMission.Mission.MissionFamily;
+}
+
+// XComGameState_Player FindPlayer(ETeam team)
+function static XComGameState_Player FindPlayer(ETeam team)
+{
+    local XComGameState_Player PlayerState;
+
+    foreach `XCOMHISTORY.IterateByClassType(class'XComGameState_Player', PlayerState)
+    {
+        if(PlayerState.GetTeam() == team)
+        {
+            return PlayerState;
+        }
+    }
+
+    return none;
 }
