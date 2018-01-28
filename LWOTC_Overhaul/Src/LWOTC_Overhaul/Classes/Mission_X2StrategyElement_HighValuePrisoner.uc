@@ -64,21 +64,6 @@ static function X2DataTemplate CreateHighValuePrisonerTemplate()
 	return Template;
 }
 
-// CanAddPOI()
-static function bool CanAddPOI()
-{
-	local XComGameState_HeadquartersResistance ResistanceHQ;
-	local array<XComGameState_PointOfInterest> POIDeck;
-
-	ResistanceHQ = XComGameState_HeadquartersResistance(`XCOMHistory.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersResistance'));
-	POIDeck = ResistanceHQ.BuildPOIDeck(false);
-	if (POIDeck.length > 0)
-	{
-		return true;
-	}
-	return false;
-}
-
 // GetHVPRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
 static function array<name> GetHVPRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
 {

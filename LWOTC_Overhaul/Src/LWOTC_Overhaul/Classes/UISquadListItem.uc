@@ -181,7 +181,7 @@ simulated function int GetClassIconAlphaStatus(XComGameState_Unit UnitState, Squ
 	switch(UnitState.GetStatus()) 
 	{
 		case eStatus_Active:
-			if (SquadState.bOnMission && SquadState.Soldiers.IsSoldierTemporary(UnitState.GetReference()))
+			if (SquadState.bOnMission && SquadState.Soldiers.IsSoldierTemporary(UnitState))
 				return 50;
 			else
 				return 100;

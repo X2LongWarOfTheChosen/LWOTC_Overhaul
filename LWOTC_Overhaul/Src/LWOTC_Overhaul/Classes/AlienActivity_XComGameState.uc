@@ -344,14 +344,10 @@ function SpawnInfiltrationUI()
 }
 
 // SpawnMissionPopup()
-/*
 function SpawnMissionPopup()
 {
-	local UIAlert Alert;
 	local XComGameState_MissionSite MissionState;
-	local XComHQPresentationLayer HQPres;
-
-	HQPres = `HQPRES;
+	local DynamicPropertySet PropertySet;
 
 	if(CurrentMissionRef.ObjectID > 0)
 		MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(CurrentMissionRef.ObjectID));
@@ -359,31 +355,31 @@ function SpawnMissionPopup()
 	if(MissionState == none)
 		return;
 
-	Alert = HQPres.Spawn(class'UIAlert', HQPres);
-	Alert.eAlertName = GetAlertType(MissionState);
-	Alert.bInstantInterp = false;
-	Alert.Mission = MissionState;
-	Alert.fnCallback = MissionAlertCB;
-	Alert.SoundToPlay = GetSoundToPlay(MissionState);
-	Alert.EventToTrigger = GetEventToTrigger(MissionState);
-	HQPres.ScreenStack.Push(Alert);
+	`HQPRES.BuildUIAlert(PropertySet, GetAlertType(MissionState), MissionAlertCB, GetEventToTrigger(MissionState), GetSoundToPlay(MissionState));
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicBoolProperty(PropertySet, 'bInstantInterp', false);
+	class'X2StrategyGameRulesetDataStructures'.static.AddDynamicIntProperty(PropertySet, 'MissionRef', CurrentMissionRef.ObjectID);
+	`HQPRES.QueueDynamicPopup(PropertySet);
 }
 
 // MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional bool bInstant = false)
-simulated function MissionAlertCB(EUIAction eAction, UIAlert AlertData, optional bool bInstant = false)
+simulated function MissionAlertCB(Name eAction, out DynamicPropertySet AlertData, optional bool bInstant = false)
 {
-	if (eAction == eUIAction_Accept)
+	local XComGameState_MissionSite MissionState;
+
+	if (eAction == 'eUIAction_Accept')
 	{
 		if (UIMission(`HQPRES.ScreenStack.GetCurrentScreen()) == none)
 		{
-			TriggerMissionUI(AlertData.Mission);
+			MissionState = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(
+				class'X2StrategyGameRulesetDataStructures'.static.GetDynamicIntProperty(AlertData, 'MissionRef')));
+
+			TriggerMissionUI(MissionState);
 		}
 
 		if (`GAME.GetGeoscape().IsScanning())
 			`HQPRES.StrategyMap2D.ToggleScan();
 	}
 }
-*/
 
 // SecondsRemainingCurrentMission()
 function float SecondsRemainingCurrentMission()
@@ -695,7 +691,7 @@ function MissionDefinition GetMissionDefinitionForFamily(name MissionFamily)
 	local XComTacticalMissionManager MissionMgr;
 
 	MissionMgr = `TACTICALMISSIONMGR;
-	MissionMgr.CacheMissionManagerCards();  
+	//MissionMgr.CacheMissionManagerCards(); Maybe allow us to use this later
 	CardManager = class'X2CardManager'.static.GetCardManager();
 
 	// now that we have a mission family, determine the mission type to use
@@ -786,7 +782,7 @@ function TriggerMissionUI(XComGameState_MissionSite MissionSite)
 	MissionScreen.MissionRef = MissionSite.GetReference();
 	MissionScreen.MissionUIType = GetMissionUIType(MissionSite);
 	MissionScreen.bInstantInterp = false;
-	MissionScreen = UIMission_LWCustomMission(HQPres.ScreenStack.Push(MissionScreen));
+	MissionScreen = UIMission_CustomMission(HQPres.ScreenStack.Push(MissionScreen));
 }
 
 // GetMissionUIType(XComGameState_MissionSite MissionSite)
@@ -859,7 +855,7 @@ simulated function name GetAlertType(XComGameState_MissionSite MissionSite)
         return MissionSettings.AlertType;
 
 	//nothing else found, default to GOps
-	return eAlert_GOps;
+	return 'eAlert_GOps';
 }
 
 // GetMissionImage(XComGameState_MissionSite MissionSite)

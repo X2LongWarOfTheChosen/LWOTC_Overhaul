@@ -312,7 +312,7 @@ static function array<name> ProtectRegionMissionRewards (AlienActivity_XComGameS
 			}
 			while (NumRebels > 0)
 			{
-				RewardArray.AddItem(class'X2StrategyElement_DefaultRewards_LW'.const.REBEL_REWARD_NAME);
+				RewardArray.AddItem(class'Mission_X2StrategyElement_DefaultRewards'.const.REBEL_REWARD_NAME);
 				--NumRebels;
 			}
 			break;
@@ -424,7 +424,7 @@ static function RemoveOrAdjustExistingActivitiesFromRegion(XComGameState_WorldRe
 	History = `XCOMHISTORY;
 	SquadMgr = `SQUADMGR;
 
-	foreach History.IterateByClassType(class'XComGameState_LWAlienActivity', ActivityState)
+	foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 	{
 		if (ActivityState.GetMyTemplateName() == default.ProtectRegionName || ActivityState.PrimaryRegion.ObjectID != RegionState.ObjectID || ActivityState.GetMyTemplate().CanOccurInLiberatedRegion)
 			continue;
@@ -455,14 +455,14 @@ static function RemoveOrAdjustExistingActivitiesFromRegion(XComGameState_WorldRe
 	}
 	foreach InfiltratedActivities(ActivityState)
 	{
-		UpdatedActivity = XComGameState_LWAlienActivity(NewGameState.GetGameStateForObjectID(ActivityState.ObjectID));
+		UpdatedActivity = AlienActivity_XComGameState(NewGameState.GetGameStateForObjectID(ActivityState.ObjectID));
 		if (UpdatedActivity == none)
 		{
-			UpdatedActivity = XComGameState_LWAlienActivity(NewGameState.CreateStateObject(class'XComGameState_LWAlienActivity', ActivityState.ObjectID));
+			UpdatedActivity = AlienActivity_XComGameState(NewGameState.CreateStateObject(class'AlienActivity_XComGameState', ActivityState.ObjectID));
 			NewGameState.AddStateObject(UpdatedActivity);
 		}
 		SquadState = SquadMgr.Squads.GetSquadOnMission(ActivityState.CurrentMissionRef);
-		SquadState = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'Squad_XComGameState', SquadState.ObjectID));
+		SquadState = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', SquadState.ObjectID));
 		NewGameState.AddStateObject(SquadState);
 
 		SquadState.InfiltrationState.CurrentInfiltration += default.INFILTRATION_BONUS_ON_LIBERATION[`CAMPAIGNDIFFICULTYSETTING] / 100.0;
@@ -499,5 +499,5 @@ static function RemoveLiberatedDoom(int DoomToRemove, XComGameState NewGameState
 		NewGameState.AddStateObject(AlienHQ);
 	}
 
-	AlienHQ.RemoveDoomFromFortress(NewGameState, DoomToRemove, class'UIStrategyMapItem_Region_LW'.default.m_strLiberatedRegion);
+	AlienHQ.RemoveDoomFromFortress(NewGameState, DoomToRemove, "SomeDoomMessage"); //class'UIStrategyMapItem_Region_LW'.default.m_strLiberatedRegion);
 }

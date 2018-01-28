@@ -35,7 +35,7 @@ static function InitializeRegionalAIs(optional XComGameState StartState)
 		RegionStates = GetAllRegionStates(NewGameState);
 	}
 
-	NewRegionalAIs = GenerateRegionalAIsForRegions(RegionStates, RegionStates, bNeedsGameState);
+	NewRegionalAIs = GenerateRegionalAIsForRegions(RegionStates, NewGameState, bNeedsGameState);
 
 	TotalForceLevelToAdd = default.TOTAL_STARTING_FORCE_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
 	TotalAlertLevelToAdd = default.TOTAL_STARTING_ALERT_LEVEL[`CAMPAIGNDIFFICULTYSETTING];
@@ -87,7 +87,7 @@ static function array<WorldRegion_XComGameState_AlienStrategyAI> GenerateRegiona
 {
 	local array<WorldRegion_XComGameState_AlienStrategyAI> NewRegionalAIs;
 	local WorldRegion_XComGameState_AlienStrategyAI RegionalAIState;
-	local XComGameState_WorldRegion RegionState;
+	local XComGameState_WorldRegion RegionState, UpdatedRegionState;
 
 	foreach RegionStates(RegionState)
 	{

@@ -86,9 +86,9 @@ static function RepressionComplete (bool bAlienSuccess, AlienActivity_XComGameSt
 	local XComGameState_WorldRegion					RegionState;
     //local XComGameState_LWOutpost					Outpoststate, NewOutpostState;
 	//local XComGameState_LWOutpostManager			OutPostManager;
-	local int										iRoll, RebelToRemove;
-	local StateObjectReference						NewUnitRef;
-	local bool										AIchange, OPChange;
+	local int										iRoll;//, RebelToRemove;
+	//local StateObjectReference						NewUnitRef;
+	local bool										AIchange;//, OPChange;
 
 	RegionState = XComGameState_WorldRegion(NewGameState.GetGameStateForObjectID(ActivityState.PrimaryRegion.ObjectID));
 
@@ -107,7 +107,7 @@ static function RepressionComplete (bool bAlienSuccess, AlienActivity_XComGameSt
 	//NewOutpostState = XComGameState_LWOutpost(NewGameState.CreateStateObject(class'XComGameState_LWOutpost', OutPostState.ObjectID));
 
 	AIChange = false;
-	OPChange = false;
+	// OPChange = false;
 
 	iRoll == `SYNC_RAND_STATIC (100);
 	if (iRoll < default.REPRESSION_ADVENT_LOSS_CHANCE)

@@ -36,7 +36,7 @@ function Squad_XComGameState GetSquadOnMission(StateObjectReference MissionRef)
 	foreach Squads(SquadRef)
 	{
 		Squad = GetSquad(SquadRef);
-		if(Squad != none && Squad.CurrentMission.ObjectID == MissionRef.ObjectID)
+		if(Squad != none && Squad.InfiltrationState.CurrentMission.ObjectID == MissionRef.ObjectID)
 			return Squad;
 	}
 	return none;
@@ -54,7 +54,7 @@ function StateObjectReference GetBestSquad()
 	foreach Squads(SquadRef)
 	{
 		Squad = GetSquad(SquadRef);
-		if (!Squad.bOnMission && Squad.CurrentMission.ObjectID == 0)
+		if (!Squad.bOnMission && Squad.InfiltrationState.CurrentMission.ObjectID == 0)
 		{
 			PossibleSquads.AddItem(Squad);
 		} 
@@ -76,7 +76,7 @@ function int NumSquadsOnAnyMission()
 	foreach Squads(SquadRef)
 	{
 		Squad = GetSquad(SquadRef);
-		if (Squad.bOnMission && Squad.CurrentMission.ObjectID > 0)
+		if (Squad.bOnMission && Squad.InfiltrationState.CurrentMission.ObjectID > 0)
 			NumMissions++;
 	}
 	return NumMissions;
@@ -91,10 +91,10 @@ function Squad_XComGameState AddSquad(optional array<StateObjectReference> Soldi
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding new preformed squad");
 	NewSquad = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState'));
-	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(Class, ParentObjectId));
+	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(class'SquadManager_XComGameState', ParentObjectId));
 
 	NewSquad.InitSquad(SquadName, Temp);
-	UpdatedSquadMgr.SquadState.Squads.AddItem(NewSquad.GetReference());
+	UpdatedSquadMgr.Squads.Squads.AddItem(NewSquad.GetReference());
 
 	if(MissionRef.ObjectID > 0)
 		NewSquad.Soldiers.SquadSoldiersOnMission = Soldiers;
@@ -124,13 +124,13 @@ function Squad_XComGameState CreateEmptySquad(optional int idx = -1, optional st
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding new empty squad");
 
 	NewSquad = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState'));
-	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(Class, ParentObjectId));
+	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(class'SquadManager_XComGameState', ParentObjectId));
 
 	NewSquad.InitSquad(SquadName, bTemporary);
 	if(idx <= 0 || idx >= Squads.Length)
-		UpdatedSquadMgr.SquadState.Squads.AddItem(NewSquad.GetReference());
+		UpdatedSquadMgr.Squads.Squads.AddItem(NewSquad.GetReference());
 	else
-		UpdatedSquadMgr.SquadState.Squads.InsertItem(idx, NewSquad.GetReference());
+		UpdatedSquadMgr.Squads.Squads.InsertItem(idx, NewSquad.GetReference());
 
 	NewGameState.AddStateObject(NewSquad);
 	NewGameState.AddStateObject(UpdatedSquadMgr);
@@ -141,17 +141,25 @@ function Squad_XComGameState CreateEmptySquad(optional int idx = -1, optional st
 }
 
 // RemoveSquad(StateObjectReference SquadRef)
-function RemoveSquad(StateObjectReference SquadRef)
+function RemoveSquad(StateObjectReference SquadRef, optional XComGameState NewGameState)
 {
 	local SquadManager_XComGameState UpdatedSquadMgr;
 	local Squad_XComGameState SquadState;
+	local bool bNeedsUpdate;
+
+	bNeedsUpdate = NewGameState == none;
+	if (bNeedsUpdate)
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Remvoing Squad");
 	
-	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(Class, ParentObjectId));
+	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(class'SquadManager_XComGameState', ParentObjectId));
 	NewGameState.AddStateObject(UpdatedSquadMgr);
-	UpdatedSquadMgr.SquadState.Squads.RemoveItem(SquadRef);
+	UpdatedSquadMgr.Squads.Squads.RemoveItem(SquadRef);
 
 	SquadState = GetSquad(SquadRef);
 	NewGameState.RemoveStateObject(SquadState.ObjectID);
+
+	if (bNeedsUpdate)
+		`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
 }
 
 // GetAssignedSoldiers()

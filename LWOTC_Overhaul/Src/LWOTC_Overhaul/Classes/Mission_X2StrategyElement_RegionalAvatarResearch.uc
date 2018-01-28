@@ -229,7 +229,7 @@ static function OnRegionalAvatarResearchUpdate(AlienActivity_XComGameState Activ
 	// If aliens have lost most of their territory and are trying to land foothold UFOs, research stops
 	foreach `XCOMHISTORY.IterateByClassType(class'AlienActivity_XComGameState', ActivityLooper)
 	{
-		if(ActivityLooper.GetMyTemplateName() == default.FootholdName)
+		if(ActivityLooper.GetMyTemplateName() == class'Mission_X2StrategyElement_Foothold'.default.FootholdName)
 			return;
 	}
 

@@ -165,7 +165,7 @@ static function float GetSoldierCovertness(array<StateObjectReference> Soldiers,
 	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
 
 	//This is to support including non-soldiers on missions eventually
-	if(!UnitState.IsASoldier())
+	if(!UnitState.IsSoldier())
 		return default.InfiltrationCovertness_Baseline;
 
 	CumulativeUnitMultiplier = 1.0;
@@ -173,10 +173,10 @@ static function float GetSoldierCovertness(array<StateObjectReference> Soldiers,
 	CumulativeWeight = 0.0;
 
 	EquippedUtilityItems = UnitState.GetAllItemsInSlot(eInvSlot_Utility,,,true);
-	CumulativeWeight += (UnitState.GetNumUtilitySlots() - EquippedUtilityItems.Length) * default.EMPTY_UTILITY_SLOT_WEIGHT;
+	CumulativeWeight += (UnitState.GetCurrentStat(eStat_UtilityItems) - EquippedUtilityItems.Length) * default.EMPTY_UTILITY_SLOT_WEIGHT; // Hook for more utility slots?
 
 	UpdateConvertnessForInventory(UnitState, CumulativeUnitCovertness, CumulativeWeight, CumulativeUnitMultiplier);
-	UpdateCovertnessForAbilities(UnitState, CumulativeUnitCovertness, CumulativeUnitMultiplier);
+	UpdateCovertnessForAbilities(UnitState, CumulativeUnitCovertness, CumulativeUnitMultiplier, SquadCovertnessMultiplierDelta);
 	//UpdateCovertnessForOfficers(Soldiers, UnitState, CumulativeUnitMultiplier); OFFICER PACK
 
 	CumulativeUnitCovertness *= CumulativeUnitMultiplier;
@@ -263,8 +263,8 @@ static function UpdateCovertnessForItem(X2ItemTemplate ItemTemplate, out float C
 	`REDSCREEN("COVERTNESS CALCULATION : No valid item or category found for item=" $ ItemTemplate.DataName);
 }
 
-// UpdateCovertnessForAbilities(XComGameState_Unit UnitState, out float CumulativeUnitCovertness, out float CumulativeUnitMultiplier)
-static function UpdateCovertnessForAbilities(XComGameState_Unit UnitState, out float CumulativeUnitCovertness, out float CumulativeUnitMultiplier)
+// UpdateCovertnessForAbilities(XComGameState_Unit UnitState, out float CumulativeUnitCovertness, out float CumulativeUnitMultiplier, out float SquadCovertnessMultiplierDelta)
+static function UpdateCovertnessForAbilities(XComGameState_Unit UnitState, out float CumulativeUnitCovertness, out float CumulativeUnitMultiplier, out float SquadCovertnessMultiplierDelta)
 {
 	local AbilityCovertnessContainer AbilityCov;
 	
@@ -391,7 +391,7 @@ static function float GetLiberationFactor(XComGameState_MissionSite MissionState
 		LiberationFactor = default.InfiltrationLiberationFactor[2];
 		foreach `XCOMHISTORY.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 		{
-			if(ActivityState.GetMyTemplateName() == class'X2StrategyElement_DefaultAlienActivities'.default.ProtectRegionName)
+			if(ActivityState.GetMyTemplateName() == class'Mission_X2StrategyElement_ProtectRegion'.default.ProtectRegionName)
 			{
 				if (ActivityState.PrimaryRegion.ObjectID == RegionState.ObjectID)
 				{

@@ -52,9 +52,9 @@ function ResetCountdown()
 }
 // End: Real OOP shit
 
-// OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+// OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 // A new evac spawner was created.
-function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
     local XComGameState NewGameState;
     local EvacZone_XComGameState_EvacSpawner NewSpawnerState;
@@ -178,9 +178,9 @@ function BuildVisualizationForEvacSpawn(XComGameState VisualizeState)
     NarrativeAction.WaitForCompletion = false;
 }
 
-// OnSpawnEvacZoneComplete(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+// OnSpawnEvacZoneComplete(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 // Evac zone has spawned. We can now clean ourselves up as this state object is no longer needed.
-function EventListenerReturn OnSpawnEvacZoneComplete(Object EventData, Object EventSource, XComGameState GameState, Name EventID)
+function EventListenerReturn OnSpawnEvacZoneComplete(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
     local XComGameState NewGameState;
     local EvacZone_XComGameState_EvacSpawner NewSpawnerState;

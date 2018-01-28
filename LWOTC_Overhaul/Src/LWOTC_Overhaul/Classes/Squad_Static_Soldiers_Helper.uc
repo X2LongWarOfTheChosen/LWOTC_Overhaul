@@ -14,7 +14,7 @@ static function bool IsUnitOnMission(XComGameState_Unit UnitState)
 			{
 				return true;
 			}
-			if (`SQUADMGR.UnitIsOnMission(UnitState.GetReference()))
+			if (`SQUADMGR.Squads.UnitIsOnMission(UnitState.GetReference()))
 			{
 				return true;
 			}
@@ -61,4 +61,30 @@ static function SetOnMissionStatus(XComGameState_Unit UnitState, XComGameState N
 			break;
 	}
 	UnitState.SetStatus(eStatus_OnMission);
+}
+
+// XComGameState_HeadquartersProjectHealSoldier GetHealSparkProject(StateObjectReference UnitRef)
+//helper to retrieve spark heal project -- note that we can't retrieve the proper project, since it is in the DLC3.u
+// so instead we retrieve the parent heal project class and check using IsA
+static function XComGameState_HeadquartersProjectHealSoldier GetHealSparkProject(StateObjectReference UnitRef)
+{
+    local XComGameStateHistory History;
+    local XComGameState_HeadquartersXCom XCOMHQ;
+    local XComGameState_HeadquartersProjectHealSoldier HealSparkProject;
+    local int Idx;
+
+    History = `XCOMHISTORY;
+    XCOMHQ = `XCOMHQ;
+    for(Idx = 0; Idx < XCOMHQ.Projects.Length; ++ Idx)
+    {
+        HealSparkProject = XComGameState_HeadquartersProjectHealSoldier(History.GetGameStateForObjectID(XCOMHQ.Projects[Idx].ObjectID));
+        if(HealSparkProject != none && HealSparkProject.IsA('XComGameState_HeadquartersProjectHealSpark'))
+        {
+            if(UnitRef == HealSparkProject.ProjectFocus)
+            {
+                return HealSparkProject;
+            }
+        }
+    }
+    return none;
 }

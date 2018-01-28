@@ -53,7 +53,7 @@ static function CreateAlienActivityManager(optional XComGameState StartState)
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Creating LW Alien Activity Manager Quasi-singleton");
 		ActivityMgr = AlienActivity_XComGameState_Manager(NewGameState.CreateStateObject(class'AlienActivity_XComGameState_Manager'));
-		ActivityMgr.OnCreation(NewGameState);
+		ActivityMgr.OnInit(NewGameState);
 		NewGameState.AddStateObject(ActivityMgr);
 		`XCOMHISTORY.AddGameStateToHistory(NewGameState);
 	}
@@ -453,8 +453,8 @@ static function int GetMissionAlertLevel(XComGameState_MissionSite MissionSite)
 	return AlertLevel;
 }
 
-// ActivityPrioritySort(AlienActivity_XComGameState TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
-private function int ActivityPrioritySort(AlienActivity_XComGameState TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
+// ActivityPrioritySort(AlienActivity_X2StrategyElementTemplate TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
+private function int ActivityPrioritySort(AlienActivity_X2StrategyElementTemplate TemplateA, AlienActivity_X2StrategyElementTemplate TemplateB)
 {
 	return (TemplateB.iPriority - TemplateA.iPriority);
 }
@@ -540,7 +540,7 @@ static function AddDoomToRandomFacility(XComGameState NewGameState, int DoomToAd
 	History = `XCOMHISTORY;
 	foreach History.IterateByClassType(class'AlienActivity_XComGameState', ActivityState)
 	{
-		if(ActivityState.GetMyTemplateName() == class'X2StrategyElement_DefaultAlienActivities'.default.RegionalAvatarResearchName)
+		if(ActivityState.GetMyTemplateName() == class'Mission_X2StrategyElement_RegionalAvatarResearch'.default.RegionalAvatarResearchName)
 		{
 			ResearchFacilities.AddItem(ActivityState);
 		}

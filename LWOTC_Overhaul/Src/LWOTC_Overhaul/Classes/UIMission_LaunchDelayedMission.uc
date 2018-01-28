@@ -298,7 +298,7 @@ simulated function bool CanBoostInfiltration(out string Reason)
 	BoostInfiltrationCost = Squad.GetBoostInfiltrationCost();
 	CostScalars.Length = 0;
 	bCanAfford = `XCOMHQ.CanAffordAllStrategyCosts(BoostInfiltrationCost, CostScalars);
-	if (Squad.bHasBoostedInfiltration)
+	if (Squad.InfiltrationState.bHasBoostedInfiltration)
 	{
 		ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
 		ParamTag.StrValue0 = Squad.sSquadName;
@@ -362,7 +362,7 @@ simulated function string GetInfiltrationString()
 	{
 		//determine if can fully infiltrate before mission expires
 		TotalSeconds_Mission = AlienActivity.SecondsRemainingCurrentMission();
-		TotalSeconds_Infiltration = InfiltratingSquad.InfiltrationState.GetSecondsRemainingToFullInfiltration();
+		TotalSeconds_Infiltration = InfiltratingSquad.GetSecondsRemainingToFullInfiltration();
 
 		bCanFullyInfiltrate = (TotalSeconds_Infiltration < TotalSeconds_Mission) && (InfiltratingSquad.InfiltrationState.CurrentInfiltration < 1.0);
 		if(bCanFullyInfiltrate)
@@ -388,7 +388,7 @@ simulated function string GetInfiltrationString()
 		//ID 619 - allow non-expiring missions to show remaining time until 100% infiltration will be reached
 		if (InfiltratingSquad.InfiltrationState.CurrentInfiltration < 1.0)
 		{
-			TotalSeconds = InfiltratingSquad.InfiltrationState.GetSecondsRemainingToFullInfiltration();
+			TotalSeconds = InfiltratingSquad.GetSecondsRemainingToFullInfiltration();
 			TotalHours = int(TotalSeconds / 3600.0) % 24;
 			TotalDays = TotalSeconds / 86400.0;
 			ParamTag.IntValue1 = int(TotalDays);
@@ -466,7 +466,7 @@ simulated public function OnBoostInfiltrationClicked(UIButton button)
 	ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
 	ParamTag.StrValue0 = class'UIUtilities_Strategy'.static.GetStrategyCostString(BoostInfiltrationCost, CostScalars);
 	//ParamTag.IntValue0 = Squad.DefaultBoostInfiltrationCost[`CAMPAIGNDIFFICULTYSETTING];
-	ParamTag.IntValue1 = Round((Squad.DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING] - 1.0) * 100.0);
+	ParamTag.IntValue1 = Round((Squad.InfiltrationState.DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING] - 1.0) * 100.0);
 
 	PlaySound(SoundCue'SoundUI.HUDOnCue');
 
@@ -483,21 +483,21 @@ simulated public function OnBoostInfiltrationClicked(UIButton button)
 
 }
 
-// ConfirmBoostInfiltrationCallback(EUIAction Action)
-simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
+// ConfirmBoostInfiltrationCallback(name Action)
+simulated function ConfirmBoostInfiltrationCallback(name Action)
 {
 	local XComGameStateHistory History;
 	local XComGameState NewGameState;
 	local Squad_XComGameState Squad, UpdatedSquad;
 
-	if(Action == eUIAction_Accept)
+	if(Action == 'eUIAction_Accept')
 	{
 		History = `XCOMHISTORY;
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding Boost Infiltration");
 		Squad = GetInfiltratingSquad();
 		UpdatedSquad = Squad_XComGameState(NewGameState.ModifyStateObject(class'Squad_XComGameState', Squad.ObjectID));
 		NewGameState.AddStateObject(UpdatedSquad);
-		UpdatedSquad.bHasBoostedInfiltration = true;
+		UpdatedSquad.InfiltrationState.bHasBoostedInfiltration = true;
 		UpdatedSquad.SpendBoostResource(NewGameState);
 
 		if (NewGameState.GetNumGameStateObjects() > 0)
@@ -507,7 +507,7 @@ simulated function ConfirmBoostInfiltrationCallback(EUIAction Action)
 
         // update the infiltration status, but don't pause the game. We're already in a popup and actually paused completely, and this
         // update "pause" actually resets to 'slow time' and causes a hang.
-		UpdatedSquad.InfiltrationState.UpdateInfiltrationState(false);
+		UpdatedSquad.UpdateInfiltrationState(false);
 
 		`ACTIVITYMGR.UpdateMissionData(GetMission()); // update units on the mission, since AlertLevel likely changed
 
@@ -603,7 +603,7 @@ simulated public function OnAbortClicked(UIButton button)
 
 		if (bCachedMustLaunch)
 		{
-			Squad = `SQUADMGR.GetSquadOnMission(MissionRef);
+			Squad = `SQUADMGR.Squads.GetSquadOnMission(MissionRef);
 			if (Squad != none)
 			{
 				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark Squad Abort Status");

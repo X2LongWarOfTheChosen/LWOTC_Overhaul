@@ -77,6 +77,7 @@ simulated function SetSquadCrew(optional XComGameState UpdateState, optional boo
 	local bool bSubmitOwnGameState, bHasMissionData, bAllowWoundedSoldiers;
 	local array<XComGameState_Unit> SquadSoldiersToAssign;
 	local XComGameState_Unit UnitState;
+	local XComGameState_MissionSite MissionSite;
 	local GeneratedMissionData MissionData;
 	local int MaxSoldiers, idx;
 	local array<name> RequiredSpecialSoldiers;
@@ -98,15 +99,18 @@ simulated function SetSquadCrew(optional XComGameState UpdateState, optional boo
 		bHasMissionData = true;
 	}
 
+	/* Override Squad Size hook
 	if (bHasMissionData)
 	{
-		MaxSoldiers = class'UISquadSelect_LW'.static.GetMaxSoldiersAllowedOnMission(MissionData.Mission);
+		MaxSoldiers = class'UISquadSelect'.static.GetMaxSoldiersAllowedOnMission(MissionData.Mission);
 		bAllowWoundedSoldiers = MissionData.Mission.AllowDeployWoundedUnits;
 	}
 	else
-	{
-		MaxSoldiers = class'X2StrategyGameRulesetDataStructures'.default.m_iMaxSoldiersOnMission;
-	}
+	{ */
+		MissionSite = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(XComHQ.MissionRef.ObjectID));
+		MaxSoldiers = class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionSite);
+		bAllowWoundedSoldiers = MissionData.Mission.AllowDeployWoundedUnits;
+//  }
 
 	XComHQ = XComGameState_HeadquartersXCom(UpdateState.CreateStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
 	UpdateState.AddStateObject(XComHQ);
@@ -154,7 +158,7 @@ simulated function SetSquadCrew(optional XComGameState UpdateState, optional boo
 	foreach SquadSoldiersToAssign(UnitState)
 	{
 		if (XComHQ.Squad.Length >= MaxSoldiers) { break; }
-		XComHQ.Squad.AddItem(UnitRef);
+		XComHQ.Squad.AddItem(UnitState.GetReference());
 	}
 
 	if(bSubmitOwnGameState)
@@ -263,19 +267,11 @@ function int EvacDelayModifier()
 	local SquadManager_XComGameState SquadMgr;
 
 	SquadMgr = class'SquadManager_XComGameState'.static.GetSquadManager();
-	NumMissions = SquadMgr.NumSquadsOnAnyMission();
+	NumMissions = SquadMgr.Squads.NumSquadsOnAnyMission();
 	if (NumMissions >= default.EvacDelayForInfiltratedMissions.Length)
 		NumMissions = default.EvacDelayForInfiltratedMissions.Length - 1;
 
 	return default.EvacDelayForInfiltratedMissions[NumMissions];
-}
-
-// GetCurrentMission()
-function XComGameState_MissionSite GetCurrentMission()
-{
-	if(InfiltrationState.CurrentMission.ObjectID == 0)
-		return none;
-	return XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(InfiltrationState.CurrentMission.ObjectID));
 }
 
 //---------------------------
@@ -293,7 +289,7 @@ function string GetUniqueRandomName(const array<string> NameList, string Default
 
 	SquadMgr = class'SquadManager_XComGameState'.static.GetSquadManager();
 	PossibleNames = NameList;
-	foreach SquadMgr.Squads(SquadRef)
+	foreach SquadMgr.Squads.Squads(SquadRef)
 	{
 		SquadState = Squad_XComGameState(`XCOMHISTORY.GetGameStateForObjectID(SquadRef.ObjectID));
 		if (SquadState == none)

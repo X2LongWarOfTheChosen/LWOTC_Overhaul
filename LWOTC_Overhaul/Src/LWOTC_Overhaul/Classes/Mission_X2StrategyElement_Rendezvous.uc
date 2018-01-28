@@ -13,14 +13,16 @@ defaultProperties
     RendezvousName="Rendezvous";
 }
 
+/*
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> AlienActivities;
 	
-	// AlienActivities.AddItem(CreateRendezvousTemplate());
+	AlienActivities.AddItem(CreateRendezvousTemplate());
 	
 	return AlienActivities;
 }
+*/
 
 // CreateRendezvousTemplate()
 static function X2DataTemplate CreateRendezvousTemplate()
@@ -36,7 +38,7 @@ static function X2DataTemplate CreateRendezvousTemplate()
 	Template.CanOccurInLiberatedRegion = true;
 	Template.ActivityCreation = new class'ActivityCreation_LWOTC';
 
-	Template.DetectionCalc = new class'X2LWActivityDetectionCalc_Rendezvous';
+	Template.DetectionCalc = new class'ActivityDetectionCalc_Rendezvous';
 
     // Allow only in contacted regions.
 	RegionStatus = new class'ActivityCondition_RegionStatus';

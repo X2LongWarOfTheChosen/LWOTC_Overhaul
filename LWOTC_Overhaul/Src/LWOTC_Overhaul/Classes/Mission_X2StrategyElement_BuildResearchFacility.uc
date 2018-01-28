@@ -27,7 +27,7 @@ static function X2DataTemplate CreateBuildResearchFacilityTemplate()
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.BuildResearchFacilityName);
 
 	//these define the requirements for creating each activity
-	Template.ActivityCreation = new class'X2LWActivityCreation_FurthestAway';
+	Template.ActivityCreation = new class'ActivityCreation_FurthestAway';
 	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetSingleActivityInWorld());
 	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetAlertAtLeastEqualtoVigilance());
 	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetAnyAlienRegion());

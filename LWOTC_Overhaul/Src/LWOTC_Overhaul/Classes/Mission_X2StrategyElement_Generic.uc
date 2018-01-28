@@ -8,6 +8,11 @@ var config int XCOM_LOSE_VIGILANCE_GAIN;
 var config int RAID_MISSION_MIN_REBELS;
 var config int RAID_MISSION_MAX_REBELS;
 
+var config int RESCUE_SCIENTIST_WEIGHT;
+var config int RESCUE_SOLDIER_WEIGHT;
+var config int RESCUE_ENGINEER_WEIGHT;
+var config int RESCUE_REBEL_CONDITIONAL_WEIGHT;
+
 // StartGeneralOp (AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 static function StartGeneralOp (AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
@@ -81,7 +86,7 @@ static function TypicalAdvanceActivityOnMissionSuccess(AlienActivity_XComGameSta
 		`XEVENTMGR.TriggerEvent('NetworkTowerDefeated', ActivityState, ActivityState, NewGameState); // this is needed to advance objective LW_T2_M0_S3_CompleteActivity
 	}
 
-	if(ActivityTemplate.DataName == class'X2StrategyElement_DefaultAlienActivities'.default.ProtectRegionEarlyName && ActivityState.CurrentMissionLevel == 0)
+	if(ActivityTemplate.DataName == class'Mission_X2StrategyElement_ProtectRegion'.default.ProtectRegionEarlyName && ActivityState.CurrentMissionLevel == 0)
 	{
 		`XEVENTMGR.TriggerEvent('OnProtectRegionActivityDiscovered', , , NewGameState); // this is needed to advance objective LW_T2_M0_S2_FindActivity
 	}
@@ -388,7 +393,7 @@ static function RecordResistanceActivity(bool Success, AlienActivity_XComGameSta
 			if (RegionalAI.NumTimesLiberated <= 0)
 			{
 				`LWTRACE ("Removing one doom for capturing a region!");
-				DoomToRemove = default.ALIEN_BASE_DOOM_REMOVAL;
+				DoomToRemove = class'Mission_X2StrategyElement_LWOTC'.default.ALIEN_BASE_DOOM_REMOVAL;
 			}
 			break;
 		case "RecruitRaid_LW":
@@ -513,7 +518,7 @@ static function GiveRewards(XComGameState NewGameState, XComGameState_MissionSit
 
 	`LWTRACE ("GiveRewards 2");
 
-	class'XComGameState_HeadquartersResistance'.static.SetRecapRewardString(NewGameState, MissionState.GetRewardAmountString());
+	class'XComGameState_HeadquartersResistance'.static.SetRecapRewardString(NewGameState, MissionState.GetRewardAmountStringArray());
 
 	// @mnauta: set VIP rewards string is deprecated, leaving blank
 	class'XComGameState_HeadquartersResistance'.static.SetVIPRewardString(NewGameState, "" /*REWARDS!*/);
@@ -571,6 +576,92 @@ static function GiveRewards(XComGameState NewGameState, XComGameState_MissionSit
 	}
 
 	MissionState.Rewards.Length = 0;
+}
+
+// RescueReward(bool IncludeRebel, bool IncludePrisoner)
+static function name RescueReward(bool IncludeRebel, bool IncludePrisoner)
+{
+	local int iRoll, Rescue_Soldier_Modified_Weight, Rescue_Engineer_Modified_Weight, Rescue_Scientist_Modified_Weight, Rescue_Rebel_Modified_Weight;
+	local XComGameStateHistory History;
+    local XComGameState_HeadquartersAlien AlienHQ;
+	local XComGameState_HeadquartersXCom XCOMHQ;
+	local name Reward;
+
+	History = class'XComGameStateHistory'.static.GetGameStateHistory();
+	XCOMHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+
+	Rescue_Soldier_Modified_Weight = default.RESCUE_SOLDIER_WEIGHT;
+	Rescue_Engineer_Modified_Weight = default.RESCUE_SCIENTIST_WEIGHT;
+	Rescue_Scientist_Modified_Weight = default.RESCUE_ENGINEER_WEIGHT;
+	Rescue_Rebel_Modified_Weight = default.RESCUE_REBEL_CONDITIONAL_WEIGHT;
+
+	// force an engineeer if you have none
+	if (XCOMHQ.GetNumberOfEngineers() == 0)
+	{
+		Rescue_Soldier_Modified_Weight = 0;
+		Rescue_Scientist_Modified_Weight = 0;
+		Rescue_Rebel_Modified_Weight = 0;
+	}
+	else
+	{
+		// force a scientist if you have an engineer but no scientist
+		if (XCOMHQ.GetNumberOfScientists() == 0)
+		{
+			Rescue_Soldier_Modified_Weight = 0;
+			Rescue_Rebel_Modified_Weight = 0;
+			Rescue_Engineer_Modified_Weight = 0;
+		}
+	}
+
+	iRoll = `SYNC_RAND_STATIC(Rescue_Scientist_Modified_Weight + Rescue_Engineer_Modified_Weight + (IncludeRebel ? Rescue_Rebel_Modified_Weight : 0) + Rescue_Soldier_Modified_Weight);
+	if (Rescue_Scientist_Modified_Weight > 0 && iRoll < Rescue_Scientist_Modified_Weight)
+	{
+		Reward = 'Reward_Scientist';
+		return Reward;
+	}
+	else
+	{
+		iRoll -= Rescue_Scientist_Modified_Weight;
+	}
+	if (Rescue_Engineer_Modified_Weight > 0 && iRoll < Rescue_Engineer_Modified_Weight)
+	{
+		Reward = 'Reward_Engineer';
+		return Reward;
+	}
+	else
+	{
+		iRoll -= Rescue_Engineer_Modified_Weight;
+	}
+	if (IncludeRebel && Rescue_Rebel_Modified_Weight > 0 && iRoll < Rescue_Rebel_Modified_Weight)
+	{
+		Reward='Reward_Rebel';
+		return Reward;
+	}
+	AlienHQ = XComGameState_HeadquartersAlien(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
+	if (AlienHQ.CapturedSoldiers.Length > 0 && IncludePrisoner)
+	{
+		Reward = 'Reward_SoldierCouncil';
+	}
+	else
+	{
+		Reward = 'Reward_Soldier';
+	}
+	return Reward;
+}
+
+// CanAddPOI()
+static function bool CanAddPOI()
+{
+	local XComGameState_HeadquartersResistance ResistanceHQ;
+	local array<XComGameState_PointOfInterest> POIDeck;
+
+	ResistanceHQ = XComGameState_HeadquartersResistance(`XCOMHistory.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersResistance'));
+	POIDeck = ResistanceHQ.BuildPOIDeck(false);
+	if (POIDeck.length > 0)
+	{
+		return true;
+	}
+	return false;
 }
 
 // AddItemRewardToLoot(XComGameState_Reward RewardState, XComGameState NewGameState)

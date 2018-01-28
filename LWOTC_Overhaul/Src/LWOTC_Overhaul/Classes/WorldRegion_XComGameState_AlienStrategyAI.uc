@@ -112,7 +112,7 @@ function bool UpdateRegionalAI(XComGameState NewGameState)
 		SlotsDelta = 6; // Random number
 
 		HoursMod = (float (SlotsDelta) / float (default.BASELINE_OUTPOST_WORKERS_FOR_STD_VIG_DECAY)) * default.MAX_VIG_DECAY_CHANGE_HOURS;
-		`LWTRACE("Setting new HoursMod for this region" @ HoursMod @ EmptySlots @ SlotsDelta);
+		`LWTRACE("Setting new HoursMod for this region" @ HoursMod @ /*EmptySlots @*/ SlotsDelta);
 		If (!default.BUSY_HAVENS_SLOW_VIGILANCE_DECAY && HoursMod > 0.0)
 		{
 			HoursMod = 0;

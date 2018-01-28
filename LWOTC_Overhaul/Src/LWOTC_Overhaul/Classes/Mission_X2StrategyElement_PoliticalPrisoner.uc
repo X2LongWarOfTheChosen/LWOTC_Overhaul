@@ -72,11 +72,11 @@ static function X2DataTemplate CreatePoliticalPrisonersTemplate()
 function array<Name> GetPoliticalPrisonersReward(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
 {
     local array<Name> Rewards;
-    local int NumRebels, Roll, RebelChance, MaxRebels;
-	local XComGameState_HeadquartersAlien AlienHQ;
-	local XComGameState_WorldRegion							Region;
+    //local int NumRebels, Roll, RebelChance, MaxRebels;
+	//local XComGameState_HeadquartersAlien AlienHQ;
+	//local XComGameState_WorldRegion							Region;
 	//local XComGameState_LWOutpost							Outpost;
-	local XComGameState_HeadquartersResistance ResistanceHQ;
+	//local XComGameState_HeadquartersResistance ResistanceHQ;
 
     switch(MissionFamily)
     {

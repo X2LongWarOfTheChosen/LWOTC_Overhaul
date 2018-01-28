@@ -88,18 +88,18 @@ simulated function RefreshData()
 
 simulated function UpdateData()
 {
-	local int i;
 	local SquadManager_XComGameState SquadMgr;
 	local Squad_XComGameState Squad; 
+	local StateObjectReference SquadRef;
 
 	SquadMgr = `SQUADMGR;
 
 	// Destroy old data
 	m_arrSquads.Length = 0;
-		
-	for(i = 0; i < SquadMgr.Squads.Squads.Length; i++)
+	
+	foreach SquadMgr.Squads.Squads(SquadRef)
 	{
-		Squad = SquadMgr.Squads.GetSquad(i);
+		Squad = SquadMgr.Squads.GetSquad(SquadRef);
 
 		if (!Squad.bOnMission && Squad.InfiltrationState.CurrentMission.ObjectID == 0)
 		{

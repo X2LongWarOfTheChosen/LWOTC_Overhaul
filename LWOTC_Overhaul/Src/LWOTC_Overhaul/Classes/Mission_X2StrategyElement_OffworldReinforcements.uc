@@ -4,11 +4,6 @@ class Mission_X2StrategyElement_OffworldReinforcements extends Mission_X2Strateg
 
 var config array<int> FORCE_UFO_LAUNCH;
 
-var config int RESCUE_SCIENTIST_WEIGHT;
-var config int RESCUE_SOLDIER_WEIGHT;
-var config int RESCUE_ENGINEER_WEIGHT;
-var config int RESCUE_REBEL_CONDITIONAL_WEIGHT;
-
 var config int EMERGENCY_REINFORCEMENT_PRIMARY_REGION_ALERT_BONUS;
 var config int EMERGENCY_REINFORCEMENT_ADJACENT_REGION_ALERT_BONUS;
 var config int ADJACENT_REGIONS_REINFORCED_BY_REGULAR_ALERT_UFO;
@@ -58,7 +53,7 @@ static function X2DataTemplate CreateScheduledOffworldReinforcementsTemplate()
 	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetSingleActivityInRegion());
 	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetAnyAlienRegion());
 
-	DaysRestriction = new class'X2LWActivityCondition_Days';
+	DaysRestriction = new class'ActivityCondition_Days';
 	DaysRestriction.FirstDayPossible[0] = default.FORCE_UFO_LAUNCH[0];
 	DaysRestriction.FirstDayPossible[1] = default.FORCE_UFO_LAUNCH[1];
 	DaysRestriction.FirstDayPossible[2] = default.FORCE_UFO_LAUNCH[2];
@@ -120,77 +115,6 @@ static function OnScheduledOffworldReinforcementsComplete(bool bAlienSuccess, Al
 	}
 }
 
-// RescueReward(bool IncludeRebel, bool IncludePrisoner)
-static function name RescueReward(bool IncludeRebel, bool IncludePrisoner)
-{
-	local int iRoll, Rescue_Soldier_Modified_Weight, Rescue_Engineer_Modified_Weight, Rescue_Scientist_Modified_Weight, Rescue_Rebel_Modified_Weight;
-	local XComGameStateHistory History;
-    local XComGameState_HeadquartersAlien AlienHQ;
-	local XComGameState_HeadquartersXCom XCOMHQ;
-	local name Reward;
-
-	History = class'XComGameStateHistory'.static.GetGameStateHistory();
-	XCOMHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
-
-	Rescue_Soldier_Modified_Weight = default.RESCUE_SOLDIER_WEIGHT;
-	Rescue_Engineer_Modified_Weight = default.RESCUE_SCIENTIST_WEIGHT;
-	Rescue_Scientist_Modified_Weight = default.RESCUE_ENGINEER_WEIGHT;
-	Rescue_Rebel_Modified_Weight = default.RESCUE_REBEL_CONDITIONAL_WEIGHT;
-
-	// force an engineeer if you have none
-	if (XCOMHQ.GetNumberOfEngineers() == 0)
-	{
-		Rescue_Soldier_Modified_Weight = 0;
-		Rescue_Scientist_Modified_Weight = 0;
-		Rescue_Rebel_Modified_Weight = 0;
-	}
-	else
-	{
-		// force a scientist if you have an engineer but no scientist
-		if (XCOMHQ.GetNumberOfScientists() == 0)
-		{
-			Rescue_Soldier_Modified_Weight = 0;
-			Rescue_Rebel_Modified_Weight = 0;
-			Rescue_Engineer_Modified_Weight = 0;
-		}
-	}
-
-	iRoll = `SYNC_RAND_STATIC(Rescue_Scientist_Modified_Weight + Rescue_Engineer_Modified_Weight + (IncludeRebel ? Rescue_Rebel_Modified_Weight : 0) + Rescue_Soldier_Modified_Weight);
-	if (Rescue_Scientist_Modified_Weight > 0 && iRoll < Rescue_Scientist_Modified_Weight)
-	{
-		Reward = 'Reward_Scientist';
-		return Reward;
-	}
-	else
-	{
-		iRoll -= Rescue_Scientist_Modified_Weight;
-	}
-	if (Rescue_Engineer_Modified_Weight > 0 && iRoll < Rescue_Engineer_Modified_Weight)
-	{
-		Reward = 'Reward_Engineer';
-		return Reward;
-	}
-	else
-	{
-		iRoll -= Rescue_Engineer_Modified_Weight;
-	}
-	if (IncludeRebel && Rescue_Rebel_Modified_Weight > 0 && iRoll < Rescue_Rebel_Modified_Weight)
-	{
-		Reward='Reward_Rebel';
-		return Reward;
-	}
-	AlienHQ = XComGameState_HeadquartersAlien(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien'));
-	if (AlienHQ.CapturedSoldiers.Length > 0 && IncludePrisoner)
-	{
-		Reward = 'Reward_SoldierCouncil';
-	}
-	else
-	{
-		Reward = 'Reward_Soldier';
-	}
-	return Reward;
-}
-
 // GetUFOMissionRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
 static function array<name> GetUFOMissionRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
 {
@@ -226,7 +150,7 @@ static function X2DataTemplate CreateEmergencyOffworldReinforcementsTemplate()
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.EmergencyOffworldReinforcementsName);
 	Template.iPriority = 50; // 50 is default, lower priority gets created earlier
 
-	Template.DetectionCalc = new class'X2LWActivityDetectionCalc';
+	Template.DetectionCalc = new class'ActivityDetectionCalc_LWOTC';
 
 	//these define the requirements for creating each activity
 	Template.ActivityCreation = new class'ActivityCreation_AlertUFOLandingRegion';

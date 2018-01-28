@@ -62,7 +62,7 @@ static function CreateFirstMissionSquad(XComGameState StartState)
 	local XComGameState_HeadquartersXCom StartXComHQ;
 	local XComGameState_MissionSite StartMission;
 
-	foreach StartState.IterateByClassType(class'Squad_XComGameState', StartSquadMgr)
+	foreach StartState.IterateByClassType(class'SquadManager_XComGameState', StartSquadMgr)
 	{
 		break;
 	}
@@ -90,10 +90,10 @@ static function CreateFirstMissionSquad(XComGameState StartState)
 	NewSquad.InitSquad(, false);
 	NewSquad.Soldiers.SquadSoldiersOnMission = StartXComHQ.Squad;
 	NewSquad.Soldiers.SquadSoldiers = StartXComHQ.Squad;
-	NewSquad.Infiltration.CurrentMission = StartXComHQ.MissionRef;
+	NewSquad.InfiltrationState.CurrentMission = StartXComHQ.MissionRef;
 	NewSquad.bOnMission = true;
-	NewSquad.Infiltration.CurrentInfiltration = 1.0;
-	NewSquad.Infiltration.CurrentEnemyAlertnessModifier = 0;
+	NewSquad.InfiltrationState.CurrentInfiltration = 1.0;
+	NewSquad.InfiltrationState.CurrentEnemyAlertnessModifier = 0;
 }
 
 // IsValidInfiltrationMission(StateObjectReference MissionRef)
@@ -140,7 +140,7 @@ function UpdateSquadPostMission(optional StateObjectReference MissionRef, option
 	UpdatedSquadMgr = SquadManager_XComGameState(UpdateState.CreateStateObject(Class, ObjectID));
 	UpdateState.AddStateObject(UpdatedSquadMgr);
 
-	UpdatedSquadState = SquadManager_XComGameState(UpdateState.CreateStateObject(SquadState.Class, SquadState.ObjectID));
+	UpdatedSquadState = Squad_XComGameState(UpdateState.CreateStateObject(SquadState.Class, SquadState.ObjectID));
 	UpdateState.AddStateObject(UpdatedSquadState);
 
 	if (bCompletedMission)
@@ -153,7 +153,7 @@ function UpdateSquadPostMission(optional StateObjectReference MissionRef, option
 
 	if(SquadState.bTemporary)
 	{
-		Squads.RemoveSquadByRef(SquadState.GetReference());
+		Squads.RemoveSquad(SquadState.GetReference(), UpdateState);
 	}
 }
 
@@ -320,8 +320,8 @@ function InitSquadManagerListeners()
 
 }
 
-// ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
-function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
+// ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
+function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
 {
 	local int idx;
 	local XComLWTuple DeployableSoldiers;
@@ -351,7 +351,7 @@ function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventDat
 	}
 	for(idx = DeployableSoldiers.Data.Length - 1; idx >= 0; idx--)
 	{
-		if(DeployableSoldiers.Data[idx].kind == LWTVObject)
+		if(DeployableSoldiers.Data[idx].kind == XComLWTVObject)
 		{
 			UnitState = XComGameState_Unit(DeployableSoldiers.Data[idx].o);
 			if(UnitState != none)
@@ -375,8 +375,8 @@ function EventListenerReturn ValidateDeployableSoldiersForSquads(Object EventDat
 	return ELR_NoInterrupt;
 }
 
-// SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
-function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
+// SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
+function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
 {
 	local UIPersonnel_ListItem ListItem;
 	local Squad_XComGameState Squad;
@@ -416,9 +416,9 @@ function EventListenerReturn SetDisabledSquadListItems(Object EventData, Object 
 	return ELR_NoInterrupt;
 }
 
-// ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
+// ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
 // selects a squad that matches a persistent squad 
-function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID)
+function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, Object EventSource, XComGameState NewGameState, Name InEventID, Object CallbackObject)
 {
 	local XComGameStateHistory				History;
 	//local XComGameState						NewGameState;
@@ -430,6 +430,7 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	local bool								bInSquadEdit;
 	local GeneratedMissionData				MissionData;
 	local int								MaxSoldiersInSquad;
+	local XComGameState_MissionSite			MissionSite;
 
 	`LWTRACE("ConfigureSquadOnEnterSquadSelect : Starting listener.");
 	XComHQ = XComGameState_HeadquartersXCom(EventData);
@@ -460,7 +461,7 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	if (LaunchingMissionSquad.ObjectID > 0)
 		SquadRef = LaunchingMissionSquad;
 	else	
-		SquadRef = GetBestSquad();
+		SquadRef = Squads.GetBestSquad();
 
 	UpdatedSquadMgr = SquadManager_XComGameState(NewGameState.CreateStateObject(Class, ObjectID));
 	NewGameState.AddStateObject(UpdatedSquadMgr);
@@ -476,7 +477,8 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	NewGameState.AddStateObject(UpdatedXComHQ);
 	UpdatedXComHQ.Squad = SquadState.Soldiers.GetDeployableSoldierRefs(MissionData.Mission.AllowDeployWoundedUnits); 
 
-	MaxSoldiersInSquad = SquadSelect.GetMaxSoldiersAllowedOnMission(MissionData.Mission);
+	MissionSite = XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(XComHQ.MissionRef.ObjectID));
+	MaxSoldiersInSquad = class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionSite);
 	if (UpdatedXComHQ.Squad.Length > MaxSoldiersInSquad)
 		UpdatedXComHQ.Squad.Length = MaxSoldiersInSquad;
 
@@ -488,8 +490,8 @@ function EventListenerReturn ConfigureSquadOnEnterSquadSelect(Object EventData, 
 	return ELR_NoInterrupt;
 }
 
-// DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID)
-function EventListenerReturn DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID)
+// DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID, Object CallbackObject)
+function EventListenerReturn DismissSoldierFromSquad(Object EventData, Object EventSource, XComGameState GameState, Name InEventID, Object CallbackObject)
 {
 	local XComGameState_Unit DismissedUnit;
 	local UIArmory_MainMenu MainMenu;

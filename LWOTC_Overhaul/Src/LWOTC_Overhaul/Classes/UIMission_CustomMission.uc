@@ -128,7 +128,7 @@ simulated function BindLibraryItem()
 				Button3.SetResizeToText(false);
 				Button3.InitButton('Button2', "");
 
-				ShadowChamber = Spawn(class'UIPanel', LibraryPanel);
+				ShadowChamber = Spawn(class'UIAlertShadowChamberPanel', LibraryPanel);
 				ShadowChamber.InitPanel('ShadowChamber');
 			}
 			break;
@@ -457,7 +457,7 @@ simulated function BuildGuerrillaOpsMissionPanel()
 	LibraryPanel.MC.QueueString(m_strMissionObjective);		// defined in UIMission
 	LibraryPanel.MC.QueueString(GetObjectiveString());		// defined in UIMission
 	LibraryPanel.MC.QueueString(m_strMissionDifficulty_start);	// defined locally
-	LibraryPanel.MC.QueueString(class'UIUtilities_Text_LW'.static.GetDifficultyString(GetMission()));		// defined in UIMission
+	LibraryPanel.MC.QueueString(class'UIUtilities_Text_LWOTC'.static.GetDifficultyString(GetMission()));		// defined in UIMission
 	LibraryPanel.MC.QueueString(m_strReward);				// defined in UIX2SimpleScreen
 	LibraryPanel.MC.QueueString(GetModifiedRewardString());			// defined in UIMission
 	LibraryPanel.MC.QueueString(strDarkEventLabel);			// defined locally

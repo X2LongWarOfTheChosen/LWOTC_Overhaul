@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # XCOM ModBuddy Solution File, Format Version 11.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "LWOTC_Overhaul", "LWOTC_Overhaul\LWOTC_Overhaul.x2proj", "{873911C3-5A95-42AD-B4AA-B26ECC943D7B}"
+Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "LWOTC_Overhaul", "LWOTC_Overhaul\LWOTC_Overhaul.x2proj", "{670B4502-8C51-4647-AFF3-2C3B9B3D3241}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Default|XCOM 2 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{873911C3-5A95-42AD-B4AA-B26ECC943D7B}.Debug|XCOM 2.ActiveCfg = Debug|XCOM 2
-		{873911C3-5A95-42AD-B4AA-B26ECC943D7B}.Debug|XCOM 2.Build.0 = Debug|XCOM 2
-		{873911C3-5A95-42AD-B4AA-B26ECC943D7B}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
-		{873911C3-5A95-42AD-B4AA-B26ECC943D7B}.Default|XCOM 2.Build.0 = Default|XCOM 2
+		{670B4502-8C51-4647-AFF3-2C3B9B3D3241}.Debug|XCOM 2.ActiveCfg = Debug|XCOM 2
+		{670B4502-8C51-4647-AFF3-2C3B9B3D3241}.Debug|XCOM 2.Build.0 = Debug|XCOM 2
+		{670B4502-8C51-4647-AFF3-2C3B9B3D3241}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
+		{670B4502-8C51-4647-AFF3-2C3B9B3D3241}.Default|XCOM 2.Build.0 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

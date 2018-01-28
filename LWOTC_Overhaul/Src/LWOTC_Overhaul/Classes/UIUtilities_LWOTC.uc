@@ -55,7 +55,7 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 	local UIBGBox MissionExpiryBG;
 	local UIX2PanelHeader MissionExpiryTitle;
 	//local MissionSite_XComGameState_Rendezvous RendezvousMissionState;
-	local X2CharacterTemplate FacelessTemplate;
+	//local X2CharacterTemplate FacelessTemplate;
 	local String MissionTime;
 	local float TotalMissionHours;
 	local string MissionInfoTimer, MissionInfo1, MissionInfo2, HeaderStr;
@@ -148,8 +148,8 @@ function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReferenc
 // Read the evac delay in the strat layer
 private static function int GetCurrentEvacDelay (Squad_XComGameState Squad, AlienActivity_XComGameState ActivityState)
 {
-	local int EvacDelay, k;
-	local XComGameState_Unit UnitState;
+	local int EvacDelay; //, k;
+	//local XComGameState_Unit UnitState;
 	//local XComGameState_Unit_LWOfficer OfficerState;
 
 	if (Squad == none)

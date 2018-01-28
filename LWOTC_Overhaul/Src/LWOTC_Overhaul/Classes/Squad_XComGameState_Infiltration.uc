@@ -57,7 +57,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
     local XComGameState_MissionSite MissionSite;
 	
 	if(CurrentMission.ObjectID == 0) return;  // only needs update when on mission
-	SecondsOfInfiltration = class'X2StrategyGameRulesetDataStructures'.static.DifferenceInSeconds(GetCurrentTime(), StartInfiltrationDateTime);
+	SecondsOfInfiltration = class'X2StrategyGameRulesetDataStructures'.static.DifferenceInSeconds(class'XComGameState_GeoscapeEntity'.static.GetCurrentTime(), StartInfiltrationDateTime);
 	HoursOfInfiltration = float(SecondsOfInfiltration) / 3600.0;
 	HoursToFullInfiltration = class'Squad_Static_Infiltration_Helper'.static.GetHoursToFullInfiltration(SquadSoldiersOnMission, CurrentMission);
 
@@ -74,7 +74,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 		RegionalAI = class'WorldRegion_XComGameState_AlienStrategyAI'.static.GetRegionalAIFromRegion(RegionState);
 		if(RegionalAI.bLiberated)
 		{
-			InfiltrationBonusOnLiberation = class'X2StrategyElement_DefaultAlienActivities'.default.INFILTRATION_BONUS_ON_LIBERATION[`CAMPAIGNDIFFICULTYSETTING] / 100.0;
+			InfiltrationBonusOnLiberation = class'Mission_X2StrategyElement_ProtectRegion'.default.INFILTRATION_BONUS_ON_LIBERATION[`CAMPAIGNDIFFICULTYSETTING] / 100.0;
 			HoursOfInfiltration += class'Squad_Static_Infiltration_Helper'.static.GetHoursToFullInfiltration(SquadSoldiersOnMission, CurrentMission) * InfiltrationBonusOnLiberation;
 		}
 	}
@@ -85,7 +85,7 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 	if(PossibleInfiltrationUpdate - CurrentInfiltration >= 0.01 || PossibleInfiltrationUpdate >= 2.0)
 	{
 		UpdateSquad = Squad_XComGameState(UpdateState.CreateStateObject(class'Squad_XComGameState', ParentObjectId));
-		UpdateSquad.CurrentInfiltration = PossibleInfiltrationUpdate;
+		UpdateSquad.InfiltrationState.CurrentInfiltration = PossibleInfiltrationUpdate;
 		UpdateState.AddStateObject(UpdateSquad);
 	}
 	StrategyMap = `HQPRES.StrategyMap2D;
@@ -93,11 +93,11 @@ function UpdateInfiltrationState(bool AllowPause, array<StateObjectReference> Sq
 	{
 		if (UpdateSquad != none)  
 		{
-			InfiltrationHaltIndex = HasPassedAvailableInfiltrationHaltPoint(UpdateSquad.CurrentInfiltration);
+			InfiltrationHaltIndex = HasPassedAvailableInfiltrationHaltPoint(UpdateSquad.InfiltrationState.CurrentInfiltration);
 			if (InfiltrationHaltIndex >= 0)
 			{
 				ShouldPause = true;
-				UpdateSquad.InfiltrationPointPassed[InfiltrationHaltIndex] = true;
+				UpdateSquad.InfiltrationState.InfiltrationPointPassed[InfiltrationHaltIndex] = true;
 			}
 		}
 	}
@@ -199,9 +199,9 @@ function int GetAlertnessModifierForCurrentInfiltration(optional XComGameState U
 	ArrayIndex = default.AlertModifierAtInfiltration.Find('Modifier', iAlertnessModifier);
 	if(bUpdateSelf)
 	{
-		UpdateSquad.LastAlertIndex = ArrayIndex;
-		UpdateSquad.CurrentEnemyAlertnessModifier = iAlertnessModifier;
-		UpdateSquad.LastInfiltrationUpdate = CurrentInfiltration;
+		UpdateSquad.InfiltrationState.LastAlertIndex = ArrayIndex;
+		UpdateSquad.InfiltrationState.CurrentEnemyAlertnessModifier = iAlertnessModifier;
+		UpdateSquad.InfiltrationState.LastInfiltrationUpdate = CurrentInfiltration;
 		UpdateState.AddStateObject(UpdateSquad);
 		`XCOMGAME.GameRuleset.SubmitGameState(UpdateState);
 	}
@@ -222,13 +222,13 @@ function float GetSecondsRemainingToFullInfiltration(array<StateObjectReference>
 	local float SecondsOfInfiltration;
 	local float SecondsToInfiltrate;
 
-	HoursToFullInfiltration = GetHoursToFullInfiltration_Static(SquadSoldiersOnMission, CurrentMission);
+	HoursToFullInfiltration = class'Squad_Static_Infiltration_Helper'.static.GetHoursToFullInfiltration(SquadSoldiersOnMission, CurrentMission);
 
 	if (bHasBoostedInfiltration)
 		HoursToFullInfiltration /= DefaultBoostInfiltrationFactor[`CAMPAIGNDIFFICULTYSETTING];
 
 	TotalSecondsToInfiltrate = 3600.0 * HoursToFullInfiltration;
-	SecondsOfInfiltration = class'X2StrategyGameRulesetDataStructures'.static.DifferenceInSeconds(GetCurrentTime(), StartInfiltrationDateTime);
+	SecondsOfInfiltration = class'X2StrategyGameRulesetDataStructures'.static.DifferenceInSeconds(class'XComGameState_GeoscapeEntity'.static.GetCurrentTime(), StartInfiltrationDateTime);
 	SecondsToInfiltrate = TotalSecondsToInfiltrate - SecondsOfInfiltration;
 
 	return SecondsToInfiltrate;
@@ -264,4 +264,12 @@ static function float GetRequiredPctInfiltrationToLaunch(XComGameState_MissionSi
 		return 100.0;
 	}
 	return default.RequiredInfiltrationToLaunch;
+}
+
+// GetCurrentMission()
+function XComGameState_MissionSite GetCurrentMission()
+{
+	if(CurrentMission.ObjectID == 0)
+		return none;
+	return XComGameState_MissionSite(`XCOMHISTORY.GetGameStateForObjectID(CurrentMission.ObjectID));
 }

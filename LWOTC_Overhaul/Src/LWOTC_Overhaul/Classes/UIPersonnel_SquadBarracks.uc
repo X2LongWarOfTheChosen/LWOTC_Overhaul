@@ -148,7 +148,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 
 simulated function int SelectInitialSquad(StateObjectReference SquadRef)
 {
-	return `SQUADMGR.Squads.Find('ObjectID', SquadRef.ObjectID);
+	return `SQUADMGR.Squads.Squads.Find('ObjectID', SquadRef.ObjectID);
 }
 
 simulated function OnImageScrollButtonClicked(UIButton Button)
@@ -184,7 +184,7 @@ simulated function OnImageScrollButtonClicked(UIButton Button)
 		return;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Change Squad ImagePath");
-	Squad = XComGameState_LWPersistentSquad(NewGameState.CreateStateObject(class'XComGameState_LWPersistentSquad', Squad.ObjectID));
+	Squad = Squad_XComGameState(NewGameState.CreateStateObject(class'Squad_XComGameState', Squad.ObjectID));
 	Squad.SquadImagePath = SquadImagePaths[CurrentIndex];
 	NewGameState.AddStateObject(Squad);
 	`XCOMGAME.GameRuleset.SubmitGameState(NewGameState);
@@ -282,7 +282,7 @@ simulated function bool CanTransferSoldier(StateObjectReference UnitRef, optiona
 	Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
 
 	//can't move soldiers that are on a mission (this does not include haven liaisons)
-	if(class'LWDLCHelpers'.static.IsUnitOnMission(Unit))// && !`LWOUTPOSTMGR.IsUnitAHavenLiaison(Unit.GetReference()))
+	if(class'LWOTC_DLCHelpers'.static.IsUnitOnMission(Unit))// && !`LWOUTPOSTMGR.IsUnitAHavenLiaison(Unit.GetReference()))
 		return false;
 
 	if(SquadState == none)
@@ -298,7 +298,7 @@ simulated function bool CanTransferSoldier(StateObjectReference UnitRef, optiona
 		//can't add to a max-size squad
 		SquadSoldiers = SquadState.Soldiers.GetSoldiers();
 		NumSoldiers = SquadSoldiers.Length;
-		MaxSize = class'XComGameState_LWSquadManager'.default.MAX_SQUAD_SIZE;
+		MaxSize = class'SquadManager_XComGameState'.default.MAX_SQUAD_SIZE;
 		if(NumSoldiers >= MaxSize)
 			if(bViewUnassignedSoldiers)
 				return false;
@@ -333,7 +333,7 @@ simulated function UpdateNavHelp()
 	//if (class'XComGameState_HeadquartersXCom'.static.GetObjectiveStatus('T0_M7_WelcomeToGeoscape') != eObjectiveState_InProgress)
 		NavHelp.AddGeoscapeButton();
 
-	class'LWHelpTemplate'.static.AddHelpButton_Nav('Personnel_SquadBarracks_Help');
+	class'HelpTemplate_X2StrategyElement'.static.AddHelpButton_Nav('Personnel_SquadBarracks_Help');
 }
 
 //squad header info above the individual soldier listings
@@ -450,6 +450,7 @@ simulated function UpdateSquadList()
 	m_kSquadList.SetSelectedIndex(CurrentSquadSelection);
 }
 
+// UpdateData()
 simulated function UpdateData()
 {
 	local SquadManager_XComGameState SquadMgr;
@@ -460,7 +461,7 @@ simulated function UpdateData()
 	if(CurrentSquadSelection < 0 || bViewUnassignedSoldiers)
 		m_arrSoldiers = SquadMgr.Squads.GetUnassignedSoldiers();		
 	else
-		m_arrSoldiers = SquadMgr.Squads.GetSquad(CurrentSquadSelection).GetSoldierRefs(true);
+		m_arrSoldiers = SquadMgr.Squads.GetSquad(SquadMgr.Squads.Squads[CurrentSquadSelection]).Soldiers.GetSoldierRefs(true);
 }
 
 //used by UIPersonnel.RefreshData to determine what the soldier list should be
@@ -651,14 +652,14 @@ function OnDeleteClicked(UIButton Button)
 	Movie.Pres.UIRaiseDialog(DialogData);
 }
 
-simulated function OnDeleteSquadDialogCallback(eUIAction eAction)
+simulated function OnDeleteSquadDialogCallback(name eAction)
 {
 	local StateObjectReference SquadRef;
 
-	if(eAction == eUIAction_Accept)
+	if(eAction == 'eUIAction_Accept')
 	{
 		SquadRef = UISquadListItem(m_kSquadList.GetItem(CurrentSquadSelection)).SquadRef;
-		`SQUADMGR.RemoveSquadByRef(SquadRef);
+		`SQUADMGR.Squads.RemoveSquad(SquadRef);
 		CurrentSquadSelection = -1;
 		RefreshAllData();
 	}

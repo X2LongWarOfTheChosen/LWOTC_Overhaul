@@ -31,7 +31,7 @@ static function X2DataTemplate CreateProtectResearchTemplate()
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.ProtectResearchName);
 	Template.iPriority = 50; // 50 is default, lower priority gets created earlier
 
-	Template.DetectionCalc = new class'X2LWActivityDetectionCalc_ProtectResearch';
+	Template.DetectionCalc = new class'ActivityDetectionCalc_ProtectResearch';
 
 	//these define the requirements for creating each activity
 	Template.ActivityCreation = new class'ActivityCreation_ProtectResearch';

@@ -284,17 +284,17 @@ function PostMissionRevertSoldierStatus(XComGameState NewGameState, SquadManager
 function PostMissionCheckForDeadOrCapturedSoldiers(XComGameState NewGameState, XComGameState_Unit UnitState, SquadManager_XComGameState SquadMgr)
 {
 	local Squad_XComGameState SquadState, UpdatedSquad;
-	local int idx;
+	local StateObjectReference SquadRef;
 
 	//if solder is dead or captured, remove from squad
 	if(UnitState.IsDead() || UnitState.bCaptured)
 	{
 		RemoveSoldier(UnitState.GetReference());
 		// Also find if the unit was a persistent member of another squad, and remove that that squad as well if so - ID 1675
-		for(idx = 0; idx < SquadMgr.Squads.Length; idx++)
+		foreach SquadMgr.Squads.Squads(SquadRef)
 		{
-			SquadState = SquadMgr.GetSquad(idx);
-			if(SquadState.UnitIsInSquad(UnitState.GetReference()))
+			SquadState = SquadMgr.Squads.GetSquad(SquadRef);
+			if(SquadState.Soldiers.UnitIsInSquad(UnitState.GetReference()))
 			{
 				UpdatedSquad = Squad_XComGameState(NewGameState.GetGameStateForObjectID(SquadState.ObjectID));
 				if (UpdatedSquad == none)
@@ -355,7 +355,7 @@ function PostMissionCheckForActivePsiTraining(XComGameState NewGameState, XComGa
 							PsiProjectState.bForcePaused = false;
 
 							UnitInfo.UnitRef = UnitState.GetReference();
-							SlotState.FillSlot(NewGameState, UnitInfo);
+							SlotState.FillSlot(UnitInfo, NewGameState);
 							break;
 						}
 					}

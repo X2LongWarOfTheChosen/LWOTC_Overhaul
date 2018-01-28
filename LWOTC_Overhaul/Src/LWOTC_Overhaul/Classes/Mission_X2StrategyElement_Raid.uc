@@ -49,10 +49,10 @@ static function X2DataTemplate CreateIntelRaidTemplate()
 {
 	local AlienActivity_X2StrategyElementTemplate					Template;
 	local ActivityCooldown_LWOTC						Cooldown;
-	local ActivityCondition_MinRebelsOnJob		RebelCondition;
+	//local ActivityCondition_MinRebelsOnJob		RebelCondition;
 	local ActivityDetectionCalc_LWOTC					AlwaysDetect;
-	local ActivityCondition_FullOutpostJobBuckets BucketFill;
-	local ActivityCondition_RetalMixer				RetalMixer;
+	//local ActivityCondition_FullOutpostJobBuckets BucketFill;
+	//local ActivityCondition_RetalMixer				RetalMixer;
 
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.IntelRaidName);
 	Template.ActivityCategory = 'RetalOps';
@@ -135,11 +135,11 @@ static function IntelRaidCompleted (bool bAlienSuccess, AlienActivity_XComGameSt
 static function X2DataTemplate CreateSupplyConvoyTemplate()
 {
 	local AlienActivity_X2StrategyElementTemplate					Template;
-	local ActivityCondition_MinRebelsOnJob		RebelCondition;
+	//local ActivityCondition_MinRebelsOnJob		RebelCondition;
 	local ActivityDetectionCalc_LWOTC					AlwaysDetect;
 	local ActivityCooldown_LWOTC						Cooldown;
-	local ActivityCondition_FullOutpostJobBuckets BucketFill;
-	local ActivityCondition_RetalMixer				RetalMixer;
+	//local ActivityCondition_FullOutpostJobBuckets BucketFill;
+	//local ActivityCondition_RetalMixer				RetalMixer;
 
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.SupplyConvoyName);
 	Template.ActivityCategory = 'RetalOps';
@@ -221,11 +221,11 @@ static function SupplyConvoyCompleted (bool bAlienSuccess, AlienActivity_XComGam
 static function X2DataTemplate CreateRecruitRaidTemplate()
 {
 	local AlienActivity_X2StrategyElementTemplate						Template;
-	local ActivityCondition_MinRebelsOnJob			RebelCondition;
+	//local ActivityCondition_MinRebelsOnJob			RebelCondition;
 	local ActivityDetectionCalc_LWOTC						AlwaysDetect;
 	local ActivityCooldown_LWOTC							Cooldown;
-	local ActivityCondition_FullOutpostJobBuckets	BucketFill;
-	local ActivityCondition_RetalMixer				RetalMixer;
+	//local ActivityCondition_FullOutpostJobBuckets	BucketFill;
+	//local ActivityCondition_RetalMixer				RetalMixer;
 
 	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.RecruitRaidName);
 	Template.ActivityCategory = 'RetalOps';

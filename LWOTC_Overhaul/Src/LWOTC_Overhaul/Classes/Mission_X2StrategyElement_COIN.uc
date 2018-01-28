@@ -1,14 +1,17 @@
-class Mission_X2StrategyElement_COINResearch extends Mission_X2StrategyElement_Generic config(LWOTC_Missions);
+class Mission_X2StrategyElement_COIN extends Mission_X2StrategyElement_Generic config(LWOTC_Missions);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
 var config int COIN_RESEARCH_GLOBAL_COOLDOWN;
+var config int COIN_OPS_GLOBAL_COOLDOWN;
 
 var name COINResearchName;
+var name COINOpsName;
 
 defaultProperties
 {
     COINResearchName="COINResearch";
+	COINOpsName="COINOps";
 }
 
 static function array<X2DataTemplate> CreateTemplates()
@@ -16,6 +19,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> AlienActivities;
 
 	AlienActivities.AddItem(CreateCOINResearchTemplate());
+	AlienActivities.AddItem(CreateCOINOpsTemplate());
 	
 	return AlienActivities;
 }
@@ -52,7 +56,7 @@ static function X2DataTemplate CreateCOINResearchTemplate()
 	Template.ActivityCreation.Conditions.AddItem(ResearchFacility);
 
 	RestrictedActivity = new class'ActivityCondition_RestrictedActivity';
-	RestrictedActivity.ActivityNames.AddItem(default.BuildResearchFacilityName);
+	RestrictedActivity.ActivityNames.AddItem(class'Mission_X2StrategyElement_BuildResearchFacility'.default.BuildResearchFacilityName);
 	RestrictedActivity.ActivityNames.AddItem(default.COINOpsName);
 	Template.ActivityCreation.Conditions.AddItem(RestrictedActivity);
 
@@ -91,24 +95,167 @@ static function X2DataTemplate CreateCOINResearchTemplate()
 	return Template;
 }
 
-// COINDarkEventSuccess(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
-static function COINDarkEventSuccess(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
+// ChooseDarkEventForCoinResearch(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+//select a dark event for the activity and add it to the chosen list in AlienHQ -- this replaces the existing deck system
+static function ChooseDarkEventForCoinResearch(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
-	if(MissionState.HasDarkEvent())
-	{
-		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, MissionState.GetDarkEvent().GetPostMissionText(true), false);
-	}
-	TypicalEndActivityOnMissionSuccess(ActivityState, MissionState, NewGameState);
+	ChooseDarkEvent(true, ActivityState, NewGameState);
 }
 
-// COINDarkEventFailure(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
-static function COINDarkEventFailure(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
+// OnCOINResearchComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+static function OnCOINResearchComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
 {
-	if(MissionState.HasDarkEvent())
+	local XComGameState_DarkEvent DarkEventState;
+
+	if(bAlienSuccess)
 	{
-		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, MissionState.GetDarkEvent().GetPostMissionText(false), false);
+		//if(default.ACTIVITY_LOGGING_ENABLED)
+		//{
+		//	`LWTRACE("COINResearchComplete : Alien Success, marking for immediate DarkEvent Activation");
+		//}
+		// research complete, mark for immediate DarkEvent activation
+		DarkEventState = XComGameState_DarkEvent(NewGameState.CreateStateObject(class'XComGameState_DarkEvent', ActivityState.DarkEvent.ObjectID));
+		NewGameState.AddStateObject(DarkEventState);
+		DarkEventState.EndDateTime = `STRATEGYRULES.GameTime;
+		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, DarkEventState.GetPostMissionText(false), true);
+
 	}
-	TypicalAdvanceActivityOnMissionFailure(ActivityState, MissionState, NewGameState);
+	else
+	{
+		//if(default.ACTIVITY_LOGGING_ENABLED)
+		//{
+		//	`LWTRACE("COINResearchComplete : XCOM Success, cancelling DarkEvent");
+		//}
+		//research halted, cancel dark event
+		CancelActivityDarkEvent(ActivityState, NewGameState);
+	}
+}
+
+// COINResearchRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
+static function array<name> COINResearchRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
+{
+	local array<name> Rewards;
+
+	Rewards[0] = 'Reward_Intel'; // for Neutralize, this will be granted only if captured
+	if (MissionFamily == 'Rescue_LW')
+	{
+		Rewards[1] = RescueReward(false, false);
+	}
+	else
+	{
+		if (CanAddPOI())
+		{
+			Rewards[1] = 'Reward_POI_LW'; // for Neutralize, this will always be granted
+			Rewards[2] = 'Reward_Dummy_POI';
+		}
+		else
+		{
+			Rewards[1] = 'Reward_Supplies';
+		}
+	}
+
+	return Rewards;
+}
+
+// CreateCOINOpsTemplate()
+static function X2DataTemplate CreateCOINOpsTemplate()
+{
+	local AlienActivity_X2StrategyElementTemplate Template;
+	local ActivityCondition_ResearchFacility ResearchFacility;
+	local ActivityCondition_RestrictedActivity RestrictedActivity;
+	local ActivityCooldown_Global Cooldown;
+	local ActivityCondition_Month MonthRestriction;
+
+	`CREATE_X2TEMPLATE(class'AlienActivity_X2StrategyElementTemplate', Template, default.COINOpsName);
+	Template.iPriority = 50; // 50 is default, lower priority gets created earlier
+
+	//these define the requirements for creating each activity
+	Template.ActivityCreation = new class'ActivityCreation_LWOTC';
+	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetSingleActivityInWorld());
+	Template.ActivityCreation.Conditions.AddItem(class'Mission_X2StrategyElement_LWOTC'.static.GetContactedAlienRegion());
+	Template.ActivityCreation.Conditions.AddItem(new class'ActivityCondition_AlertVigilance');
+
+	ResearchFacility = new class'ActivityCondition_ResearchFacility';
+ 	ResearchFacility.bAllowedAlienResearchFacilityInRegion = false;
+	Template.ActivityCreation.Conditions.AddItem(ResearchFacility);
+
+	RestrictedActivity = new class'ActivityCondition_RestrictedActivity';
+	RestrictedActivity.ActivityNames.AddItem(class'Mission_X2StrategyElement_BuildResearchFacility'.default.BuildResearchFacilityName);
+	RestrictedActivity.ActivityNames.AddItem(default.COINResearchName);
+	Template.ActivityCreation.Conditions.AddItem(RestrictedActivity);
+
+	MonthRestriction = new class'ActivityCondition_Month';
+	MonthRestriction.UseDarkEventDifficultyTable = true;
+	Template.ActivityCreation.Conditions.AddItem(MonthRestriction);
+
+	//these define the requirements for discovering each activity, based on the RebelJob "Missions"
+	Template.DetectionCalc = new class'ActivityDetectionCalc_LWOTC';
+
+	//Cooldown
+	Cooldown = new class'ActivityCooldown_Global';
+	Cooldown.Cooldown_Hours = default.COIN_OPS_GLOBAL_COOLDOWN;
+	Template.ActivityCooldown = Cooldown;
+
+	// required delegates
+	Template.OnMissionSuccessFn = COINDarkEventSuccess; //TypicalEndActivityOnMissionSuccess;
+	Template.OnMissionFailureFn = COINDarkEventFailure; // TypicalAdvanceActivityOnMissionFailure;
+
+	//optional delegates
+	Template.OnActivityStartedFn = ChooseDarkEventForCoinOps;
+
+	Template.WasMissionSuccessfulFn = none;  // always one objective
+	Template.GetMissionForceLevelFn = GetTypicalMissionForceLevel; // use regional ForceLevel
+	Template.GetMissionAlertLevelFn = GetTypicalMissionAlertLevel; // configurable offset to mission difficulty
+
+	Template.GetTimeUpdateFn = none;  //Must be none for activities that spawn dark events
+	Template.OnMissionExpireFn = none; // just remove the mission, handle in failure
+	Template.GetMissionRewardsFn = COINOpsRewards;
+	Template.OnActivityUpdateFn = none;
+	Template.GetMissionDarkEventFn = GetTypicalMissionDarkEvent;  // Dark Event attached to last mission in chain
+
+	Template.CanBeCompletedFn = none;  // can always be completed
+	Template.OnActivityCompletedFn = OnCOINOpsComplete;
+
+	return Template;
+}
+
+// ChooseDarkEventForCoinOps(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+//select a dark event for the activity and add it to the chosen list in AlienHQ -- this replaces the existing deck system
+static function ChooseDarkEventForCoinOps(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+{
+	ChooseDarkEvent(false, ActivityState, NewGameState);
+}
+
+// OnCOINOpsComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+static function OnCOINOpsComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+{
+	local XComGameState_DarkEvent DarkEventState;
+
+	if(bAlienSuccess)
+	{
+		`LWTRACE("COINOpsComplete : Alien Success, marking for immediate DarkEvent Activation");
+		// research complete, mark for immediate DarkEvent activation
+		DarkEventState = XComGameState_DarkEvent(NewGameState.CreateStateObject(class'XComGameState_DarkEvent', ActivityState.DarkEvent.ObjectID));
+		NewGameState.AddStateObject(DarkEventState);
+		DarkEventState.EndDateTime = `STRATEGYRULES.GameTime;
+		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, DarkEventState.GetPostMissionText(false), true);
+
+	}
+	else
+	{
+		`LWTRACE("COINOpsComplete : XCOM Success, cancelling DarkEvent");
+		//research halted, cancel dark event
+		CancelActivityDarkEvent(ActivityState, NewGameState);
+	}
+}
+
+// COINOpsRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
+static function array<name> COINOpsRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
+{
+	local array<name> Rewards;
+
+	Rewards[0] = 'Reward_Intel';
+	return Rewards;
 }
 
 // StateObjectReference GetMissionDarkEvent(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
@@ -120,13 +267,6 @@ static function  StateObjectReference GetMissionDarkEvent(AlienActivity_XComGame
 	//	`LWTRACE("COIN Research : Retrieving DarkEvent ");
 	//}
 	return ActivityState.DarkEvent;
-}
-
-// ChooseDarkEventForCoinResearch(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
-//select a dark event for the activity and add it to the chosen list in AlienHQ -- this replaces the existing deck system
-static function ChooseDarkEventForCoinResearch(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
-{
-	ChooseDarkEvent(true, ActivityState, NewGameState);
 }
 
 // ChooseDarkEvent(bool bTactical, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
@@ -186,33 +326,24 @@ static function ChooseDarkEvent(bool bTactical, AlienActivity_XComGameState Acti
 	}
 }
 
-// OnCOINResearchComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
-static function OnCOINResearchComplete(bool bAlienSuccess, AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
+// COINDarkEventSuccess(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
+static function COINDarkEventSuccess(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
 {
-	local XComGameState_DarkEvent DarkEventState;
-
-	if(bAlienSuccess)
+	if(MissionState.HasDarkEvent())
 	{
-		//if(default.ACTIVITY_LOGGING_ENABLED)
-		//{
-		//	`LWTRACE("COINResearchComplete : Alien Success, marking for immediate DarkEvent Activation");
-		//}
-		// research complete, mark for immediate DarkEvent activation
-		DarkEventState = XComGameState_DarkEvent(NewGameState.CreateStateObject(class'XComGameState_DarkEvent', ActivityState.DarkEvent.ObjectID));
-		NewGameState.AddStateObject(DarkEventState);
-		DarkEventState.EndDateTime = `STRATEGYRULES.GameTime;
-		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, DarkEventState.GetPostMissionText(false), true);
+		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, MissionState.GetDarkEvent().GetPostMissionText(true), false);
+	}
+	TypicalEndActivityOnMissionSuccess(ActivityState, MissionState, NewGameState);
+}
 
-	}
-	else
+// COINDarkEventFailure(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
+static function COINDarkEventFailure(AlienActivity_XComGameState ActivityState, XComGameState_MissionSite MissionState, XComGameState NewGameState)
+{
+	if(MissionState.HasDarkEvent())
 	{
-		//if(default.ACTIVITY_LOGGING_ENABLED)
-		//{
-		//	`LWTRACE("COINResearchComplete : XCOM Success, cancelling DarkEvent");
-		//}
-		//research halted, cancel dark event
-		CancelActivityDarkEvent(ActivityState, NewGameState);
+		class'XComGameState_HeadquartersResistance'.static.AddGlobalEffectString(NewGameState, MissionState.GetDarkEvent().GetPostMissionText(false), false);
 	}
+	TypicalAdvanceActivityOnMissionFailure(ActivityState, MissionState, NewGameState);
 }
 
 // CancelActivityDarkEvent(AlienActivity_XComGameState ActivityState, XComGameState NewGameState)
@@ -255,31 +386,5 @@ static function CancelActivityDarkEvent(AlienActivity_XComGameState ActivityStat
 	}
 
 	//remove the dark event from the AlienHQ ChosenDarkEvent list
-	AlienHQ.CancelDarkEvent(DarkEventRef);
-}
-
-// COINResearchRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
-static function array<name> COINResearchRewards(AlienActivity_XComGameState ActivityState, name MissionFamily, XComGameState NewGameState)
-{
-	local array<name> Rewards;
-
-	Rewards[0] = 'Reward_Intel'; // for Neutralize, this will be granted only if captured
-	if (MissionFamily == 'Rescue_LW')
-	{
-		Rewards[1] = RescueReward(false, false);
-	}
-	else
-	{
-		if (CanAddPOI())
-		{
-			Rewards[1] = 'Reward_POI_LW'; // for Neutralize, this will always be granted
-			Rewards[2] = 'Reward_Dummy_POI';
-		}
-		else
-		{
-			Rewards[1] = 'Reward_Supplies';
-		}
-	}
-
-	return Rewards;
+	AlienHQ.CancelDarkEvent(NewGameState, DarkEventRef);
 }
