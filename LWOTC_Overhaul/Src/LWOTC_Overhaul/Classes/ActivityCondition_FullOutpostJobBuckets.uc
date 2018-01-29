@@ -1,4 +1,4 @@
-class ActivityCondition_FullOutpostJobBuckets extends ActivityCondition_LWOTC config(LW_Activities);
+class ActivityCondition_FullOutpostJobBuckets extends ActivityCondition_LWOTC config(LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

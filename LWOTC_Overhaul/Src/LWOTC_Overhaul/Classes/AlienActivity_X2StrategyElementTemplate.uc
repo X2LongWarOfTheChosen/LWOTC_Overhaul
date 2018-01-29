@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //	PURPOSE: Creates templates for Alien Activities, which alien strategy AI pursues, and XCOM tries to discover to generate missions
 //---------------------------------------------------------------------------------------
-class AlienActivity_X2StrategyElementTemplate extends X2StrategyElementTemplate config(LWOTC_AlienActivities);
+class AlienActivity_X2StrategyElementTemplate extends X2StrategyElementTemplate config(LWOTC_AlienActivityTemplates);
 
 var localized string ActivityName;
 var localized array<string> ActivityObjectives;

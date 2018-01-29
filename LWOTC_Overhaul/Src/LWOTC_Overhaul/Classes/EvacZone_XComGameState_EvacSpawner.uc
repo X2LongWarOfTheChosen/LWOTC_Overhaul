@@ -4,9 +4,7 @@
 //  PURPOSE: Game state for tracking delayed evac zone deployment.
 //---------------------------------------------------------------------------------------
 
-class EvacZone_XComGameState_EvacSpawner extends XComGameState_BaseObject
-    config(LWOTC_EvacZone);
-    //implements(X2VisualizedInterface);
+class EvacZone_XComGameState_EvacSpawner extends XComGameState_BaseObject config(LWOTC_EvacZone); //implements(X2VisualizedInterface);
 
 var config String FlareEffectPathName;
 var config String EvacRequestedNarrativePathName;

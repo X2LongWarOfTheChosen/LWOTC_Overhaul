@@ -4,7 +4,7 @@
 //
 //  PURPOSE: Panel/container for displaying Infiltration information about mission being selected
 //--------------------------------------------------------------------------------------- 
-class UISquadSelect_InfiltrationPanel extends UIPanel config(LW_Overhaul);
+class UISquadSelect_InfiltrationPanel extends UIPanel;
 
 var GeneratedMissionData MissionData;
 

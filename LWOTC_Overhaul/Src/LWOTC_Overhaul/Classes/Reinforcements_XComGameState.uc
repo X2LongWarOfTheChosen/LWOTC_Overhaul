@@ -6,7 +6,7 @@
 //           what are the chances of reinforcement occuring?
 //---------------------------------------------------------------------------------------
 
-class Reinforcements_XComGameState extends XComGameState_BaseObject config(LW_Overhaul);
+class Reinforcements_XComGameState extends XComGameState_BaseObject config(LWOTC_Overhaul);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

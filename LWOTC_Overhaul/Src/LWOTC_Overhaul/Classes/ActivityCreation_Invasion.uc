@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //	PURPOSE: Extended Creation class that selects invasion region based on neighboring regions
 //---------------------------------------------------------------------------------------
-class ActivityCreation_Invasion extends ActivityCreation_LWOTC config (LW_Activities);
+class ActivityCreation_Invasion extends ActivityCreation_LWOTC config (LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

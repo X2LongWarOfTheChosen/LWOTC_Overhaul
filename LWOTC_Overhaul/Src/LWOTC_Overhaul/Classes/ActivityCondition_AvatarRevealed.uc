@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------------------
-//  FILE:    X2LWActivityCondition_AvatarRevealed
+//  FILE:    ActivityCondition_AvatarRevealed
 //  AUTHOR:  JohnnyLump / Pavonis Interactive
 //	PURPOSE: Conditionals on whether Avatar project has been revealed to the player
 //---------------------------------------------------------------------------------------

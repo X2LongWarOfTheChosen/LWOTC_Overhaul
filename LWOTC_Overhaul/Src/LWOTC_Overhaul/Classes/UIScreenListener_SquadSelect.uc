@@ -6,7 +6,7 @@
 //			 Provides support for squad-editting without launching mission
 //--------------------------------------------------------------------------------------- 
 
-class UIScreenListener_SquadSelect extends UIScreenListener config(LW_Overhaul);
+class UIScreenListener_SquadSelect extends UIScreenListener config(LWOTC_Overhaul);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

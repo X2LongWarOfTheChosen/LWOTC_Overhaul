@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: This singleton object manages persistent squad information for the mod
 //---------------------------------------------------------------------------------------
-class SquadManager_XComGameState extends XComGameState_BaseObject config(LWOTC_Squads);
+class SquadManager_XComGameState extends XComGameState_BaseObject config(LWOTC_Infiltration);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

@@ -4,7 +4,7 @@
 //
 //  PURPOSE: Helpers for interfacing with Firaxis DLC
 //--------------------------------------------------------------------------------------- 
-class LWOTC_DLCHelpers extends object config(LW_Overhaul);
+class LWOTC_DLCHelpers extends Object;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

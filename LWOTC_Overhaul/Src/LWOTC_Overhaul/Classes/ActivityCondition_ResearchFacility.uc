@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //	PURPOSE: Conditionals on the alien research facilities
 //---------------------------------------------------------------------------------------
-class ActivityCondition_ResearchFacility extends ActivityCondition_LWOTC config(LW_Activities);
+class ActivityCondition_ResearchFacility extends ActivityCondition_LWOTC config(LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

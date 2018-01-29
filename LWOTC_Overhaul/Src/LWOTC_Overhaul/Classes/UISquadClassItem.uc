@@ -4,7 +4,7 @@
 //
 //  PURPOSE: An class icon within a squad element
 //--------------------------------------------------------------------------------------- 
-class UISquadClassItem extends UIPanel config(LW_Overhaul);
+class UISquadClassItem extends UIPanel;
 
 // the list that owns this item
 var UIList List;

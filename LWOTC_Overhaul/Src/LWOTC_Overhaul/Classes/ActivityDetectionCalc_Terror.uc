@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //	PURPOSE: Adds additional detection chance for AlertLevel
 //---------------------------------------------------------------------------------------
-class ActivityDetectionCalc_Terror extends ActivityDetectionCalc_LWOTC config(LW_Activities);
+class ActivityDetectionCalc_Terror extends ActivityDetectionCalc_LWOTC config(LWOTC_AlienActivities);
 
 var config array<float> RESISTANCE_INFORMANT_DETECTION_DIVIDER;
 var config float PER_FACELESS_TERROR_DETECTION_MODIFIER;

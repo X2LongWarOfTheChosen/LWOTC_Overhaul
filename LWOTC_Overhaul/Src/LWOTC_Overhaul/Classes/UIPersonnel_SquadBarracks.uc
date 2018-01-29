@@ -4,9 +4,21 @@
 //  PURPOSE: Provides custom behavior for personnel selection screen squad selection
 //--------------------------------------------------------------------------------------- 
 
-class UIPersonnel_SquadBarracks extends UIPersonnel config(LW_Content);
+class UIPersonnel_SquadBarracks extends UIPersonnel config(LWOTC_Overhaul);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
+var localized string strSquadBarrackTitle;
+var localized string strUnassignedSoldierTitle;
+var localized string strEdit, strSquad, strSelect, strRenameSquad, strDeleteSquad, strAddSquad, strViewUnassigned, strViewSquad, strEditBiography;
+var localized string strDeleteSquadConfirm;
+var localized string strDeleteSquadConfirmDesc;
+var localized string strMissions;
+var localized string strDefaultSquadBiography;
+
+var config int SQUAD_MAX_NAME_LENGTH;
+var config int MAX_CHARACTERS_BIO;
+var config array<string> SquadImagePaths;
 
 //external config variables
 var bool bHideSelect;
@@ -33,19 +45,6 @@ var int CurrentSquadSelection;
 var bool bViewUnassignedSoldiers;
 var array<StateObjectReference> CachedSquad;
 var bool bRestoreCachedSquad;
-
-var config int SQUAD_MAX_NAME_LENGTH;
-var config int MAX_CHARACTERS_BIO;
-
-var localized string strSquadBarrackTitle;
-var localized string strUnassignedSoldierTitle;
-var localized string strEdit, strSquad, strSelect, strRenameSquad, strDeleteSquad, strAddSquad, strViewUnassigned, strViewSquad, strEditBiography;
-var localized string strDeleteSquadConfirm;
-var localized string strDeleteSquadConfirmDesc;
-var localized string strMissions;
-var localized string strDefaultSquadBiography;
-
-var config array<string> SquadImagePaths;
 
 // InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)

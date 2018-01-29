@@ -4,7 +4,7 @@
 //
 //  PURPOSE: An individual item that can be contained with a list, or used as a separate button, small version for dropdowns
 //--------------------------------------------------------------------------------------- 
-class UISquadListItem_Small extends UIPanel config(LW_Overhaul);
+class UISquadListItem_Small extends UIPanel;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

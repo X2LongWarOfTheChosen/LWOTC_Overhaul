@@ -4,7 +4,7 @@
 //
 //  PURPOSE: An individual item within the squad list
 //--------------------------------------------------------------------------------------- 
-class UISquadListItem extends UIPanel config(LW_Overhaul);
+class UISquadListItem extends UIPanel;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

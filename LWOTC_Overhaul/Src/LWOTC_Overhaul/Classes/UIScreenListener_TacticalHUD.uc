@@ -4,7 +4,7 @@
 //
 //  PURPOSE: A big ball of event listeners we need to set up for tactical games.
 //--------------------------------------------------------------------------------------- 
-class UIScreenListener_TacticalHUD extends UIScreenListener config(LW_Overhaul);
+class UIScreenListener_TacticalHUD extends UIScreenListener config(LWOTC_Overhaul);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

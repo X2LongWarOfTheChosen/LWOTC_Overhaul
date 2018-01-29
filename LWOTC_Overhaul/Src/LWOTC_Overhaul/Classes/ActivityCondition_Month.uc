@@ -3,13 +3,14 @@
 //  AUTHOR:  JohnnyLump / Pavonis Interactive
 //	PURPOSE: ?
 //---------------------------------------------------------------------------------------
-class ActivityCondition_Month extends ActivityCondition_LWOTC config(LW_Activities);
+class ActivityCondition_Month extends ActivityCondition_LWOTC config(LWOTC_AlienActivities);
+
+var config array<int> DARK_EVENT_DIFFICULTY_TABLE;
+var config array<int> LIBERATE_DIFFICULTY_TABLE;
 
 var int FirstMonthPossible; //Note game starts at month 0
 var bool UseDarkEventDifficultyTable;
 var bool UseLiberateDifficultyTable;
-var config array<int> DarkEventDifficultyTable;
-var config array<int> LiberateDifficultyTable;
 
 simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, XComGameState NewGameState)
 {
@@ -19,14 +20,14 @@ simulated function bool MeetsCondition(ActivityCreation_LWOTC ActivityCreation, 
 	
 	if (UseLiberateDifficultyTable)
 	{
-		if 	(ResistanceHQ.NumMonths >= default.LiberateDifficultyTable[`CAMPAIGNDIFFICULTYSETTING])
+		if 	(ResistanceHQ.NumMonths >= default.LIBERATE_DIFFICULTY_TABLE[`CAMPAIGNDIFFICULTYSETTING])
 			return true;
 		return false;
 	}
 
 	if (UseDarkEventDifficultyTable)
 	{
-		if 	(ResistanceHQ.NumMonths >= default.DarkEventDifficultyTable[`CAMPAIGNDIFFICULTYSETTING])
+		if 	(ResistanceHQ.NumMonths >= default.DARK_EVENT_DIFFICULTY_TABLE[`CAMPAIGNDIFFICULTYSETTING])
 			return true;
 		return false;
 	}

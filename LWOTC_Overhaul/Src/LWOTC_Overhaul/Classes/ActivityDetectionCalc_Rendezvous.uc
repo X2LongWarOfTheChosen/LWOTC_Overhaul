@@ -3,7 +3,7 @@
 //  AUTHOR:  tracktwo / Pavonis Interactive
 //	PURPOSE: Special detection logic for rendezvous missions
 //---------------------------------------------------------------------------------------
-class ActivityDetectionCalc_Rendezvous extends ActivityDetectionCalc_LWOTC config(LW_Activities);
+class ActivityDetectionCalc_Rendezvous extends ActivityDetectionCalc_LWOTC config(LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

@@ -4,7 +4,7 @@
 //  PURPOSE: Swaps an approached civilian to the xcom team to be controllable for evac.
 //---------------------------------------------------------------------------------------
 
-class Mission_X2StrategyElement_DefaultRewards extends X2StrategyElement config(GameData);
+class Mission_X2StrategyElement_DefaultRewards extends X2StrategyElement;
 
 const REBEL_REWARD_NAME='Reward_Rebel';
 const RESISTANCE_MEC_REWARD_NAME='Reward_ResistanceMEC';

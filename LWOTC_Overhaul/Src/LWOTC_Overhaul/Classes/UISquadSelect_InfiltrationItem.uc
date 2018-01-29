@@ -4,7 +4,7 @@
 //
 //  PURPOSE: Item linking to X2ObjectiveListItem for displaying shadowed text
 //--------------------------------------------------------------------------------------- 
-class UISquadSelect_InfiltrationItem extends UIPanel config(LW_Overhaul);
+class UISquadSelect_InfiltrationItem extends UIPanel;
 
 var UIPanel TitleIcon;
 

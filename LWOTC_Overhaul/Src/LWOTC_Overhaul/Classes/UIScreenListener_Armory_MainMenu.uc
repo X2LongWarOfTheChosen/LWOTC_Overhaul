@@ -5,7 +5,7 @@
 //  PURPOSE: This class updates the Rank string to include the squad name, and rolls for AWC abilities when needed
 //---------------------------------------------------------------------------------------
 
-class UIScreenListener_Armory_MainMenu extends UIScreenListener config(LW_AWCPack);
+class UIScreenListener_Armory_MainMenu extends UIScreenListener;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

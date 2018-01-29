@@ -4,9 +4,11 @@
 //	PURPOSE: Conditional on a die rolled every check
 //---------------------------------------------------------------------------------------
 
-class ActivityCondition_RNG_Region extends ActivityCondition_LWOTC config(LW_Activities);
+class ActivityCondition_RNG_Region extends ActivityCondition_LWOTC config(LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
+
+var config array<float> FACELESS_ROLL_MODIFIER; // added ability to make this vary by difficulty
 
 var float Multiplier; 
 var bool UseAlert; // if false, use vigilance
@@ -15,7 +17,6 @@ var bool UseFaceless; // each Facless at outpost adds X% to chance
 var bool Invasion; // if an invasion, just use the multipler as the baseline
 var int StandardRebelCount;	// This is the value we measure the current number of rebels against to modify the chance for this to occur
 var name RebelJob;
-var config array<float> FACELESS_ROLL_MODIFIER; // added ability to make this vary by difficulty
 
 simulated function bool MeetsConditionWithRegion(ActivityCreation_LWOTC ActivityCreation, XComGameState_WorldRegion Region, XComGameState NewGameState)
 {

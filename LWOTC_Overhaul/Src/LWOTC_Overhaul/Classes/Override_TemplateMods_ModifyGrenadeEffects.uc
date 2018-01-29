@@ -1,4 +1,4 @@
-class Override_TemplateMods_ModifyGrenadeEffects extends X2StrategyElement config(LW_Overhaul);
+class Override_TemplateMods_ModifyGrenadeEffects extends X2StrategyElement config(LWOTC_Overrides);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

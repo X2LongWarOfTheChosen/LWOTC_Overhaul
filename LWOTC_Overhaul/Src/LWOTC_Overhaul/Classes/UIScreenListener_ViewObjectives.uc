@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri (Pavonis Interactive)
 //  PURPOSE: Adjust objectives pane to use scrollbar instead of slow autoscroll
 //---------------------------------------------------------------------------------------
-class UIScreenListener_ViewObjectives extends UIScreenListener config(LW_Overhaul);
+class UIScreenListener_ViewObjectives extends UIScreenListener;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

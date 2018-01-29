@@ -1,4 +1,4 @@
-class Override_Storage extends Object config(LWOTC_Overhaul);
+class Override_Storage extends Object config(LWOTC_Overrides);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

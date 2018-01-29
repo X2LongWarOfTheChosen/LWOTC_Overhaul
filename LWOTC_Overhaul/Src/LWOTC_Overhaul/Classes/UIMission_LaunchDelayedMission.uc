@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: Provides controls for actually launching a mission that has been infiltrated
 //--------------------------------------------------------------------------------------- 
-class UIMission_LaunchDelayedMission extends UIMission config(LWOTC_Infiltration);
+class UIMission_LaunchDelayedMission extends UIMission;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

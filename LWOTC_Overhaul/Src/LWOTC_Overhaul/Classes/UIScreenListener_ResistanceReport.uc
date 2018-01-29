@@ -6,7 +6,7 @@
 //
 //--------------------------------------------------------------------------------------- 
 
-class UIScreenListener_ResistanceReport extends UIScreenListener config(LW_Activities);
+class UIScreenListener_ResistanceReport extends UIScreenListener config(LWOTC_AlienActivities);
 
 var localized string m_strStaffingHelp;
 var config array<name> RestrictedAvatarResistanceActivities;

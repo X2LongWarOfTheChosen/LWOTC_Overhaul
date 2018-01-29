@@ -6,7 +6,7 @@
 //           defined in XComGameState_LWListenerManager.
 //--------------------------------------------------------------------------------------- 
 
-class LWOTC_Version extends Object config(LW_Overhaul);
+class LWOTC_Version extends Object config(LWOTC_Overhaul);
 
 // Configurable Major/Minor versions. Set in LW_Overhaul.ini
 var config int MajorVersion;

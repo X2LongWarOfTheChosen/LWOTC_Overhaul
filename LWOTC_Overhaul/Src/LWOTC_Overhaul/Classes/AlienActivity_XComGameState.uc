@@ -3,7 +3,7 @@
 //  AUTHOR:  Amineri / Pavonis Interactive
 //  PURPOSE: This models a single persistent alien activity, which can generate mission(s)
 //---------------------------------------------------------------------------------------
-class AlienActivity_XComGameState extends XComGameState_GeoscapeEntity config(LW_Overhaul) dependson(UIMission_CustomMission, Mission_X2StrategyElement_LWOTC);
+class AlienActivity_XComGameState extends XComGameState_GeoscapeEntity dependson(UIMission_CustomMission, Mission_X2StrategyElement_LWOTC);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
@@ -41,7 +41,7 @@ var StateObjectReference		DarkEvent;					//associated Dark Event, if any
 var float						DarkEventDuration_Hours;	//randomized duration for the DarkEvent
 var array<float>				arrDuration_Hours;			//randomized duration of all missions in the chain, filled out when activity is created
 
-var MissionDefinition ForceMission;                         // A mission type to force to occur next.
+var MissionDefinition			ForceMission;               // A mission type to force to occur next.
 
 //#############################################################################################
 //----------------   REQUIRED FROM BASEOBJECT   -----------------------------------------------

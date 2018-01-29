@@ -5,17 +5,9 @@
 //  PURPOSE: Miscellanous UI helper routines
 //---------------------------------------------------------------------------------------
 
-class UIUtilities_LWOTC extends Object config(LW_Overhaul);
+class UIUtilities_LWOTC extends Object config(LWOTC_Overhaul);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
-
-var config array<name> EvacFlareMissions;
-var config array<name> EvacFlareEscapeMissions;
-var config array<name> FixedExitMissions;
-var config array<name> DelayedEvacMissions;
-var config array<name> NoEvacMissions;
-var config array<name> ObjectiveTimerMissions;
-var config array<name> EvacTimerMissions;
 
 var localized string m_strInfiltrationMission;
 var localized string m_strQuickResponseMission;
@@ -44,6 +36,14 @@ var localized string m_strStripWeaponUpgradesConfirm;
 var localized string m_strStripWeaponUpgradesConfirmDesc;
 var localized string m_strTooltipStripWeapons;
 var localized string m_strVIPCaptureReward;
+
+var config array<name> EvacFlareMissions;
+var config array<name> EvacFlareEscapeMissions;
+var config array<name> FixedExitMissions;
+var config array<name> DelayedEvacMissions;
+var config array<name> NoEvacMissions;
+var config array<name> ObjectiveTimerMissions;
+var config array<name> EvacTimerMissions;
 
 // BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReference MissionRef)
 function static BuildMissionInfoPanel(UIScreen ParentScreen, StateObjectReference MissionRef)

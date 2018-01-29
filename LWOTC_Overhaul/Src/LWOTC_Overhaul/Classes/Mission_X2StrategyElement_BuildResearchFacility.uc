@@ -1,4 +1,4 @@
-class Mission_X2StrategyElement_BuildResearchFacility extends Mission_X2StrategyElement_Generic config(LWOTC_Missions);
+class Mission_X2StrategyElement_BuildResearchFacility extends Mission_X2StrategyElement_Generic;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

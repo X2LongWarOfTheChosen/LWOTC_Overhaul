@@ -1,4 +1,4 @@
-class DarkEvents_X2StrategyElement extends X2StrategyElement_DefaultDarkEvents config (GameData);
+class DarkEvents_X2StrategyElement extends X2StrategyElement_DefaultDarkEvents config (LWOTC_DarkEvents);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

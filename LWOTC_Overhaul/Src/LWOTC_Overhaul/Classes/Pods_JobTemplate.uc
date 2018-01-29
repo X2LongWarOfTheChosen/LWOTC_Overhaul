@@ -4,7 +4,7 @@
 //  PURPOSE: Template class for managing pod jobs. Allows new jobs to be defined and added
 //           to the system.
 //---------------------------------------------------------------------------------------
-class Pods_JobTemplate extends X2StrategyElementTemplate config(LWOTC_PodManager);
+class Pods_JobTemplate extends X2StrategyElementTemplate;
 
 var delegate<CreateInstanceFn> CreateInstance;
 var delegate<GetNewDestinationFn> GetNewDestination;

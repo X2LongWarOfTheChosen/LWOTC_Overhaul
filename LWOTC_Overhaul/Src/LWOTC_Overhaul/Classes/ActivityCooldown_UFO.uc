@@ -3,7 +3,7 @@
 //  AUTHOR:  JohnnyLump / Pavonis Interactive
 //	PURPOSE: Cooldown mechanics for creation of UFO activities; primarily here so we can have difficulty-specific 
 //---------------------------------------------------------------------------------------
-class ActivityCooldown_UFO extends ActivityCooldown_Global config(LWOTC_Missions);
+class ActivityCooldown_UFO extends ActivityCooldown_Global config(LWOTC_AlienActivities);
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 

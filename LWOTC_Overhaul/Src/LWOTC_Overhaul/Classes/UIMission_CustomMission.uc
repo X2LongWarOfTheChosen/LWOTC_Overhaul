@@ -5,7 +5,7 @@
 //			 This is used for initiating infiltration/investigation of a mission site 
 //			 Launching a mission after investigation has begun is handled in UIMission_LWLaunchDelayedMission
 //--------------------------------------------------------------------------------------- 
-class UIMission_CustomMission extends UIMission config(LWOTC_Infiltration);
+class UIMission_CustomMission extends UIMission;
 
 `include(LWOTC_Overhaul\Src\LWOTC_Overhaul.uci)
 
